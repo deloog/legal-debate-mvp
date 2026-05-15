@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/orders/create，此路由保留以向后兼容 */
 /**
  * 订单创建API
  * POST /api/orders/create

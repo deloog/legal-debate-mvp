@@ -7,6 +7,10 @@ import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
 import os from 'os';
 import { rateLimitConfig } from './rate-limit-config';
+import {
+  loadRuntimePolicy,
+  saveRuntimePolicy,
+} from '@/lib/admin/runtime-policy-storage';
 
 /**
  * 用户信誉等级
@@ -59,10 +63,14 @@ class AdaptiveRateLimitManager {
 
   private requestCounter = 0;
   private lastResetTime = Date.now();
+  private hydratePromise: Promise<void> | null = null;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastHydratedAt = 0;
 
   constructor() {
+    void this.hydrateFromStorage();
     // 定期更新服务器负载
-    if (typeof setInterval !== 'undefined') {
+    if (typeof setInterval !== 'undefined' && process.env.NODE_ENV !== 'test') {
       setInterval(() => {
         this.updateServerLoad();
       }, 5000); // 每5秒更新一次
@@ -81,6 +89,94 @@ class AdaptiveRateLimitManager {
         60 * 60 * 1000
       ); // 每小时清理一次
     }
+  }
+
+  private shouldUsePersistence(): boolean {
+    return process.env.NODE_ENV !== 'test';
+  }
+
+  private refreshIfStale(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (Date.now() - this.lastHydratedAt > 15000) {
+      void this.hydrateFromStorage();
+    }
+  }
+
+  private async hydrateFromStorage(force = false): Promise<void> {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.hydratePromise && !force) {
+      await this.hydratePromise;
+      return;
+    }
+
+    this.hydratePromise = (async () => {
+      const persisted = await loadRuntimePolicy<
+        Array<
+          UserReputation & {
+            createdAt: string;
+            updatedAt: string;
+            lastViolation?: string;
+          }
+        >
+      >('admin.reputation.records');
+
+      if (persisted) {
+        this.reputations = new Map(
+          persisted.map(rep => [
+            rep.identifier,
+            {
+              ...rep,
+              createdAt: new Date(rep.createdAt),
+              updatedAt: new Date(rep.updatedAt),
+              lastViolation: rep.lastViolation
+                ? new Date(rep.lastViolation)
+                : undefined,
+            },
+          ])
+        );
+      }
+
+      this.lastHydratedAt = Date.now();
+    })();
+
+    try {
+      await this.hydratePromise;
+    } finally {
+      this.hydratePromise = null;
+    }
+  }
+
+  private schedulePersist(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+    }
+
+    this.persistTimer = setTimeout(() => {
+      void this.persistToStorage();
+    }, 5000);
+  }
+
+  private async persistToStorage(): Promise<void> {
+    await saveRuntimePolicy(
+      'admin.reputation.records',
+      Array.from(this.reputations.values()).map(rep => ({
+        ...rep,
+        createdAt: rep.createdAt.toISOString(),
+        updatedAt: rep.updatedAt.toISOString(),
+        lastViolation: rep.lastViolation?.toISOString(),
+      })),
+      '运行时用户信誉记录'
+    );
   }
 
   /**
@@ -156,6 +252,7 @@ class AdaptiveRateLimitManager {
    * 获取用户信誉
    */
   getReputation(identifier: string): UserReputation {
+    this.refreshIfStale();
     let reputation = this.reputations.get(identifier);
 
     if (!reputation) {
@@ -188,6 +285,7 @@ class AdaptiveRateLimitManager {
 
     // 更新等级
     this.updateReputationLevel(reputation);
+    this.schedulePersist();
   }
 
   /**
@@ -204,6 +302,7 @@ class AdaptiveRateLimitManager {
 
     // 更新等级
     this.updateReputationLevel(reputation);
+    this.schedulePersist();
 
     if (process.env.NODE_ENV !== 'test') {
       logger.warn('[AdaptiveRateLimit] Violation recorded:', {
@@ -329,6 +428,7 @@ class AdaptiveRateLimitManager {
    * 获取所有信誉数据
    */
   getAllReputations(): UserReputation[] {
+    this.refreshIfStale();
     return Array.from(this.reputations.values());
   }
 
@@ -337,6 +437,7 @@ class AdaptiveRateLimitManager {
    */
   resetReputation(identifier: string): void {
     this.reputations.delete(identifier);
+    this.schedulePersist();
   }
 
   /**
@@ -365,6 +466,7 @@ class AdaptiveRateLimitManager {
     }
 
     reputation.updatedAt = new Date();
+    this.schedulePersist();
   }
 
   /**

@@ -7,6 +7,8 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 export async function GET(
   request: NextRequest,
@@ -20,28 +22,18 @@ export async function GET(
   const { id: debateId } = await params;
 
   try {
-    // 验证辩论存在且属于当前用户（或管理员）
-    const debate = await prisma.debate.findUnique({
-      where: { id: debateId },
-      select: { id: true, userId: true },
-    });
-
-    if (!debate) {
+    const access = await canAccessDebateByCasePermission(
+      authUser.userId,
+      debateId,
+      CasePermission.VIEW_DEBATES
+    );
+    if (!access.allowed || !access.debate) {
       return Response.json(
-        { success: false, error: '辩论不存在' },
-        { status: 404 }
-      );
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-      select: { role: true },
-    });
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
-    if (debate.userId !== authUser.userId && !isAdmin) {
-      return Response.json(
-        { success: false, error: '无权访问' },
-        { status: 403 }
+        {
+          success: false,
+          error: access.reason === '辩论不存在' ? '辩论不存在' : '无权访问',
+        },
+        { status: access.reason === '辩论不存在' ? 404 : 403 }
       );
     }
 

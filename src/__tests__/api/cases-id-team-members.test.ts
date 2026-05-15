@@ -7,7 +7,7 @@ import {
   PUT as PUT_MEMBER,
   DELETE as DELETE_MEMBER,
 } from '@/app/api/cases/[id]/team-members/[userId]/route';
-import { CaseRole } from '@/types/case-collaboration';
+import { CasePermission, CaseRole } from '@/types/case-collaboration';
 import {
   createMockRequest,
   createTestResponse,
@@ -39,6 +39,15 @@ import { prisma } from '@/lib/db/prisma';
 // Mock Auth
 jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -375,6 +384,55 @@ describe('Case Team Members API', () => {
 
       assertions.assertCreated(testResponse);
       expect(testResponse.data.role).toBe(CaseRole.OBSERVER);
+      expect(mockedPrisma.caseTeamMember.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            permissions: expect.arrayContaining([CasePermission.VIEW_CASE]),
+          }),
+        })
+      );
+    });
+
+    it('should revive soft-deleted member instead of returning conflict', async () => {
+      const deletedAt = new Date('2024-01-01T00:00:00Z');
+      mockedPrisma.caseTeamMember.findFirst.mockResolvedValue({
+        id: testMemberId,
+        caseId: testCaseId,
+        userId: testTargetUserId,
+        role: CaseRole.OBSERVER,
+        permissions: ['view_case'],
+        deletedAt,
+      });
+
+      const newMemberData = {
+        userId: testTargetUserId,
+        role: CaseRole.ASSISTANT,
+        notes: '恢复协作成员',
+      };
+
+      const request = createMockRequest(
+        `http://localhost:3000/api/cases/${testCaseId}/team-members`,
+        {
+          method: 'POST',
+          body: newMemberData,
+        }
+      );
+
+      const response = await POST_LIST(request, {
+        params: Promise.resolve({ id: testCaseId }),
+      });
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertCreated(testResponse);
+      expect(mockedPrisma.caseTeamMember.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: testMemberId },
+          data: expect.objectContaining({
+            deletedAt: null,
+            role: CaseRole.ASSISTANT,
+          }),
+        })
+      );
     });
 
     it('should validate required fields', async () => {

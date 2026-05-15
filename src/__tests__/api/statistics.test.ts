@@ -45,7 +45,13 @@ describe('Statistics API', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      expect(data).toMatchObject({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: '请先登录',
+        },
+      });
     });
 
     it('应该成功返回统计数据', async () => {
@@ -252,9 +258,9 @@ describe('Statistics API', () => {
       (prisma.client.findMany as jest.Mock)
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([
-          { createdAt: new Date('2025-03-15') },
-          { createdAt: new Date('2025-03-20') },
-          { createdAt: new Date('2025-04-10') },
+          { createdAt: new Date('2026-03-15') },
+          { createdAt: new Date('2026-03-20') },
+          { createdAt: new Date('2026-04-10') },
         ])
         .mockResolvedValueOnce([]);
 
@@ -265,7 +271,7 @@ describe('Statistics API', () => {
 
       const data = await response.json();
       const aprilData = data.monthlyGrowth.find((item: { month: string }) =>
-        item.month.startsWith('2025-04')
+        item.month.startsWith('2026-04')
       );
       expect(aprilData).toBeDefined();
       expect(aprilData.count).toBeGreaterThan(0);
@@ -367,7 +373,13 @@ describe('Statistics API', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('获取统计数据失败');
+      expect(data).toMatchObject({
+        success: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: '获取统计数据失败',
+        },
+      });
     });
   });
 

@@ -28,7 +28,12 @@ async function handleRefresh(
 
     // 如果cookie中没有，则从请求体中读取（向后兼容）
     if (!refreshToken) {
-      const body = await request.json();
+      let body: { refreshToken?: string } = {};
+      try {
+        body = (await request.json()) as { refreshToken?: string };
+      } catch {
+        body = {};
+      }
       refreshToken = body.refreshToken;
     }
 
@@ -143,6 +148,7 @@ async function handleRefresh(
       userId: payload.userId,
       email: payload.email,
       role: payload.role,
+      jti: session.id,
       r: Math.random().toString(36).substring(2), // 随机盐值
     };
     const newAccessToken = generateAccessToken(accessTokenPayload);

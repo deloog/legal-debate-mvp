@@ -11,21 +11,14 @@ import { RoleDetailResponse } from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  canManagePrivilegedRole,
+  getFreshUserRole,
+  isSystemRoleName,
+} from '@/lib/admin/role-security';
 
 // =============================================================================
 // 辅助函数
-// =============================================================================
-
-/**
- * 检查角色是否为系统内置角色（不能删除）
- */
-function isSystemRole(roleName: string): boolean {
-  const systemRoles = ['USER', 'LAWYER', 'ENTERPRISE', 'ADMIN', 'SUPER_ADMIN'];
-  return systemRoles.includes(roleName);
-}
-
-// =============================================================================
-// API处理函数
 // =============================================================================
 
 /**
@@ -156,8 +149,30 @@ export async function PUT(
       ) as unknown as NextResponse;
     }
 
+    const currentUserRole = await getFreshUserRole(user.userId);
+
+    if (
+      isSystemRoleName(existingRole.name) &&
+      !canManagePrivilegedRole(currentUserRole)
+    ) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以修改系统内置角色',
+        },
+        { status: 403 }
+      ) as unknown as NextResponse;
+    }
+
     // 如果要修改角色名称，检查新名称是否已被使用
     if (body.name && body.name.trim() !== existingRole.name) {
+      if (isSystemRoleName(body.name.trim())) {
+        return Response.json(
+          { error: '操作不允许', message: '系统角色名称为保留名称' },
+          { status: 403 }
+        ) as unknown as NextResponse;
+      }
+
       const nameExists = await prisma.role.findUnique({
         where: { name: body.name.trim() },
       });
@@ -254,7 +269,7 @@ export async function DELETE(
     }
 
     // 检查是否为系统内置角色
-    if (isSystemRole(existingRole.name)) {
+    if (isSystemRoleName(existingRole.name)) {
       return Response.json(
         { error: '操作不允许', message: '系统内置角色不能删除' },
         { status: 403 }

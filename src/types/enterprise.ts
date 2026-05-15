@@ -63,6 +63,7 @@ export interface EnterpriseAccountPublic {
   creditCode: string;
   legalPerson: string;
   industryType: string;
+  businessLicense?: string | null;
   status: EnterpriseStatus;
   submittedAt: Date;
   expiresAt: Date | null;
@@ -76,7 +77,6 @@ export interface EnterpriseRegisterRequest {
   creditCode: string;
   legalPerson: string;
   industryType: string;
-  businessLicense?: string; // Base64编码的营业执照图片
 }
 
 /**

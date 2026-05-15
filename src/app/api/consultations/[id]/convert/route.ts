@@ -51,7 +51,10 @@ export async function GET(
 
     // 获取转化预览
     const conversionService = createConversionService();
-    const result = await conversionService.getConversionPreview(id);
+    const result = await conversionService.getConversionPreview(
+      id,
+      authUser.userId
+    );
 
     if (!result.success || !result.data) {
       return NextResponse.json(

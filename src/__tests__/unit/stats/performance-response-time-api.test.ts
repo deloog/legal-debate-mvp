@@ -21,6 +21,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { DateGranularity, TimeRange } from '@/types/stats';

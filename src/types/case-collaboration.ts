@@ -65,6 +65,7 @@ export enum CasePermission {
   POST_DISCUSSIONS = 'POST_DISCUSSIONS', // 发表讨论
   EDIT_DISCUSSIONS = 'EDIT_DISCUSSIONS', // 编辑讨论
   DELETE_DISCUSSIONS = 'DELETE_DISCUSSIONS', // 删除讨论
+  PIN_DISCUSSIONS = 'PIN_DISCUSSIONS', // 置顶讨论
 
   // 导出权限
   EXPORT_DATA = 'EXPORT_DATA', // 导出数据
@@ -107,6 +108,7 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<CaseRole, CasePermission[]> = {
     CasePermission.POST_DISCUSSIONS,
     CasePermission.EDIT_DISCUSSIONS,
     CasePermission.DELETE_DISCUSSIONS,
+    CasePermission.PIN_DISCUSSIONS,
     CasePermission.EXPORT_DATA,
   ],
   [CaseRole.ASSISTANT]: [
@@ -307,6 +309,7 @@ export const CASE_PERMISSION_LABELS: Partial<Record<CasePermission, string>> = {
   [CasePermission.POST_DISCUSSIONS]: '发表讨论',
   [CasePermission.EDIT_DISCUSSIONS]: '编辑讨论',
   [CasePermission.DELETE_DISCUSSIONS]: '删除讨论',
+  [CasePermission.PIN_DISCUSSIONS]: '置顶讨论',
   [CasePermission.EXPORT_DATA]: '导出数据',
 };
 

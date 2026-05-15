@@ -32,6 +32,7 @@ describe('EnterpriseRiskProfileService', () => {
 
   const mockEnterprise = {
     id: 'enterprise-1',
+    userId: 'enterprise-user-1',
     enterpriseName: '测试企业',
     creditCode: '91110000000000001X',
     industryType: 'TECHNOLOGY',
@@ -132,6 +133,12 @@ describe('EnterpriseRiskProfileService', () => {
       expect(mockPrisma.enterpriseAccount.findUnique).toHaveBeenCalledWith({
         where: { id: 'enterprise-1' },
       });
+      expect(mockPrisma.contract.findMany).toHaveBeenCalledWith({
+        where: {
+          case: { is: { userId: 'enterprise-user-1', deletedAt: null } },
+          status: { notIn: ['DRAFT', 'TERMINATED'] },
+        },
+      });
       expect(mockPrisma.enterpriseRiskProfile.create).toHaveBeenCalled();
     });
 
@@ -168,6 +175,38 @@ describe('EnterpriseRiskProfileService', () => {
       // Assert
       expect(profile.recommendations).toBeInstanceOf(Array);
       expect(profile.recommendations.length).toBeGreaterThan(0);
+    });
+
+    it('应该识别大写风险枚举的Top风险', async () => {
+      mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(mockEnterprise);
+      mockPrisma.contract.findMany.mockResolvedValue([]);
+      mockPrisma.contractClauseRisk.findMany.mockResolvedValue(
+        mockContractRisks
+      );
+      mockPrisma.enterpriseRiskProfile.create.mockImplementation(
+        async (data: Record<string, unknown>) => ({
+          id: 'profile-1',
+          ...data,
+        })
+      );
+
+      const profile = await service.generateEnterpriseRiskProfile(
+        'enterprise-1',
+        'user-1'
+      );
+
+      expect(profile.topRisks).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            contractId: 'contract-2',
+            riskLevel: 'HIGH',
+          }),
+          expect.objectContaining({
+            contractId: 'contract-4',
+            riskLevel: 'HIGH',
+          }),
+        ])
+      );
     });
   });
 

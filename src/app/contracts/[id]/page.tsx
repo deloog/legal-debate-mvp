@@ -76,6 +76,10 @@ export default function ContractDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const userId = user?.id || '';
+  const isLawyerOwner = !!user && contract?.lawyerId === user.id;
+  const canManageContract =
+    !!user &&
+    (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || isLawyerOwner);
 
   // 发起审批 dialog
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
@@ -215,7 +219,15 @@ export default function ContractDetailPage() {
     if (versions.length < 2) return;
     try {
       const response = await fetch(
-        `/api/contracts/${params.id}/versions/compare?v1=${versions[0].version}&v2=${versions[1].version}`
+        `/api/contracts/${params.id}/versions/compare`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            versionId1: versions[0].id,
+            versionId2: versions[1].id,
+          }),
+        }
       );
       const result = await response.json();
       setCompareResult(
@@ -232,12 +244,18 @@ export default function ContractDetailPage() {
   async function handleRollback(versionNumber: number) {
     setRollingBack(true);
     try {
+      const targetVersion = versions.find(v => v.version === versionNumber);
+      if (!targetVersion) {
+        alert('未找到目标版本');
+        return;
+      }
+
       const response = await fetch(
         `/api/contracts/${params.id}/versions/rollback`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ versionNumber }),
+          body: JSON.stringify({ versionId: targetVersion.id }),
         }
       );
       const result = await response.json();
@@ -330,7 +348,7 @@ export default function ContractDetailPage() {
           </div>
           <div className='flex flex-wrap gap-2'>
             {/* 审批操作 */}
-            {contract.status === 'DRAFT' && (
+            {contract.status === 'DRAFT' && canManageContract && (
               <button
                 onClick={() => setShowApprovalDialog(true)}
                 className='rounded-lg bg-orange-600 px-3 py-2 text-sm font-medium text-white hover:bg-orange-700'
@@ -345,12 +363,14 @@ export default function ContractDetailPage() {
               查看审批
             </Link>
             {/* 邮件 */}
-            <button
-              onClick={() => setShowEmailDialog(true)}
-              className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-            >
-              发送邮件
-            </button>
+            {canManageContract && (
+              <button
+                onClick={() => setShowEmailDialog(true)}
+                className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
+              >
+                发送邮件
+              </button>
+            )}
             {/* 版本历史 */}
             <button
               onClick={() => {
@@ -371,12 +391,14 @@ export default function ContractDetailPage() {
               下载PDF
             </a>
             {/* 编辑 */}
-            <Link
-              href={`/contracts/${contract.id}/edit`}
-              className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-            >
-              编辑
-            </Link>
+            {canManageContract && (
+              <Link
+                href={`/contracts/${contract.id}/edit`}
+                className='rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
+              >
+                编辑
+              </Link>
+            )}
             <button
               onClick={() => router.push('/contracts')}
               className='rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700'
@@ -672,7 +694,7 @@ export default function ContractDetailPage() {
                     合同签署
                   </Link>
                 )}
-                {contract.status === 'SIGNED' && (
+                {contract.status === 'SIGNED' && canManageContract && (
                   <button
                     onClick={async () => {
                       if (

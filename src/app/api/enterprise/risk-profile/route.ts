@@ -11,14 +11,18 @@ async function resolveEnterpriseAccess(enterpriseId: string, userId: string) {
   const [enterprise, dbUser] = await Promise.all([
     prisma.enterpriseAccount.findUnique({
       where: { id: enterpriseId },
-      select: { userId: true },
+      select: { userId: true, status: true },
     }),
     prisma.user.findUnique({ where: { id: userId }, select: { role: true } }),
   ]);
   if (!enterprise) return { found: false, allowed: false };
   const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
   const isOwner = enterprise.userId === userId;
-  return { found: true, allowed: isAdmin || isOwner };
+  return {
+    found: true,
+    allowed: isAdmin || isOwner,
+    approved: enterprise.status === 'APPROVED',
+  };
 }
 
 /**
@@ -44,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '企业ID不能为空' }, { status: 400 });
     }
 
-    const { found, allowed } = await resolveEnterpriseAccess(
+    const { found, allowed, approved } = await resolveEnterpriseAccess(
       enterpriseId,
       authUser.userId
     );
@@ -57,6 +61,12 @@ export async function POST(request: NextRequest) {
     if (!allowed) {
       return NextResponse.json(
         { success: false, error: '无权访问此企业账号' },
+        { status: 403 }
+      );
+    }
+    if (!approved) {
+      return NextResponse.json(
+        { success: false, error: '企业认证尚未通过，暂不可生成风险画像' },
         { status: 403 }
       );
     }
@@ -104,7 +114,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '企业ID不能为空' }, { status: 400 });
     }
 
-    const { found, allowed } = await resolveEnterpriseAccess(
+    const { found, allowed, approved } = await resolveEnterpriseAccess(
       enterpriseId,
       authUser.userId
     );
@@ -117,6 +127,12 @@ export async function GET(request: NextRequest) {
     if (!allowed) {
       return NextResponse.json(
         { success: false, error: '无权访问此企业账号' },
+        { status: 403 }
+      );
+    }
+    if (!approved) {
+      return NextResponse.json(
+        { success: false, error: '企业认证尚未通过，暂不可查看风险画像' },
         { status: 403 }
       );
     }

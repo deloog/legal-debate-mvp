@@ -9,13 +9,31 @@ import {
 import { TextDecoder } from 'util';
 /// <reference path="./test-types.d.ts" />
 
-// Mock next-auth to avoid "headers outside request scope" error
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-123',
+    email: 'test@example.com',
+    role: 'USER',
+  }),
 }));
 
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
+jest.mock('@/lib/debate/access', () => ({
+  canAccessDebateByCasePermission: jest.fn().mockResolvedValue({
+    allowed: true,
+    debate: {
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      userId: 'user-123',
+      caseId: 'case-123',
+    },
+  }),
+}));
+
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({
+    allowed: true,
+    remaining: { daily: 999, monthly: 9999 },
+  }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock Prisma
@@ -83,11 +101,6 @@ jest.mock('@/lib/debate/graph-enhanced-law-search', () => ({
 }));
 
 import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-
-const mockGetServerSession = getServerSession as jest.MockedFunction<
-  typeof getServerSession
->;
 
 describe('Debates Stream API - Basic Tests', () => {
   let mockReq: any;
@@ -100,12 +113,6 @@ describe('Debates Stream API - Basic Tests', () => {
     jest.clearAllMocks();
 
     mockedPrisma = prisma as any;
-
-    // Mock session
-    mockGetServerSession.mockResolvedValue({
-      user: { id: 'user-123', role: 'USER' },
-      expires: '2099-01-01',
-    } as never);
 
     // 创建模拟的NextRequest对象
     mockReq = {
@@ -158,6 +165,7 @@ describe('Debates Stream API - Basic Tests', () => {
           title: '测试案件',
           description: '案件描述',
           type: 'civil',
+          metadata: null,
         },
         user: {
           id: 'user-123',
@@ -219,7 +227,13 @@ describe('Debates Stream API - Basic Tests', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 3 },
-        case: { title: '测试案件', description: '', type: null },
+        caseId: 'case-123',
+        case: {
+          title: '测试案件',
+          description: '',
+          type: null,
+          metadata: null,
+        },
       });
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
@@ -248,7 +262,13 @@ describe('Debates Stream API - Basic Tests', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 3 },
-        case: { title: '测试案件', description: '', type: null },
+        caseId: 'case-123',
+        case: {
+          title: '测试案件',
+          description: '',
+          type: null,
+          metadata: null,
+        },
       });
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
@@ -271,7 +291,13 @@ describe('Debates Stream API - Basic Tests', () => {
         status: 'active',
         currentRound: 2,
         debateConfig: { maxRounds: 3 },
-        case: { title: '测试案件', description: '案件描述', type: null },
+        caseId: 'case-123',
+        case: {
+          title: '测试案件',
+          description: '案件描述',
+          type: null,
+          metadata: null,
+        },
         rounds: [
           {
             id: 'round-1',
@@ -312,7 +338,13 @@ describe('Debates Stream API - Basic Tests', () => {
         status: 'completed',
         currentRound: 3,
         debateConfig: { maxRounds: 3 },
-        case: { title: '测试案件', description: '案件描述', type: null },
+        caseId: 'case-123',
+        case: {
+          title: '测试案件',
+          description: '案件描述',
+          type: null,
+          metadata: null,
+        },
         rounds: [],
         _count: { rounds: 3, arguments: 10 },
       });

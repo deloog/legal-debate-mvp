@@ -31,6 +31,18 @@ interface NeighborInfo {
   strength: number;
   distance: number;
   category?: string;
+  sourceId: string;
+  targetId: string;
+  direction: 'outgoing' | 'incoming';
+}
+
+interface NeighborEdge {
+  neighborId: string;
+  relationType: string;
+  strength: number;
+  sourceId: string;
+  targetId: string;
+  direction: 'outgoing' | 'incoming';
 }
 
 /**
@@ -46,16 +58,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const relationTypesParam = searchParams.get('relationTypes');
 
     if (!nodeId) {
-      // 如果没有提供 nodeId，返回空结果
-      logger.warn('邻居查询缺少 nodeId 参数，返回空结果');
-      return NextResponse.json({
-        success: true,
-        data: {
-          nodeId: null,
-          neighbors: [],
-        },
-        message: '请提供 nodeId 参数以查询特定节点的邻居',
-      });
+      logger.warn('邻居查询缺少 nodeId 参数');
+      return NextResponse.json(
+        { error: '缺少必需参数: nodeId' },
+        { status: 400 }
+      );
     }
 
     const depth = parseInt(depthParam || '1', 10);
@@ -125,7 +132,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const adjList = await buildAdjacencyList();
 
     // 查找N度邻居
-    const neighbors = findNeighbors(nodeId, depth, adjList, relationTypes);
+    const neighbors = await hydrateNeighbors(
+      findNeighbors(nodeId, depth, adjList, relationTypes)
+    );
 
     // 记录操作日志
     await logKnowledgeGraphAction({
@@ -168,7 +177,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
  * 构建邻接表
  */
 async function buildAdjacencyList(): Promise<
-  Map<string, Map<string, { relationType: string; strength: number }>>
+  Map<string, Map<string, NeighborEdge>>
 > {
   const relations = await prisma.lawArticleRelation.findMany({
     where: {
@@ -182,21 +191,35 @@ async function buildAdjacencyList(): Promise<
     },
   });
 
-  const adjList = new Map<
-    string,
-    Map<string, { relationType: string; strength: number }>
-  >();
+  const adjList = new Map<string, Map<string, NeighborEdge>>();
 
   relations.forEach(relation => {
     const { sourceId, targetId, relationType, strength } = relation;
 
-    // 添加有向边 source -> target
+    // 邻居探索按无向图展开，避免只存在入边的法条在用户侧“消失”。
+    // 但返回时保留原始 source/target，前端仍可解释真实法条关系方向。
     if (!adjList.has(sourceId)) {
       adjList.set(sourceId, new Map());
     }
     adjList.get(sourceId)?.set(targetId, {
+      neighborId: targetId,
       relationType,
       strength,
+      sourceId,
+      targetId,
+      direction: 'outgoing',
+    });
+
+    if (!adjList.has(targetId)) {
+      adjList.set(targetId, new Map());
+    }
+    adjList.get(targetId)?.set(sourceId, {
+      neighborId: sourceId,
+      relationType,
+      strength,
+      sourceId,
+      targetId,
+      direction: 'incoming',
     });
   });
 
@@ -209,7 +232,7 @@ async function buildAdjacencyList(): Promise<
 function findNeighbors(
   nodeId: string,
   depth: number,
-  adjList: Map<string, Map<string, { relationType: string; strength: number }>>,
+  adjList: Map<string, Map<string, NeighborEdge>>,
   relationTypes: string[]
 ): Record<string, NeighborInfo[]> {
   const result: Record<string, NeighborInfo[]> = {
@@ -244,17 +267,17 @@ function findNeighbors(
           continue;
         }
 
-        // 查询目标节点信息
-        // 注意：这里需要在循环外批量查询以提高性能
-        // 为简化，这里假设节点ID即为标题
         nextLevel.add(targetId);
 
         result[degreeKey].push({
           id: targetId,
-          title: targetId, // 实际应该查询法条标题
+          title: targetId,
           relationType: edge.relationType,
           strength: edge.strength,
           distance: d,
+          sourceId: edge.sourceId,
+          targetId: edge.targetId,
+          direction: edge.direction,
         });
       }
     }
@@ -268,4 +291,48 @@ function findNeighbors(
   }
 
   return result;
+}
+
+async function hydrateNeighbors(
+  neighbors: Record<string, NeighborInfo[]>
+): Promise<Record<string, NeighborInfo[]>> {
+  const neighborIds = Array.from(
+    new Set(
+      Object.values(neighbors).flatMap(items => items.map(item => item.id))
+    )
+  );
+
+  if (neighborIds.length === 0) {
+    return neighbors;
+  }
+
+  const articles = await prisma.lawArticle.findMany({
+    where: { id: { in: neighborIds } },
+    select: {
+      id: true,
+      lawName: true,
+      articleNumber: true,
+      category: true,
+    },
+  });
+
+  const articleMap = new Map(articles.map(article => [article.id, article]));
+
+  return Object.fromEntries(
+    Object.entries(neighbors).map(([degree, items]) => [
+      degree,
+      items.map(item => {
+        const article = articleMap.get(item.id);
+        if (!article) {
+          return item;
+        }
+
+        return {
+          ...item,
+          title: `${article.lawName}${article.articleNumber}`,
+          category: article.category ?? undefined,
+        };
+      }),
+    ])
+  ) as Record<string, NeighborInfo[]>;
 }

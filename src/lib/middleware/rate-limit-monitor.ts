@@ -45,7 +45,7 @@ class RateLimitMonitor {
 
   constructor() {
     // 每小时清理一次过期事件
-    if (typeof setInterval !== 'undefined') {
+    if (typeof setInterval !== 'undefined' && process.env.NODE_ENV !== 'test') {
       this.cleanupInterval = setInterval(
         () => {
           this.cleanup();

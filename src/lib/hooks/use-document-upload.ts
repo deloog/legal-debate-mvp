@@ -167,10 +167,6 @@ export const useDocumentUpload = (options: UploadOptions) => {
           xhr.timeout = 30000;
 
           xhr.open('POST', '/api/v1/documents/upload');
-          xhr.setRequestHeader(
-            'Authorization',
-            `Bearer ${localStorage.getItem('token') || ''}`
-          );
           xhr.send(formData);
         });
 

@@ -44,48 +44,9 @@ interface ConflictItem {
  * GET /api/v1/knowledge-graph/conflicts
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = new URL(request.url).searchParams;
 
   try {
-    // 参数验证
-    const lawArticleIdsParam = searchParams.get('lawArticleIds');
-
-    if (!lawArticleIdsParam || !lawArticleIdsParam.trim()) {
-      logger.warn('冲突检测缺少 lawArticleIds 参数，返回空结果');
-      return NextResponse.json({
-        success: true,
-        data: {
-          conflicts: [],
-          total: 0,
-        },
-        message: '请提供 lawArticleIds 参数以检测冲突',
-      });
-    }
-
-    // 解析法条ID列表
-    const lawArticleIds = lawArticleIdsParam
-      .split(',')
-      .map(id => id.trim())
-      .filter(id => id.length > 0);
-
-    if (lawArticleIds.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          conflicts: [],
-          total: 0,
-        },
-        message: '未提供有效的法条ID',
-      });
-    }
-
-    if (lawArticleIds.length > 10) {
-      return NextResponse.json(
-        { error: 'lawArticleIds最多支持10个' },
-        { status: 400 }
-      );
-    }
-
     // 认证检查
     const authUser = await getAuthUser(request);
     if (!authUser) {
@@ -95,6 +56,43 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           error: { code: 'UNAUTHORIZED', message: '请先登录' },
         },
         { status: 401 }
+      );
+    }
+
+    // 参数验证
+    const lawArticleIdsParam = searchParams.get('lawArticleIds');
+
+    if (lawArticleIdsParam === null) {
+      return NextResponse.json(
+        { error: '缺少必需参数: lawArticleIds' },
+        { status: 400 }
+      );
+    }
+
+    if (!lawArticleIdsParam.trim()) {
+      return NextResponse.json(
+        { error: 'lawArticleIds不能为空' },
+        { status: 400 }
+      );
+    }
+
+    // 解析法条ID列表
+    const lawArticleIds = lawArticleIdsParam
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => id.length > 0);
+
+    if (lawArticleIds.length === 0) {
+      return NextResponse.json(
+        { error: 'lawArticleIds不能为空' },
+        { status: 400 }
+      );
+    }
+
+    if (lawArticleIds.length > 10) {
+      return NextResponse.json(
+        { error: 'lawArticleIds最多支持10个' },
+        { status: 400 }
       );
     }
 
@@ -129,14 +127,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     if (articles.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          conflicts: [],
-          total: 0,
-        },
-        message: '未找到相关法条',
-      });
+      return NextResponse.json({ error: '未找到相关法条' }, { status: 404 });
     }
 
     // 构建法条标题映射
@@ -270,14 +261,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     } catch {
       // 忽略日志错误
     }
-    // 即使出错也返回有效 JSON，避免 "Unexpected end of JSON input"
-    return NextResponse.json({
-      success: true,
-      data: {
-        conflicts: [],
-        total: 0,
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '服务器错误' },
       },
-      message: '冲突检测功能暂不可用',
-    });
+      { status: 500 }
+    );
   }
 }

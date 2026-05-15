@@ -11,6 +11,10 @@ import {
   getTasksExpiringSoon,
   markExpiredFollowUpTasks,
 } from '@/lib/cron/send-follow-up-reminders';
+import {
+  createForbiddenResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
 import { logger } from '@/lib/agent/security/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
@@ -28,17 +32,14 @@ async function requireAdmin(
 ): Promise<NextResponse | null> {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json({ error: '未授权' }, { status: 401 });
+    return createUnauthorizedResponse('未授权');
   }
   const dbUser = await prisma.user.findUnique({
     where: { id: authUser.userId },
     select: { role: true },
   });
   if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
-    return NextResponse.json(
-      { error: '权限不足，仅管理员可访问' },
-      { status: 403 }
-    );
+    return createForbiddenResponse('权限不足，仅管理员可访问');
   }
   return null;
 }
@@ -89,7 +90,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: errorMessage,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message:
+            error instanceof Error && error.message
+              ? error.message
+              : errorMessage,
+        },
       },
       { status: 500 }
     );
@@ -144,7 +151,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: errorMessage,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message:
+            error instanceof Error && error.message
+              ? error.message
+              : errorMessage,
+        },
       },
       { status: 500 }
     );

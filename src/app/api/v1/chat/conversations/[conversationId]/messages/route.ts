@@ -26,10 +26,6 @@ import {
 } from '@/lib/chat/file-extractor';
 import { redactPII, type RedactionResult } from '@/lib/chat/pii-redactor';
 import { Prisma } from '@prisma/client';
-import { LawsuitRequestClassifier } from '@/lib/classification/lawsuit-request-classifier';
-
-const lawsuitClassifier = new LawsuitRequestClassifier();
-
 const CHAT_UPLOADS_DIR = resolve(process.cwd(), 'private_uploads', 'chat');
 
 // 从环境变量读取模型名和 provider，确保两者绑定一致
@@ -221,28 +217,7 @@ async function extractAndSaveCrystal(
         ? ((existing.caseContext as Record<string, unknown>).version as number)
         : 0;
 
-    // 规则引擎补充：对最新一条用户消息做诉讼请求分类，合并进 applicable_law_areas
-    const lastUserMessage =
-      history.filter(m => m.role === 'user').at(-1)?.content ?? '';
-    let ruleBasedLawAreas: string[] = [];
-    try {
-      const classResult =
-        await lawsuitClassifier.classifyLawsuitRequests(lastUserMessage);
-      if (
-        classResult.claims.length > 0 &&
-        classResult.classificationConfidence > 0.5
-      ) {
-        // 提取唯一的诉讼请求类型标签（中文）
-        ruleBasedLawAreas = [
-          ...new Set(
-            classResult.claims.map(c => c.classifiedType.replace(/_/g, '·'))
-          ),
-        ];
-      }
-    } catch {
-      // 分类失败不影响主流程
-    }
-
+    const ruleBasedLawAreas: string[] = [];
     const aiLawAreas = crystal.applicable_law_areas ?? [];
     const mergedLawAreas = [...new Set([...aiLawAreas, ...ruleBasedLawAreas])];
 
@@ -264,11 +239,7 @@ async function extractAndSaveCrystal(
       data: { caseContext: updated as unknown as Prisma.InputJsonValue },
     });
 
-    logger.info(`案情晶体已更新 v${updated.version}`, {
-      conversationId,
-      ruleBasedLawAreas:
-        ruleBasedLawAreas.length > 0 ? ruleBasedLawAreas : undefined,
-    });
+    logger.info(`案情晶体已更新 v${updated.version}`, { conversationId });
   } catch (err) {
     // 晶体提取失败不影响主流程，静默记录
     logger.warn('案情晶体提取失败（降级为无晶体模式）', {

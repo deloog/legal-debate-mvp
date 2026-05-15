@@ -88,17 +88,19 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Deploy to development
+      # [PLACEHOLDER] 替换为实际部署命令
+      - name: Deploy to development [PLACEHOLDER]
         id: deploy
         run: |
-          echo "::notice title=Deployment::Deploying to development environment"
-          echo "::set-output name=url::https://dev.example.com"
+          echo "::warning title=Placeholder::此步骤为占位符，请替换为实际部署命令"
+          echo "::set-output name=url::${{ secrets.DEV_URL }}"
         continue-on-error: false
 
       - name: Health check
         run: |
-          sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://dev.example.com/api/health || echo "000")
+          sleep 15
+          DEV_URL="${{ secrets.DEV_URL }}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${DEV_URL}/api/health" || echo "000")
           if [ "$response" != "200" ]; then
             echo "::error title=Health Check Failed::Health check returned $response"
             exit 1
@@ -138,17 +140,19 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Deploy to staging
+      # [PLACEHOLDER] 替换为实际部署命令
+      - name: Deploy to staging [PLACEHOLDER]
         id: deploy
         run: |
-          echo "::notice title=Deployment::Deploying to staging environment"
-          echo "::set-output name=url::https://staging.example.com"
+          echo "::warning title=Placeholder::此步骤为占位符，请替换为实际部署命令"
+          echo "::set-output name=url::${{ secrets.STAGING_URL }}"
         continue-on-error: false
 
       - name: Health check
         run: |
-          sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://staging.example.com/api/health || echo "000")
+          sleep 15
+          STAGING_URL="${{ secrets.STAGING_URL }}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_URL}/api/health" || echo "000")
           if [ "$response" != "200" ]; then
             echo "::error title=Health Check Failed::Health check returned $response"
             exit 1
@@ -193,35 +197,41 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run database migrations
-        run: |
-          npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
-
-      - name: Create database backup
+      - name: Create database backup (pre-migration)
         run: |
           timestamp=$(date +%Y%m%d_%H%M%S)
           backup_file="backup_prod_${timestamp}.sql"
-          PGPASSWORD=${{ secrets.PG_PASSWORD }} pg_dump -h ${{ secrets.PG_HOST }} -U ${{ secrets.PG_USER }} -d ${{ secrets.PG_DATABASE }} > $backup_file
-          echo "::notice title=Backup::Database backup created: $backup_file"
-        continue-on-error: true
+          PGPASSWORD=${{ secrets.PG_PASSWORD }} pg_dump \
+            -h ${{ secrets.PG_HOST }} \
+            -U ${{ secrets.PG_USER }} \
+            -d ${{ secrets.PG_DATABASE }} \
+            > $backup_file
+          echo "::notice title=Backup::Pre-migration backup created: $backup_file"
+        continue-on-error: false
 
-      - name: Deploy to production
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+
+      # [PLACEHOLDER] 此步骤需替换为真实部署指令（SSH/rsync/Docker/k8s 等）
+      - name: Deploy to production [PLACEHOLDER]
         id: deploy
         run: |
-          echo "::notice title=Deployment::Deploying to production environment"
-          echo "::set-output name=url::https://example.com"
+          echo "::warning title=Placeholder::此步骤为占位符，请替换为实际部署命令"
+          echo "::set-output name=url::${{ secrets.PROD_URL }}"
         continue-on-error: false
 
       - name: Health check
         run: |
-          sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://example.com/api/health || echo "000")
+          sleep 15
+          PROD_URL="${{ secrets.PROD_URL }}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${PROD_URL}/api/health" || echo "000")
           if [ "$response" != "200" ]; then
-            echo "::error title=Health Check Failed::Health check returned $response"
+            echo "::error title=Health Check Failed::Health check returned $response for ${PROD_URL}"
             exit 1
           fi
+          echo "::notice title=Health Check::OK - ${PROD_URL}/api/health returned 200"
 
       - name: Run smoke tests
         run: npm run test:e2e:ci -- --grep "Smoke Test"

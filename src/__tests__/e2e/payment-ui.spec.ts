@@ -864,7 +864,7 @@ test.describe('支付确认完整流程', () => {
       });
     });
 
-    await page.route(`**/api/orders/create`, route => {
+    await page.route(`**/api/payments/create`, route => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -876,6 +876,8 @@ test.describe('支付确认完整流程', () => {
             amount: 99,
             currency: 'CNY',
             status: 'PENDING',
+            paymentMethod: 'ALIPAY',
+            qrCode: 'https://qr.alipay.mock/e2e',
           },
         }),
       });
@@ -917,7 +919,7 @@ test.describe('支付确认完整流程', () => {
 
     // 在 setupPaymentMocks 之后额外监听订单创建，记录调用
     let orderCreateCalled = false;
-    await page.route(`**/api/orders/create`, route => {
+    await page.route(`**/api/payments/create`, route => {
       orderCreateCalled = true;
       void route.fulfill({
         status: 200,
@@ -930,6 +932,8 @@ test.describe('支付确认完整流程', () => {
             amount: 99,
             currency: 'CNY',
             status: 'PENDING',
+            paymentMethod: 'ALIPAY',
+            qrCode: 'https://qr.alipay.mock/e2e',
           },
         }),
       });
@@ -955,9 +959,9 @@ test.describe('支付确认完整流程', () => {
         // 订单创建 API 应被调用
         expect(orderCreateCalled).toBe(true);
 
-        // 应跳转到成功页面
+        // 应跳转到处理中页面
         expect(page.url()).toContain(
-          `/payment/success?orderId=${MOCK_ORDER_ID}`
+          `/payment/processing?orderId=${MOCK_ORDER_ID}`
         );
       }
     }
@@ -990,7 +994,7 @@ test.describe('支付确认完整流程', () => {
       });
     });
 
-    await page.route(`**/api/orders/create`, route => {
+    await page.route(`**/api/payments/create`, route => {
       void route.fulfill({
         status: 500,
         contentType: 'application/json',
@@ -1016,7 +1020,7 @@ test.describe('支付确认完整流程', () => {
         await page.waitForTimeout(1500);
 
         // 不应跳转到成功页
-        expect(page.url()).not.toContain('/payment/success');
+        expect(page.url()).not.toContain('/payment/processing');
 
         // 页面应出现错误提示文字
         const hasError = (await page.getByText(/失败|错误|不可用/).count()) > 0;

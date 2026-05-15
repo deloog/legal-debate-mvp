@@ -35,18 +35,21 @@ interface RequestRecord {
 
 const memStore = new Map<string, RequestRecord>();
 
-// 每5分钟清理过期记录，防止内存泄漏
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [key, record] of memStore.entries()) {
-      if (now > record.resetTime) {
-        memStore.delete(key);
+// 每5分钟清理过期记录，防止内存泄漏。
+// 测试环境避免创建悬挂定时器，否则会显著拖慢/阻塞 Jest 退出。
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(
+    () => {
+      const now = Date.now();
+      for (const [key, record] of memStore.entries()) {
+        if (now > record.resetTime) {
+          memStore.delete(key);
+        }
       }
-    }
-  },
-  5 * 60 * 1000
-);
+    },
+    5 * 60 * 1000
+  );
+}
 
 // =============================================================================
 // Redis 客户端（延迟初始化，仅当 REDIS_URL 已配置时启用）

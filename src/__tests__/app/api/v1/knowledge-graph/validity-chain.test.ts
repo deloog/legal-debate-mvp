@@ -4,6 +4,8 @@
 
 import { GET } from '@/app/api/v1/knowledge-graph/validity-chain/route';
 import { prisma } from '@/lib/db';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { checkKnowledgeGraphPermission } from '@/lib/middleware/knowledge-graph-permission';
 
 // Mock数据库
 jest.mock('@/lib/db', () => ({
@@ -17,6 +19,10 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
 // Mock权限检查
 jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   checkKnowledgeGraphPermission: jest.fn(() =>
@@ -26,14 +32,41 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   KnowledgeGraphAction: {
     VIEW_RELATIONS: 'VIEW_RELATIONS',
   },
+  KnowledgeGraphResource: {
+    RELATION: 'law_article_relation',
+  },
 }));
+
+const mockGetAuthUser = getAuthUser as jest.Mock;
+const mockCheckPermission = checkKnowledgeGraphPermission as jest.Mock;
 
 describe('GET /api/v1/knowledge-graph/validity-chain', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue({
+      userId: 'user-123',
+      email: 'user@example.com',
+      role: 'USER',
+    });
+    mockCheckPermission.mockResolvedValue({ hasPermission: true });
   });
 
   describe('参数验证', () => {
+    it('未登录时返回401', async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/validity-chain?lawArticleId=article-1',
+        {
+          method: 'GET',
+        }
+      );
+
+      const response = await GET(request as any);
+
+      expect(response.status).toBe(401);
+    });
+
     it('应该拒绝缺少lawArticleId参数的请求', async () => {
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/validity-chain',
@@ -188,6 +221,24 @@ describe('GET /api/v1/knowledge-graph/validity-chain', () => {
   });
 
   describe('错误处理', () => {
+    it('应该处理权限不足的情况', async () => {
+      mockCheckPermission.mockResolvedValueOnce({
+        hasPermission: false,
+        reason: '权限不足',
+      });
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/validity-chain?lawArticleId=article-1',
+        {
+          method: 'GET',
+        }
+      );
+
+      const response = await GET(request as any);
+
+      expect(response.status).toBe(403);
+    });
+
     it('应该处理法条不存在的情况', async () => {
       (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(null);
 

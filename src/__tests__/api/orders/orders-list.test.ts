@@ -3,17 +3,6 @@
  * GET /api/orders
  */
 
-// Mock JWT 工具
-jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn(),
-  verifyToken: jest.fn(),
-}));
-
-// Mock NextAuth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
 import { GET } from '@/app/api/orders/route';
 import {
   createMockRequest,
@@ -21,18 +10,21 @@ import {
   assertions,
   mockData,
 } from '../test-utils';
-import { getServerSession } from 'next-auth';
 import { getUserOrders } from '@/lib/order/order-service';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 jest.mock('@/lib/order/order-service', () => ({
   getUserOrders: jest.fn(),
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
 describe('GET /api/orders', () => {
   describe('认证测试', () => {
     it('未登录用户应返回401', async () => {
-      (getServerSession as jest.Mock).mockResolvedValue(null);
+      (getAuthUser as jest.Mock).mockResolvedValue(null);
 
       const request = createMockRequest('http://localhost:3000/api/orders');
 
@@ -54,14 +46,9 @@ describe('GET /api/orders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (extractTokenFromHeader as jest.Mock).mockImplementation(
-        (header: string) => header?.replace('Bearer ', '')
-      );
-      (verifyToken as jest.Mock).mockReturnValue({
-        valid: true,
-        payload: { userId: 'test-user-id' },
+      (getAuthUser as jest.Mock).mockResolvedValue({
+        userId: mockSession.user.id,
       });
-      (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     });
 
     it('无效的status应返回400', async () => {
@@ -182,7 +169,9 @@ describe('GET /api/orders', () => {
     ];
 
     beforeEach(() => {
-      (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+      (getAuthUser as jest.Mock).mockResolvedValue({
+        userId: mockSession.user.id,
+      });
       (getUserOrders as jest.Mock).mockReset();
       (getUserOrders as jest.Mock).mockResolvedValue({
         orders: mockOrders,
@@ -310,14 +299,9 @@ describe('GET /api/orders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (extractTokenFromHeader as jest.Mock).mockImplementation(
-        (header: string) => header?.replace('Bearer ', '')
-      );
-      (verifyToken as jest.Mock).mockReturnValue({
-        valid: true,
-        payload: { userId: 'test-user-id' },
+      (getAuthUser as jest.Mock).mockResolvedValue({
+        userId: mockSession.user.id,
       });
-      (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     });
 
     it('查询失败应返回500', async () => {

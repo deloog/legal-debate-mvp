@@ -25,11 +25,16 @@ export enum PermissionAction {
  */
 export enum PermissionResource {
   USER = 'user',
+  ROLE = 'role',
   CASE = 'case',
   DEBATE = 'debate',
   DOCUMENT = 'document',
   LAW = 'law',
   SYSTEM = 'system',
+  MEMBERSHIP = 'membership',
+  ORDER = 'order',
+  LOG = 'log',
+  ADMIN = 'admin',
   REVIEW = 'review', // 审核管理
   QUALIFICATION = 'qualification', // 资格管理
   ENTERPRISE = 'enterprise', // 企业管理
@@ -126,6 +131,17 @@ export const USER_PERMISSIONS = {
 } as const;
 
 /**
+ * 角色管理权限
+ */
+export const ROLE_PERMISSIONS = {
+  CREATE: 'role:create',
+  READ: 'role:read',
+  UPDATE: 'role:update',
+  DELETE: 'role:delete',
+  MANAGE: 'role:manage',
+} as const;
+
+/**
  * 案件管理权限
  */
 export const CASE_PERMISSIONS = {
@@ -178,6 +194,37 @@ export const SYSTEM_PERMISSIONS = {
   BACKUP: 'system:backup',
   RESTORE: 'system:restore',
   MANAGE: 'system:manage',
+} as const;
+
+/**
+ * 会员管理权限
+ */
+export const MEMBERSHIP_PERMISSIONS = {
+  READ: 'membership:read',
+  WRITE: 'membership:write',
+} as const;
+
+/**
+ * 订单管理权限
+ */
+export const ORDER_PERMISSIONS = {
+  READ: 'order:read',
+  WRITE: 'order:write',
+} as const;
+
+/**
+ * 日志查看权限
+ */
+export const LOG_PERMISSIONS = {
+  READ: 'log:read',
+} as const;
+
+/**
+ * 后台系统运维权限
+ */
+export const ADMIN_PERMISSIONS = {
+  READ: 'admin:read',
+  WRITE: 'admin:write',
 } as const;
 
 /**
@@ -274,11 +321,16 @@ export const TEAM_PERMISSIONS = {
  */
 export const ALL_PERMISSIONS = [
   ...Object.values(USER_PERMISSIONS),
+  ...Object.values(ROLE_PERMISSIONS),
   ...Object.values(CASE_PERMISSIONS),
   ...Object.values(DEBATE_PERMISSIONS),
   ...Object.values(DOCUMENT_PERMISSIONS),
   ...Object.values(LAW_PERMISSIONS),
   ...Object.values(SYSTEM_PERMISSIONS),
+  ...Object.values(MEMBERSHIP_PERMISSIONS),
+  ...Object.values(ORDER_PERMISSIONS),
+  ...Object.values(LOG_PERMISSIONS),
+  ...Object.values(ADMIN_PERMISSIONS),
   ...Object.values(REVIEW_PERMISSIONS),
   ...Object.values(QUALIFICATION_PERMISSIONS),
   ...Object.values(ENTERPRISE_PERMISSIONS),
@@ -323,6 +375,38 @@ export const PERMISSION_DEFINITIONS = [
     name: USER_PERMISSIONS.MANAGE,
     description: '管理用户',
     resource: PermissionResource.USER,
+    action: PermissionAction.MANAGE,
+  },
+
+  // 角色管理
+  {
+    name: ROLE_PERMISSIONS.CREATE,
+    description: '创建角色',
+    resource: PermissionResource.ROLE,
+    action: PermissionAction.CREATE,
+  },
+  {
+    name: ROLE_PERMISSIONS.READ,
+    description: '查看角色',
+    resource: PermissionResource.ROLE,
+    action: PermissionAction.READ,
+  },
+  {
+    name: ROLE_PERMISSIONS.UPDATE,
+    description: '更新角色',
+    resource: PermissionResource.ROLE,
+    action: PermissionAction.UPDATE,
+  },
+  {
+    name: ROLE_PERMISSIONS.DELETE,
+    description: '删除角色',
+    resource: PermissionResource.ROLE,
+    action: PermissionAction.DELETE,
+  },
+  {
+    name: ROLE_PERMISSIONS.MANAGE,
+    description: '管理角色',
+    resource: PermissionResource.ROLE,
     action: PermissionAction.MANAGE,
   },
 
@@ -486,6 +570,56 @@ export const PERMISSION_DEFINITIONS = [
     action: PermissionAction.MANAGE,
   },
 
+  // 会员管理
+  {
+    name: MEMBERSHIP_PERMISSIONS.READ,
+    description: '查看会员',
+    resource: PermissionResource.MEMBERSHIP,
+    action: PermissionAction.READ,
+  },
+  {
+    name: MEMBERSHIP_PERMISSIONS.WRITE,
+    description: '更新会员',
+    resource: PermissionResource.MEMBERSHIP,
+    action: PermissionAction.UPDATE,
+  },
+
+  // 订单管理
+  {
+    name: ORDER_PERMISSIONS.READ,
+    description: '查看订单',
+    resource: PermissionResource.ORDER,
+    action: PermissionAction.READ,
+  },
+  {
+    name: ORDER_PERMISSIONS.WRITE,
+    description: '更新订单',
+    resource: PermissionResource.ORDER,
+    action: PermissionAction.UPDATE,
+  },
+
+  // 后台运维
+  {
+    name: ADMIN_PERMISSIONS.READ,
+    description: '查看后台运维数据',
+    resource: PermissionResource.ADMIN,
+    action: PermissionAction.READ,
+  },
+  {
+    name: ADMIN_PERMISSIONS.WRITE,
+    description: '更新后台运维配置',
+    resource: PermissionResource.ADMIN,
+    action: PermissionAction.UPDATE,
+  },
+
+  // 日志查看
+  {
+    name: LOG_PERMISSIONS.READ,
+    description: '查看系统日志',
+    resource: PermissionResource.LOG,
+    action: PermissionAction.READ,
+  },
+
   // 审核管理
   {
     name: REVIEW_PERMISSIONS.CREATE,
@@ -616,6 +750,30 @@ export const PERMISSION_DEFINITIONS = [
     description: '删除报告',
     resource: PermissionResource.REPORT,
     action: PermissionAction.DELETE,
+  },
+  {
+    name: REPORT_PERMISSIONS.MANAGE,
+    description: '管理报告',
+    resource: PermissionResource.REPORT,
+    action: PermissionAction.MANAGE,
+  },
+  {
+    name: ALERT_PERMISSIONS.READ,
+    description: '查看告警',
+    resource: PermissionResource.ALERT,
+    action: PermissionAction.READ,
+  },
+  {
+    name: ALERT_PERMISSIONS.ACKNOWLEDGE,
+    description: '确认告警',
+    resource: PermissionResource.ALERT,
+    action: PermissionAction.UPDATE,
+  },
+  {
+    name: ALERT_PERMISSIONS.RESOLVE,
+    description: '处理告警',
+    resource: PermissionResource.ALERT,
+    action: PermissionAction.UPDATE,
   },
   {
     name: ALERT_PERMISSIONS.MANAGE,

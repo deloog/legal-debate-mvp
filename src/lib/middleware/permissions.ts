@@ -6,6 +6,15 @@ import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import type { UserRole } from '@/types/auth';
 import type { PermissionCheckResult } from '@/types/permission';
+import { ADMIN_ROLE_PERMISSIONS } from '@/types/permission';
+
+function getBuiltinRolePermissions(userRole: string): string[] {
+  if (userRole === 'ADMIN') {
+    return [...ADMIN_ROLE_PERMISSIONS];
+  }
+
+  return [];
+}
 
 // =============================================================================
 // 角色检查函数
@@ -81,11 +90,20 @@ export async function hasPermission(
 
     // 检查用户是否通过permissions字段直接分配了权限
     const directPermissions = user.permissions as Array<string> | null;
-    if (directPermissions && directPermissions.includes(permissionName)) {
+    const builtinPermissions = getBuiltinRolePermissions(user.role);
+
+    if (
+      (directPermissions && directPermissions.includes(permissionName)) ||
+      builtinPermissions.includes(permissionName)
+    ) {
+      const actualPermissions = Array.from(
+        new Set([...(directPermissions ?? []), ...builtinPermissions])
+      );
+
       return {
         hasPermission: true,
         requiredPermission: permissionName,
-        actualPermissions: directPermissions,
+        actualPermissions,
       };
     }
 
@@ -109,18 +127,23 @@ export async function hasPermission(
       };
     }
 
-    // 检查角色是否有该权限
-    const hasRolePermission = role.permissions.some(
-      rp => rp.permission?.name === permissionName
+    const allPermissions = Array.from(
+      new Set([
+        ...builtinPermissions,
+        ...(directPermissions ?? []),
+        ...role.permissions
+          .map(rp => rp.permission?.name)
+          .filter((p): p is string => !!p),
+      ])
     );
 
-    const allPermissions = role.permissions.map(rp => rp.permission?.name);
-
     return {
-      hasPermission: hasRolePermission,
-      reason: hasRolePermission ? undefined : '角色缺少该权限',
+      hasPermission: allPermissions.includes(permissionName),
+      reason: allPermissions.includes(permissionName)
+        ? undefined
+        : '角色缺少该权限',
       requiredPermission: permissionName,
-      actualPermissions: allPermissions.filter((p): p is string => !!p),
+      actualPermissions: allPermissions,
     };
   } catch (error) {
     logger.error('检查权限时出错:', error);
@@ -154,6 +177,8 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     }
 
     const permissions: string[] = [];
+
+    permissions.push(...getBuiltinRolePermissions(user.role));
 
     // 添加直接分配的权限
     const directPermissions = user.permissions as Array<string> | null;

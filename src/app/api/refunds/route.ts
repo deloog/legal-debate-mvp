@@ -4,37 +4,21 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         { success: false, message: '未授权' },
         { status: 401 }
       );
     }
 
-    const token = extractTokenFromHeader(authHeader);
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: '未授权' },
-        { status: 401 }
-      );
-    }
-
-    const tokenResult = verifyToken(token);
-    if (!tokenResult.valid || !tokenResult.payload) {
-      return NextResponse.json(
-        { success: false, message: '无效的 token' },
-        { status: 401 }
-      );
-    }
-
-    const { userId } = tokenResult.payload;
+    const { userId } = authUser;
 
     const refunds = await prisma.refundRecord.findMany({
       where: { userId },

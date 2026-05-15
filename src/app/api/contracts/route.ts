@@ -18,6 +18,7 @@ import {
   resolveContractUserId,
   unauthorizedResponse,
 } from '@/app/api/lib/middleware/contract-auth';
+import { contractVersionService } from '@/lib/contract/contract-version-service';
 
 /**
  * 转换 Zod 验证后的 feeType 为 Prisma 期望的类型
@@ -366,6 +367,8 @@ export async function POST(
         });
       }
     }
+
+    await contractVersionService.createVersion(contract.id, 'CREATE', userId);
 
     // 转换响应数据
     const responseData = {

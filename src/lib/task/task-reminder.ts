@@ -98,7 +98,7 @@ class TaskReminderGenerator {
 
         const input: CreateReminderInput = {
           userId: task.assignedTo || task.createdBy,
-          type: ReminderType.TASK_DUE, // 使用正确的枚举值
+          type: ReminderType.FOLLOW_UP,
           title: `任务提醒: ${task.title}`,
           content: `您有一个任务将于${hoursBefore}小时后到期。\n\n任务: ${task.title}\n优先级: ${task.priority}\n负责人: ${assignedUser}${caseInfo}\n截止时间: ${task.dueDate.toLocaleString('zh-CN')}`,
           message: `您有一个任务将于${hoursBefore}小时后到期。\n\n任务: ${task.title}\n优先级: ${task.priority}\n负责人: ${assignedUser}${caseInfo}\n截止时间: ${task.dueDate.toLocaleString('zh-CN')}`, // 兼容旧代码

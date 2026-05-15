@@ -77,6 +77,22 @@ export async function POST(
       );
     }
 
+    if (
+      validatedData.approvers &&
+      validatedData.approvers.some(step => !step.approverId?.trim())
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_APPROVER',
+            message: '发起审批时，每个步骤都必须指定具体审批人',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     // 发起审批（createdBy 使用来自 JWT 的 userId）
     const approvalId = await contractApprovalService.startApproval({
       contractId,

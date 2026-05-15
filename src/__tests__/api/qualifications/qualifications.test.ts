@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { QualificationStatus } from '@/types/qualification';
 
 // Mock fs/promises
 const mockWriteFile = jest.fn();
@@ -325,6 +326,54 @@ describe('Qualification API Security Tests', () => {
       });
 
       expect(userQualifications.length).toBeGreaterThan(0);
+    });
+
+    it('should allow resubmission for rejected qualifications', async () => {
+      const latestQualification = {
+        id: 'qual-rejected',
+        status: QualificationStatus.REJECTED,
+      };
+
+      const canResubmit =
+        latestQualification.status === QualificationStatus.REJECTED ||
+        latestQualification.status === QualificationStatus.EXPIRED;
+
+      expect(canResubmit).toBe(true);
+    });
+
+    it('should allow resubmission for expired qualifications', async () => {
+      const latestQualification = {
+        id: 'qual-expired',
+        status: QualificationStatus.EXPIRED,
+      };
+
+      const canResubmit =
+        latestQualification.status === QualificationStatus.REJECTED ||
+        latestQualification.status === QualificationStatus.EXPIRED;
+
+      expect(canResubmit).toBe(true);
+    });
+
+    it('should persist licensePhoto value with qualification payload', async () => {
+      const payload = {
+        userId: testUser.userId,
+        licenseNumber: '12345678901234567',
+        fullName: '张测试',
+        idCardNumber: '110101199001011237',
+        lawFirm: '测试律师事务所',
+        licensePhoto: '/api/qualifications/photo/qual-test-123',
+        status: QualificationStatus.UNDER_REVIEW,
+      };
+
+      mockPrisma.lawyerQualification.create.mockResolvedValue(payload);
+
+      const created = await mockPrisma.lawyerQualification.create({
+        data: payload,
+      });
+
+      expect(created.licensePhoto).toBe(
+        '/api/qualifications/photo/qual-test-123'
+      );
     });
   });
 

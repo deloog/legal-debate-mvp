@@ -2,38 +2,43 @@
  * 跟进任务处理器测试
  */
 
-import { FollowUpTaskPriority, FollowUpTaskStatus } from '@/types/client';
+import {
+  CommunicationType,
+  FollowUpTaskPriority,
+  FollowUpTaskStatus,
+} from '@/types/client';
 
-// 服务内部使用 new PrismaClient()，需要 mock @prisma/client
 const mockQueryRaw = jest.fn();
 const mockQueryRawUnsafe = jest.fn();
+const mockFollowUpTaskCreate = jest.fn();
 
-jest.mock('@prisma/client', () => {
-  const actual = jest.requireActual(
-    '@prisma/client'
-  ) as typeof import('@prisma/client');
-  return {
-    ...actual,
-    PrismaClient: jest.fn().mockImplementation(() => ({
-      $queryRaw: mockQueryRaw,
-      $queryRawUnsafe: mockQueryRawUnsafe,
-      followUpTask: {
-        create: jest.fn(),
-        update: jest.fn(),
-        findUnique: jest.fn(),
-        findMany: jest.fn(),
-        count: jest.fn(),
-      },
-      $connect: jest.fn(),
-      $disconnect: jest.fn(),
-    })),
-  };
-});
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    $queryRaw: mockQueryRaw,
+    $queryRawUnsafe: mockQueryRawUnsafe,
+    followUpTask: {
+      create: mockFollowUpTaskCreate,
+    },
+  },
+}));
+
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    $queryRaw: mockQueryRaw,
+    $queryRawUnsafe: mockQueryRawUnsafe,
+    followUpTask: {
+      create: mockFollowUpTaskCreate,
+    },
+  },
+}));
 
 // mockPrisma 别名，方便测试中使用
 const mockPrisma = {
   $queryRaw: mockQueryRaw,
   $queryRawUnsafe: mockQueryRawUnsafe,
+  followUpTask: {
+    create: mockFollowUpTaskCreate,
+  },
 };
 
 const {
@@ -455,6 +460,53 @@ describe('FollowUpTaskProcessor', () => {
     });
   });
 
+  describe('createTask', () => {
+    it('应该允许创建不关联沟通记录的手动跟进任务', async () => {
+      const createdTask = {
+        id: 'task-manual',
+        clientId: 'client-1',
+        communicationId: null,
+        userId: 'user-1',
+        type: 'PHONE',
+        summary: '手动跟进客户',
+        dueDate: new Date('2026-01-25'),
+        priority: 'MEDIUM',
+        status: 'PENDING',
+        completedAt: null,
+        notes: '客户页手动创建',
+        metadata: null,
+        createdAt: new Date('2026-01-20'),
+        updatedAt: new Date('2026-01-20'),
+        clientName: '张三',
+        clientPhone: '13800138000',
+        clientEmail: 'test@example.com',
+      };
+
+      mockFollowUpTaskCreate.mockResolvedValue({
+        id: createdTask.id,
+      });
+      (mockPrisma.$queryRaw as jest.Mock).mockResolvedValueOnce([createdTask]);
+
+      const result = await FollowUpTaskProcessor.createTask({
+        clientId: 'client-1',
+        userId: 'user-1',
+        type: CommunicationType.PHONE,
+        summary: '手动跟进客户',
+        dueDate: new Date('2026-01-25'),
+        notes: '客户页手动创建',
+      });
+
+      expect(mockFollowUpTaskCreate).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          clientId: 'client-1',
+          communicationId: null,
+          userId: 'user-1',
+        }),
+      });
+      expect(result.communicationId).toBeNull();
+    });
+  });
+
   describe('updateTask', () => {
     it('应该更新任务状态', async () => {
       const mockTask = {
@@ -485,6 +537,7 @@ describe('FollowUpTaskProcessor', () => {
 
       (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce([mockTask])
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([mockUpdatedTask]);
 
       const result = await FollowUpTaskProcessor.updateTask(

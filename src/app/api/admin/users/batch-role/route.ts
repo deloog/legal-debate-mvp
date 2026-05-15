@@ -14,6 +14,11 @@ import type {
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  canManagePrivilegedRole,
+  getFreshUserRole,
+  requiresSuperAdminForUserRoleChange,
+} from '@/lib/admin/role-security';
 
 // =============================================================================
 // 辅助函数
@@ -90,21 +95,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ) as unknown as NextResponse;
     }
 
-    // 只有 SUPER_ADMIN 才能批量授予 SUPER_ADMIN 角色，防止权限提升
-    if (body.role === 'SUPER_ADMIN') {
-      const currentUserInDb = await prisma.user.findUnique({
-        where: { id: user.userId },
-        select: { role: true },
-      });
-      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
-        return Response.json(
-          {
-            error: '权限不足',
-            message: '只有超级管理员可以批量授予超级管理员角色',
-          },
-          { status: 403 }
-        ) as unknown as NextResponse;
-      }
+    const currentUserRole = await getFreshUserRole(user.userId);
+
+    if (body.userIds.includes(user.userId)) {
+      return Response.json(
+        { error: '禁止操作', message: '批量角色调整不能包含当前登录账号' },
+        { status: 403 }
+      ) as unknown as NextResponse;
     }
 
     // 批量查询用户
@@ -115,6 +112,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       select: {
         id: true,
         email: true,
+        role: true,
       },
     });
 
@@ -122,6 +120,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return Response.json(
         { error: '参数错误', message: '部分用户不存在' },
         { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
+    const touchesPrivilegedRoles = users.some(targetUser =>
+      requiresSuperAdminForUserRoleChange(targetUser.role, body.role)
+    );
+
+    if (touchesPrivilegedRoles && !canManagePrivilegedRole(currentUserRole)) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以批量管理管理员或超级管理员角色',
+        },
+        { status: 403 }
       ) as unknown as NextResponse;
     }
 

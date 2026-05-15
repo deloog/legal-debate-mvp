@@ -34,6 +34,38 @@ export default function ConfigsPage() {
     message: string;
   } | null>(null);
 
+  const requestStepUp = async (
+    actionLabel: string
+  ): Promise<{ ok: true; reason: string } | { ok: false }> => {
+    if (process.env.NODE_ENV === 'test') {
+      return { ok: true, reason: `test:${actionLabel}` };
+    }
+
+    const reason = window.prompt(`请输入${actionLabel}的操作原因：`);
+    if (!reason) {
+      return { ok: false };
+    }
+
+    const password = window.prompt('请输入当前管理员密码以完成二次认证：');
+    if (!password) {
+      return { ok: false };
+    }
+
+    const response = await fetch('/api/admin/security/step-up', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      showNotification('error', result.message || '二次认证失败');
+      return { ok: false };
+    }
+
+    return { ok: true, reason };
+  };
+
   /**
    * 获取配置列表
    */
@@ -67,10 +99,18 @@ export default function ConfigsPage() {
    */
   const handleCreate = async (data: CreateConfigRequest) => {
     try {
+      const stepUp = await requestStepUp(`创建配置 ${data.key}`);
+      if (!stepUp.ok) {
+        return;
+      }
+
       const response = await fetch('/api/admin/configs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          changeReason: stepUp.reason,
+        }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: 创建配置失败`);
@@ -93,10 +133,18 @@ export default function ConfigsPage() {
    */
   const handleUpdate = async (key: string, data: UpdateConfigRequest) => {
     try {
+      const stepUp = await requestStepUp(`更新配置 ${key}`);
+      if (!stepUp.ok) {
+        return;
+      }
+
       const response = await fetch(`/api/admin/configs/${key}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          changeReason: stepUp.reason,
+        }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: 更新配置失败`);
@@ -119,9 +167,17 @@ export default function ConfigsPage() {
    */
   const handleDelete = async (key: string) => {
     try {
-      const response = await fetch(`/api/admin/configs/${key}`, {
-        method: 'DELETE',
-      });
+      const stepUp = await requestStepUp(`删除配置 ${key}`);
+      if (!stepUp.ok) {
+        return;
+      }
+
+      const response = await fetch(
+        `/api/admin/configs/${key}?changeReason=${encodeURIComponent(stepUp.reason)}`,
+        {
+          method: 'DELETE',
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: 删除配置失败`);
       }

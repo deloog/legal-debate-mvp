@@ -2,6 +2,7 @@
  * 认证中间件
  */
 
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import type { JwtPayload } from '@/types/auth';
 import type { NextRequest } from 'next/server';
@@ -42,7 +43,31 @@ export async function getAuthUser(
     return null;
   }
 
-  return verificationResult.payload;
+  const payload = verificationResult.payload;
+
+  // 新版本 accessToken 通过 jti 绑定 session.id。
+  // 若会话已删除（如 logout）或过期，则旧 accessToken 立即失效。
+  if (payload.jti) {
+    try {
+      const session = await prisma.session.findUnique({
+        where: { id: payload.jti },
+        select: { id: true, userId: true, expires: true },
+      });
+
+      if (!session) return null;
+      if (session.userId !== payload.userId) return null;
+      if (session.expires.getTime() <= Date.now()) return null;
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('[getAuthUser] Session 绑定校验失败，拒绝认证:', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+      return null;
+    }
+  }
+
+  return payload;
 }
 
 /**

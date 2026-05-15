@@ -31,8 +31,16 @@ jest.mock('@/lib/db/prisma', () => ({
     },
     courtSchedule: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     followUpTask: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+    },
+    case: {
+      findUnique: jest.fn(),
+    },
+    task: {
       findUnique: jest.fn(),
     },
   },
@@ -106,6 +114,29 @@ describe('ReminderService', () => {
       expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
+    it('应该把 content/scheduledAt 映射为 Prisma message/reminderTime', async () => {
+      const mockCreate = prisma.reminder.create as jest.Mock;
+      mockCreate.mockResolvedValue(mockReminder);
+      const scheduledAt = new Date('2024-12-01T09:00:00Z');
+
+      await reminderService.createReminder({
+        userId: mockUserId,
+        type: ReminderType.COURT_SCHEDULE,
+        title: '法庭提醒',
+        content: '请准时出庭',
+        scheduledAt,
+        channel: NotificationChannel.IN_APP,
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          message: '请准时出庭',
+          reminderTime: scheduledAt,
+          channels: [NotificationChannel.IN_APP],
+        }),
+      });
+    });
+
     it('应该正确处理创建提醒失败的情况', async () => {
       const mockCreate = prisma.reminder.create as jest.Mock;
       mockCreate.mockRejectedValue(new Error('数据库错误'));
@@ -140,6 +171,35 @@ describe('ReminderService', () => {
       expect(result.total).toBe(1);
       expect(result.page).toBe(1);
       expect(result.limit).toBe(20);
+    });
+
+    it('应该同时保留 startTime 和 endTime 查询条件', async () => {
+      const mockFindMany = prisma.reminder.findMany as jest.Mock;
+      const mockCount = prisma.reminder.count as jest.Mock;
+      const startTime = new Date('2024-12-01T00:00:00Z');
+      const endTime = new Date('2024-12-31T23:59:59Z');
+
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(0);
+
+      await reminderService.getReminders({
+        userId: mockUserId,
+        startTime,
+        endTime,
+        page: '1',
+        limit: '20',
+      });
+
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            reminderTime: {
+              gte: startTime,
+              lte: endTime,
+            },
+          }),
+        })
+      );
     });
 
     it('应该正确处理空列表', async () => {
@@ -188,6 +248,32 @@ describe('ReminderService', () => {
 
       expect(result.title).toBe('更新后的标题');
       expect(mockUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该更新 message/reminderTime/channels 字段', async () => {
+      const mockUpdate = prisma.reminder.update as jest.Mock;
+      const nextTime = new Date('2024-12-02T09:00:00Z');
+      mockUpdate.mockResolvedValue({
+        ...mockReminder,
+        message: '新的提醒内容',
+        reminderTime: nextTime,
+        channels: ['EMAIL'],
+      });
+
+      await reminderService.updateReminder('reminder-1', mockUserId, {
+        message: '新的提醒内容',
+        reminderTime: nextTime,
+        channels: [NotificationChannel.EMAIL],
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 'reminder-1', userId: mockUserId },
+        data: expect.objectContaining({
+          message: '新的提醒内容',
+          reminderTime: nextTime,
+          channels: [NotificationChannel.EMAIL],
+        }),
+      });
     });
 
     it('应该正确处理更新失败的情况', async () => {
@@ -405,6 +491,9 @@ describe('ReminderGenerator', () => {
   describe('generateDeadlineReminders', () => {
     it('应该成功生成截止日期提醒', async () => {
       const mockCreate = prisma.reminder.create as jest.Mock;
+      (prisma.case.findUnique as jest.Mock).mockResolvedValue({
+        userId: 'user-1',
+      });
       mockCreate.mockResolvedValue({ id: 'reminder-1' });
 
       await reminderGenerator.generateDeadlineReminders(
@@ -417,6 +506,14 @@ describe('ReminderGenerator', () => {
 
       // 默认配置有3个提前提醒时间：7天、3天、1天
       expect(mockCreate).toHaveBeenCalledTimes(3);
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 'user-1',
+            type: 'DEADLINE',
+          }),
+        })
+      );
     });
   });
 });

@@ -13,6 +13,11 @@ import {
 } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkKnowledgeGraphPermission,
+  KnowledgeGraphAction,
+  KnowledgeGraphResource,
+} from '@/lib/middleware/knowledge-graph-permission';
 
 export async function GET(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -23,14 +28,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 仅管理员可查看待审核关系列表
-  const dbUser = await prisma.user.findUnique({
-    where: { id: authUser.userId },
-    select: { role: true },
-  });
-  if (!dbUser || (dbUser.role !== 'ADMIN' && dbUser.role !== 'SUPER_ADMIN')) {
+  const permissionResult = await checkKnowledgeGraphPermission(
+    authUser.userId,
+    KnowledgeGraphAction.VERIFY_RELATION,
+    KnowledgeGraphResource.RELATION
+  );
+  if (!permissionResult.hasPermission) {
     return NextResponse.json(
-      { success: false, error: '权限不足' },
+      { success: false, error: permissionResult.reason || '权限不足' },
       { status: 403 }
     );
   }

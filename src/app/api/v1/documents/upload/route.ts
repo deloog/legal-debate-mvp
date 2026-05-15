@@ -12,8 +12,11 @@ import {
   checkResourceOwnership,
   ResourceType,
 } from '@/lib/middleware/resource-permission';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 import { logger } from '@/lib/logger';
 import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
+import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
 
 /**
  * 文件上传API
@@ -60,14 +63,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 检查用户是否拥有此案件
-    const permissionResult = await checkResourceOwnership(
+    // 所有者/管理员直接通过；其余用户按案件协作权限检查
+    const ownershipResult = await checkResourceOwnership(
       authUser.userId,
       caseId,
       ResourceType.CASE
     );
+    const permissionResult = ownershipResult.hasPermission
+      ? { hasAccess: true }
+      : await canAccessSharedCase(
+          authUser.userId,
+          caseId,
+          CasePermission.UPLOAD_DOCUMENTS
+        );
 
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.hasAccess) {
       return NextResponse.json(
         { success: false, error: '无权上传文件到此案件' },
         { status: 403 }
@@ -147,24 +157,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       contentType: file.type,
     });
 
-    // 本地模式同时写入磁盘（供文档分析任务读取）
-    if (process.env.OSS_ENABLED !== 'true') {
-      const uploadDir = join(
-        process.cwd(),
-        'private_uploads',
-        'documents',
-        caseId
-      );
-      await mkdir(uploadDir, { recursive: true });
-      const filePath = join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-    }
+    // 始终写入本地分析工作目录，保证手动/自动分析都能读取到源文件
+    const uploadDir = join(
+      process.cwd(),
+      'private_uploads',
+      'documents',
+      caseId
+    );
+    await mkdir(uploadDir, { recursive: true });
+    const filePath = join(uploadDir, fileName);
+    await writeFile(filePath, buffer);
 
     // 保存到数据库
     const document = await prisma.document.create({
       data: {
         caseId,
-        userId: existingCase.userId,
+        userId: authUser.userId,
         filename: file.name,
         filePath: ossKey,
         fileType: extension,
@@ -174,11 +182,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    // 检测虚拟测试PDF（用于E2E测试）
-    const contentStr = buffer.toString('utf8', 0, 50);
+    // E2E 测试专用：仅在测试模式下，对约定的测试文件名使用 Mock 数据
+    // 注意：不能用 PDF 版本头（%PDF-1.4/%PDF-1.5）检测——所有合规 PDF 都包含此标记
     const isTestPDF =
-      contentStr.includes('%PDF-1.4') ||
-      contentStr.includes('%PDF-1.5') ||
+      (process.env.NODE_ENV === 'test' || process.env.USE_MOCK_AI === 'true') &&
       file.name === 'test-document.pdf';
 
     if (isTestPDF) {
@@ -266,19 +273,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     } else {
       // 真实PDF文件，异步触发文档分析
-      triggerDocumentAnalysis(document.id, ossKey, extension).catch(error => {
-        logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
-        // 更新文档状态为失败
-        prisma.document
-          .update({
-            where: { id: document.id },
-            data: {
-              analysisStatus: 'FAILED',
-              analysisError: `分析触发失败: ${'未知错误'}`,
-            },
-          })
-          .catch(err => logger.error('更新文档分析状态失败:', err));
-      });
+      triggerDocumentAnalysis(document.id, caseId, ossKey, extension).catch(
+        error => {
+          logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
+          // 更新文档状态为失败
+          prisma.document
+            .update({
+              where: { id: document.id },
+              data: {
+                analysisStatus: 'FAILED',
+                analysisError: `分析触发失败: ${'未知错误'}`,
+              },
+            })
+            .catch(err => logger.error('更新文档分析状态失败:', err));
+        }
+      );
     }
 
     return NextResponse.json({
@@ -306,13 +315,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 /**
- * 异步触发文档分析
+ * 异步触发文档分析，分析完成后若满足阈值则自动触发案件提炼
  * @param documentId 文档ID
+ * @param caseId 所属案件ID
  * @param filePath 文件路径
  * @param fileType 文件类型
  */
 async function triggerDocumentAnalysis(
   documentId: string,
+  caseId: string,
   filePath: string,
   fileType: string
 ): Promise<void> {
@@ -323,10 +334,10 @@ async function triggerDocumentAnalysis(
       data: { analysisStatus: 'PROCESSING' },
     });
 
-    // 构建完整文件路径
+    // 构建完整文件路径（文件保存在 private_uploads/，不在 public/ 下）
     const fullFilePath = join(
       process.cwd(),
-      'public',
+      'private_uploads',
       filePath.startsWith('/') ? filePath.substring(1) : filePath
     );
 
@@ -386,24 +397,47 @@ async function triggerDocumentAnalysis(
         },
       });
       logger.info(`文档分析完成 [${documentId}]:`, result.data);
+
+      // 文档分析完成后，触发后置钩子（案件提炼 + 证据草稿落库），fire-and-forget
+      runAfterAnalysisHooks(caseId).catch(err => {
+        logger.warn(
+          `[upload] 后置钩子 fire-and-forget 失败 [caseId=${caseId}]:`,
+          err
+        );
+      });
     } else {
+      const rawMsg = result.error?.message || '';
+      logger.error(`文档分析失败 [${documentId}]:`, result.error);
       await prisma.document.update({
         where: { id: documentId },
         data: {
           analysisStatus: 'FAILED',
-          analysisError: result.error?.message || '文档分析失败',
+          analysisError: toUserFriendlyError(rawMsg),
         },
       });
-      logger.error(`文档分析失败 [${documentId}]:`, result.error);
     }
   } catch (error) {
+    const rawMsg = error instanceof Error ? error.message : String(error);
     logger.error(`文档分析异常 [${documentId}]:`, error);
     await prisma.document.update({
       where: { id: documentId },
       data: {
         analysisStatus: 'FAILED',
-        analysisError: `分析异常: ${'未知错误'}`,
+        analysisError: toUserFriendlyError(rawMsg),
       },
     });
   }
+}
+
+function toUserFriendlyError(raw: string): string {
+  if (/fetch failed|ECONNREFUSED|ETIMEDOUT|timeout|network|socket/i.test(raw)) {
+    return 'AI 服务暂时不可用，请稍候重试';
+  }
+  if (/rate.?limit|quota|429|too many/i.test(raw)) {
+    return 'AI 服务请求过于频繁，请稍候重试';
+  }
+  if (/unauthorized|401|api.?key|invalid.*key/i.test(raw)) {
+    return 'AI 服务配置异常，请联系管理员';
+  }
+  return 'AI 分析失败，请稍候重试';
 }

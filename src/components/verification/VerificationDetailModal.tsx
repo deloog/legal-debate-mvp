@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -64,13 +64,7 @@ export function VerificationDetailModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && argumentId) {
-      fetchVerificationData();
-    }
-  }, [isOpen, argumentId]);
-
-  const fetchVerificationData = async () => {
+  const fetchVerificationData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -89,7 +83,13 @@ export function VerificationDetailModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [argumentId]);
+
+  useEffect(() => {
+    if (isOpen && argumentId) {
+      void fetchVerificationData();
+    }
+  }, [isOpen, argumentId, fetchVerificationData]);
 
   const getScoreColor = (score: number) => {
     if (score >= 0.8) return 'text-green-600 bg-green-50 border-green-200';

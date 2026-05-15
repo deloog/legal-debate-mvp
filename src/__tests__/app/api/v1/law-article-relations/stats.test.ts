@@ -24,6 +24,28 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'admin-user-1',
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    })
+  ),
+}));
+
+jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
+  checkKnowledgeGraphPermission: jest.fn(() =>
+    Promise.resolve({ hasPermission: true })
+  ),
+  KnowledgeGraphAction: {
+    VIEW_STATS: 'view_stats',
+  },
+  KnowledgeGraphResource: {
+    STATS: 'knowledge_graph_stats',
+  },
+}));
+
 describe('GET /api/v1/law-article-relations/stats', () => {
   beforeEach(() => {
     jest.clearAllMocks();

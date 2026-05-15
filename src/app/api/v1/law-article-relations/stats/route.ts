@@ -8,6 +8,11 @@ import { prisma } from '@/lib/db';
 import { VerificationStatus, Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkKnowledgeGraphPermission,
+  KnowledgeGraphAction,
+  KnowledgeGraphResource,
+} from '@/lib/middleware/knowledge-graph-permission';
 
 export async function GET(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -15,6 +20,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: '未授权，请先登录' },
       { status: 401 }
+    );
+  }
+
+  const permissionResult = await checkKnowledgeGraphPermission(
+    authUser.userId,
+    KnowledgeGraphAction.VIEW_STATS,
+    KnowledgeGraphResource.STATS
+  );
+  if (!permissionResult.hasPermission) {
+    return NextResponse.json(
+      { success: false, error: permissionResult.reason || '权限不足' },
+      { status: 403 }
     );
   }
 

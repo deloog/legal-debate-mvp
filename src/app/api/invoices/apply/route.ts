@@ -105,7 +105,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     logger.error('[API] 申请发票失败:', error);
 
-    const errorMessage = '申请发票失败，请稍后重试';
+    const errorMessage =
+      error instanceof Error ? error.message : '申请发票失败，请稍后重试';
 
     // 根据错误信息返回不同的状态码
     if (errorMessage.includes('不存在')) {
@@ -138,6 +139,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: 'ALREADY_APPLIED',
         },
         { status: 409 }
+      );
+    }
+
+    if (
+      errorMessage.includes('未支付') ||
+      errorMessage.includes('无效') ||
+      errorMessage.includes('不能为空')
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: errorMessage,
+          error: 'INVALID_REQUEST',
+        },
+        { status: 400 }
       );
     }
 

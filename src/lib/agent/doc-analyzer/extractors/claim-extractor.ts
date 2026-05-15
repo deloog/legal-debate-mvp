@@ -10,9 +10,6 @@ import {
   DETAILED_CLAIM_PATTERNS,
   getClaimTypeLabel,
   identifyClaimSubType,
-  shouldInferInterest,
-  shouldInferLitigationCost,
-  shouldInferPenalty,
 } from './claim-extraction-rules';
 
 // =============================================================================
@@ -61,11 +58,6 @@ export class ClaimExtractor {
         this.decomposeCompoundClaims(claims, text);
       claims = decomposedClaims;
       compoundDecomposed = decomposedCount;
-    }
-
-    // 补充缺失的诉讼请求类型
-    if (options.addMissingTypes !== false) {
-      claims = this.addMissingClaimTypes(claims, text);
     }
 
     // 识别细分类型和子类型
@@ -347,104 +339,6 @@ export class ClaimExtractor {
 
     // 如果没有匹配到复合请求模式，返回空数组
     return decomposed;
-  }
-
-  /**
-   * 补充缺失的诉讼请求类型
-   */
-  private addMissingClaimTypes(claims: Claim[], fullText: string): Claim[] {
-    const added: Claim[] = [...claims];
-    const existingTypes = new Set(claims.map(c => c.type));
-
-    // 使用规则库的智能推断
-    if (
-      !existingTypes.has('LITIGATION_COST') &&
-      shouldInferLitigationCost(fullText)
-    ) {
-      const hasExplicitMention = /诉讼费用|本案.*诉讼费|全部诉讼费用/.test(
-        fullText
-      );
-      added.push({
-        type: 'LITIGATION_COST',
-        content: hasExplicitMention ? '承担诉讼费用' : '诉讼费用由被告承担',
-        amount: undefined,
-        currency: 'CNY',
-        evidence: [],
-        legalBasis: '民事诉讼法',
-        _inferred: true,
-      });
-    }
-
-    // 本金推断
-    if (
-      existingTypes.has('LITIGATION_COST') &&
-      !existingTypes.has('PAY_PRINCIPAL') &&
-      /本金|货款|欠款|借款/.test(fullText)
-    ) {
-      added.push({
-        type: 'PAY_PRINCIPAL',
-        content: '偿还本金（从上下文推断）',
-        amount: undefined,
-        currency: 'CNY',
-        evidence: [],
-        legalBasis: '',
-        _inferred: true,
-      });
-    }
-
-    // 利息推断
-    if (
-      !existingTypes.has('PAY_INTEREST') &&
-      !existingTypes.has('PAYMENT_INTEREST') &&
-      shouldInferInterest(fullText)
-    ) {
-      added.push({
-        type: 'PAY_INTEREST',
-        content: '支付利息（从上下文推断）',
-        amount: undefined,
-        currency: 'CNY',
-        evidence: [],
-        legalBasis: '',
-        _inferred: true,
-      });
-    }
-
-    // 违约金推断
-    const hasPenaltyInterest = /罚息/.test(fullText);
-    const hasLateFee = /滞纳金/.test(fullText);
-    const hasPenalty = /违约金/.test(fullText);
-
-    // 如果已经提取到违约金类型，不再推断
-    if (existingTypes.has('PAY_PENALTY')) {
-      // 检查是否需要更新内容
-      const penaltyClaim = added.find(c => c.type === 'PAY_PENALTY');
-      if (penaltyClaim && (hasPenaltyInterest || hasLateFee || hasPenalty)) {
-        if (hasPenaltyInterest) {
-          penaltyClaim.content = '支付罚息';
-        } else if (hasLateFee) {
-          penaltyClaim.content = '支付滞纳金';
-        } else if (hasPenalty) {
-          penaltyClaim.content = '支付违约金';
-        }
-      }
-    } else if (
-      shouldInferPenalty(fullText) &&
-      !hasPenalty &&
-      !hasPenaltyInterest &&
-      !hasLateFee
-    ) {
-      added.push({
-        type: 'PAY_PENALTY',
-        content: '支付违约金（从上下文推断）',
-        amount: undefined,
-        currency: 'CNY',
-        evidence: [],
-        legalBasis: '',
-        _inferred: true,
-      });
-    }
-
-    return added;
   }
 
   /**

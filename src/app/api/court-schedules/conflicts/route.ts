@@ -3,6 +3,11 @@ import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  buildScheduleAccessWhere,
+  checkCaseSchedulePermission,
+} from '@/lib/court-schedule/schedule-access';
+import { CasePermission } from '@/types/case-collaboration';
 import { z } from 'zod';
 import { ScheduleConflictDetectionResponse } from '@/types/court-schedule';
 
@@ -47,13 +52,15 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     null;
 
   if (query.scheduleId) {
+    const accessWhere = await buildScheduleAccessWhere(
+      authUser.userId,
+      CasePermission.VIEW_SCHEDULES
+    );
+
     targetSchedule = await prisma.courtSchedule.findFirst({
       where: {
         id: query.scheduleId,
-        case: {
-          userId: authUser.userId,
-          deletedAt: null,
-        },
+        AND: [accessWhere],
       },
     });
 
@@ -65,11 +72,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     }
   }
 
+  const accessWhere = await buildScheduleAccessWhere(
+    authUser.userId,
+    CasePermission.VIEW_SCHEDULES
+  );
   const where: Record<string, unknown> = {
-    case: {
-      userId: authUser.userId,
-      deletedAt: null,
-    },
+    AND: [accessWhere],
     status: { notIn: ['CANCELLED'] },
   };
 
@@ -78,6 +86,19 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   }
 
   if (query.caseId) {
+    const access = await checkCaseSchedulePermission(
+      authUser.userId,
+      query.caseId,
+      CasePermission.VIEW_SCHEDULES
+    );
+
+    if (!access.hasAccess) {
+      return NextResponse.json(
+        { error: access.message },
+        { status: access.status }
+      );
+    }
+
     where.caseId = query.caseId;
   }
 

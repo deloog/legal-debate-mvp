@@ -23,6 +23,28 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'admin-user-1',
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    })
+  ),
+}));
+
+jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
+  checkKnowledgeGraphPermission: jest.fn(() =>
+    Promise.resolve({ hasPermission: true })
+  ),
+  KnowledgeGraphAction: {
+    VIEW_STATS: 'view_stats',
+  },
+  KnowledgeGraphResource: {
+    STATS: 'knowledge_graph_stats',
+  },
+}));
+
 describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,9 +59,9 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
 
       // Mock 有关系的法条数量
       jest.mocked(prisma.lawArticleRelation.findMany).mockResolvedValue([
-        { sourceId: 'article1' },
-        { sourceId: 'article2' },
-        { sourceId: 'article1' }, // 重复
+        { sourceId: 'article1', targetId: 'article2' },
+        { sourceId: 'article2', targetId: 'article3' },
+        { sourceId: 'article1', targetId: 'article2' }, // 重复
       ] as never);
 
       // Mock 关系总数
@@ -58,8 +80,8 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
       expect(data.success).toBe(true);
       expect(data.data).toMatchObject({
         totalArticles: 1000,
-        articlesWithRelations: 2, // 去重后
-        coverageRate: 0.002, // 2/1000
+        articlesWithRelations: 3, // source/target 双端去重后
+        coverageRate: 0.003, // 3/1000
         totalRelations: 500,
         verifiedRelations: 450,
         avgRelationsPerArticle: 0.5, // 500/1000
@@ -89,6 +111,7 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
       jest.mocked(prisma.lawArticleRelation.findMany).mockResolvedValue(
         Array.from({ length: 50 }, (_, i) => ({
           sourceId: `article${i}`,
+          targetId: `article${i + 50}`,
         })) as never
       );
       jest.mocked(prisma.lawArticleRelation.count).mockResolvedValue(200);
@@ -99,7 +122,7 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
       const response = await GET(request);
       const data = await response.json();
 
-      expect(data.data.coverageRate).toBe(0.5); // 50/100
+      expect(data.data.coverageRate).toBe(1); // source + target 共覆盖 100 个法条
     });
 
     it('应该支持按时间范围过滤', async () => {
@@ -129,15 +152,13 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
       jest.mocked(prisma.lawArticle.count).mockResolvedValue(100);
 
       // Mock 关系数据
-      jest
-        .mocked(prisma.lawArticleRelation.findMany)
-        .mockResolvedValue([
-          { sourceId: 'article1' },
-          { sourceId: 'article1' },
-          { sourceId: 'article1' },
-          { sourceId: 'article2' },
-          { sourceId: 'article2' },
-        ] as never);
+      jest.mocked(prisma.lawArticleRelation.findMany).mockResolvedValue([
+        { sourceId: 'article1', targetId: 'article2' },
+        { sourceId: 'article1', targetId: 'article3' },
+        { sourceId: 'article1', targetId: 'article4' },
+        { sourceId: 'article2', targetId: 'article1' },
+        { sourceId: 'article2', targetId: 'article3' },
+      ] as never);
 
       jest.mocked(prisma.lawArticleRelation.count).mockResolvedValue(5);
 
@@ -169,8 +190,43 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
         article: expect.objectContaining({
           id: 'article1',
         }),
-        relationCount: 3,
+        relationCount: 4,
       });
+    });
+
+    it('应该把只作为target的法条计入覆盖率和热门法条', async () => {
+      jest.mocked(prisma.lawArticle.count).mockResolvedValue(10);
+      jest
+        .mocked(prisma.lawArticleRelation.findMany)
+        .mockResolvedValue([
+          { sourceId: 'article1', targetId: 'article-target-only' },
+        ] as never);
+      jest.mocked(prisma.lawArticleRelation.count).mockResolvedValue(1);
+      jest.mocked(prisma.lawArticle.findMany).mockResolvedValue([
+        {
+          id: 'article-target-only',
+          lawName: '民法典',
+          articleNumber: '第999条',
+          fullText: '目标法条...',
+        },
+      ] as never);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/v1/law-article-relations/recommendation-stats'
+      );
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.articlesWithRelations).toBe(2);
+      expect(data.data.coverageRate).toBe(0.2);
+      expect(prisma.lawArticle.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            id: { in: expect.arrayContaining(['article-target-only']) },
+          },
+        })
+      );
     });
   });
 
@@ -276,6 +332,7 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
       jest.mocked(prisma.lawArticleRelation.findMany).mockResolvedValue(
         Array.from({ length: 10 }, (_, i) => ({
           sourceId: `article${i}`,
+          targetId: `article${i}`,
         })) as never
       );
       jest.mocked(prisma.lawArticleRelation.count).mockResolvedValue(50);
@@ -306,13 +363,11 @@ describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
 
     it('应该正确去重sourceId', async () => {
       jest.mocked(prisma.lawArticle.count).mockResolvedValue(100);
-      jest
-        .mocked(prisma.lawArticleRelation.findMany)
-        .mockResolvedValue([
-          { sourceId: 'article1' },
-          { sourceId: 'article1' },
-          { sourceId: 'article1' },
-        ] as never);
+      jest.mocked(prisma.lawArticleRelation.findMany).mockResolvedValue([
+        { sourceId: 'article1', targetId: 'article1' },
+        { sourceId: 'article1', targetId: 'article1' },
+        { sourceId: 'article1', targetId: 'article1' },
+      ] as never);
       jest.mocked(prisma.lawArticleRelation.count).mockResolvedValue(3);
 
       const request = new NextRequest(

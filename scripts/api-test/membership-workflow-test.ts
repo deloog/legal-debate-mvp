@@ -97,6 +97,21 @@ interface UserMembership {
   permissions: Record<string, unknown>;
 }
 
+type HeadersWithSetCookie = Headers & {
+  getSetCookie?: () => string[];
+};
+
+function getSetCookieHeaders(headers: Headers): string[] {
+  const cookieHeaders = headers as HeadersWithSetCookie;
+  return typeof cookieHeaders.getSetCookie === 'function'
+    ? cookieHeaders.getSetCookie()
+    : [];
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 interface UsageStats {
   userId: string;
   periodStart: string;
@@ -230,7 +245,7 @@ class ApiClient {
   }
 
   private parseCookies(response: Response) {
-    const setCookie = (response.headers as any).getSetCookie?.();
+    const setCookie = getSetCookieHeaders(response.headers);
     if (Array.isArray(setCookie)) {
       for (const cookie of setCookie) {
         const [nameValue] = cookie.split(';');
@@ -492,8 +507,8 @@ async function main() {
           );
           return;
         }
-      } catch (err: any) {
-        console.log(`   ⚠️  登录失败: ${err.message}`);
+      } catch (err: unknown) {
+        console.log(`   ⚠️  登录失败: ${toError(err).message}`);
         console.log(`   📝 尝试注册新用户...`);
       }
     }
@@ -536,14 +551,14 @@ async function main() {
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
-      } catch (err: any) {
-        lastError = err;
+      } catch (err: unknown) {
+        lastError = toError(err);
 
         if (
-          !err.message?.includes('USER_EXISTS') &&
-          !err.message?.includes('邮箱已被注册')
+          !lastError.message?.includes('USER_EXISTS') &&
+          !lastError.message?.includes('邮箱已被注册')
         ) {
-          throw err;
+          throw lastError;
         }
 
         if (attempt === maxRetries - 1) {

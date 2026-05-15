@@ -6,7 +6,7 @@ import { TierSelection } from '@/components/payment/TierSelection';
 import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector';
 import { UpgradeConfirm } from '@/components/payment/UpgradeConfirm';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Crown, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Crown, AlertCircle } from 'lucide-react';
 import {
   MembershipTierDef,
   MembershipTier,
@@ -31,8 +31,6 @@ export default function MembershipUpgradePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
   const [membershipData, setMembershipData] = useState<MembershipData | null>(
     null
   );
@@ -114,29 +112,12 @@ export default function MembershipUpgradePage() {
     try {
       setIsSubmitting(true);
       setError(null);
-
-      // 调用升级API
-      const response = await fetch('/api/memberships/upgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tierId: selectedTierId,
-          billingCycle: selectedBillingCycle,
-          autoRenew: true,
-        }),
+      const params = new URLSearchParams({
+        tierId: selectedTierId,
+        billingCycle: selectedBillingCycle,
+        paymentMethod: selectedPaymentMethod,
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '升级失败，请稍后重试');
-      }
-
-      // 模拟支付成功（实际支付功能待集成）
-      setSuccess(true);
-      setStep(3);
+      router.push(`/payment?${params.toString()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : '升级失败，请稍后重试');
     } finally {
@@ -156,10 +137,6 @@ export default function MembershipUpgradePage() {
     router.push('/membership');
   };
 
-  const handleGoToMembership = (): void => {
-    router.push('/membership');
-  };
-
   // 加载状态
   if (isLoading) {
     return (
@@ -175,7 +152,7 @@ export default function MembershipUpgradePage() {
   }
 
   // 错误状态
-  if (error && step === 3 && !success) {
+  if (error && step === 3) {
     return (
       <div className='container mx-auto flex min-h-screen items-center justify-center px-4 py-8'>
         <div className='max-w-md text-center'>
@@ -190,32 +167,6 @@ export default function MembershipUpgradePage() {
               重试
             </Button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 成功状态
-  if (success) {
-    return (
-      <div className='container mx-auto flex min-h-screen items-center justify-center px-4 py-8'>
-        <div className='max-w-md text-center'>
-          <CheckCircle className='mx-auto mb-4 h-16 w-16 text-green-500' />
-          <h2 className='mb-2 text-2xl font-bold text-gray-900'>升级成功</h2>
-          <p className='mb-6 text-gray-600'>
-            恭喜！您的会员等级已升级成功，现在可以享受更多功能了。
-          </p>
-          <div className='mb-6 rounded-lg border border-green-200 bg-green-50 p-4'>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm text-gray-700'>会员等级</span>
-              <span className='font-semibold text-green-800'>
-                {selectedTier?.displayName}
-              </span>
-            </div>
-          </div>
-          <Button onClick={handleGoToMembership} className='w-full'>
-            前往会员中心
-          </Button>
         </div>
       </div>
     );

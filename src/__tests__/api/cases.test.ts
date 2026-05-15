@@ -10,9 +10,13 @@ import {
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
+    user: {
+      findUnique: jest.fn(),
+    },
     case: {
       findMany: jest.fn(),
       count: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
     },
   },
@@ -47,6 +51,7 @@ describe('Cases API', () => {
       role: 'lawyer',
     });
     (isAdminRole as jest.Mock).mockReturnValue(false);
+    mockedPrisma.user.findUnique.mockResolvedValue({ role: 'LAWYER' });
     mockedPrisma.case.findMany.mockResolvedValue([
       {
         id: 'case-1',
@@ -84,6 +89,7 @@ describe('Cases API', () => {
       },
     ]);
     mockedPrisma.case.count.mockResolvedValue(2);
+    mockedPrisma.case.findFirst.mockResolvedValue(null);
     mockedPrisma.case.create.mockImplementation((data: any) => {
       return Promise.resolve({
         id: 'case-new',
@@ -91,6 +97,7 @@ describe('Cases API', () => {
         description: data.data.description,
         type: data.data.type || 'CIVIL',
         status: data.data.status || 'DRAFT',
+        caseNumber: data.data.caseNumber,
         ownerType: data.data.ownerType || OwnerType.USER,
         sharedWithTeam: data.data.sharedWithTeam || false,
         createdAt: new Date(),
@@ -213,6 +220,7 @@ describe('Cases API', () => {
       delete caseData.id;
       delete caseData.createdAt;
       delete caseData.updatedAt;
+      delete caseData.caseNumber;
 
       const request = createMockRequest('http://localhost:3000/api/v1/cases', {
         method: 'POST',
@@ -228,11 +236,28 @@ describe('Cases API', () => {
       expect(testResponse.data.description).toBe(caseData.description);
       expect(testResponse.data.type).toBe('CIVIL'); // API转换为大写
       expect(testResponse.data.status).toBe('DRAFT'); // API转换为大写
+      expect(testResponse.data.caseNumber).toMatch(/^\d{4}M民初\d{4}号$/);
       expect(testResponse.data.ownerType).toBe(OwnerType.USER); // 默认为USER
       expect(testResponse.data.sharedWithTeam).toBe(false); // 默认为false
       expect(testResponse.data.id).toBeDefined();
       expect(testResponse.data.createdAt).toBeDefined();
       expect(testResponse.data.updatedAt).toBeDefined();
+    });
+
+    it('should preserve provided caseNumber', async () => {
+      const caseData = mockData.case({ caseNumber: 'MANUAL-2026-001' });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.caseNumber).toBe('MANUAL-2026-001');
+      expect(mockedPrisma.case.findFirst).not.toHaveBeenCalled();
     });
 
     it('should validate required fields', async () => {

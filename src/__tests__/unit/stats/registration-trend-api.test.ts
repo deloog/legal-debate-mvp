@@ -24,6 +24,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange, DateGranularity } from '@/types/stats';
@@ -161,6 +167,28 @@ describe('用户注册趋势API', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+    });
+
+    it('应该统一排除软删除用户', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockUserCount.mockResolvedValue(0);
+      mockQueryRaw.mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/users/registration-trend'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(mockUserCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
+          }),
+        })
+      );
     });
 
     it('应该正确计算增长率', async () => {

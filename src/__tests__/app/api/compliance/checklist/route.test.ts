@@ -4,6 +4,7 @@
 
 import { NextRequest } from 'next/server';
 import { GET, PUT } from '@/app/api/compliance/checklist/route';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   ComplianceCategory,
   ComplianceCheckStatus,
@@ -12,15 +13,50 @@ import {
 
 // Mock合规服务
 jest.mock('@/lib/compliance/compliance-service', () => ({
+  ComplianceAccessError: class ComplianceAccessError extends Error {
+    code: string;
+    status: number;
+
+    constructor(code: string, message: string, status: number) {
+      super(message);
+      this.name = 'ComplianceAccessError';
+      this.code = code;
+      this.status = status;
+    }
+  },
+  ComplianceRequestError: class ComplianceRequestError extends Error {
+    code: string;
+    status: number;
+
+    constructor(code: string, message: string, status: number) {
+      super(message);
+      this.name = 'ComplianceRequestError';
+      this.code = code;
+      this.status = status;
+    }
+  },
   ComplianceService: {
     getChecklists: jest.fn(),
     updateCheckItem: jest.fn(),
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 describe('合规检查清单API测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'enterprise-user-1',
+    });
   });
 
   describe('GET /api/compliance/checklist', () => {
@@ -66,6 +102,10 @@ describe('合规检查清单API测试', () => {
       expect(data.success).toBe(true);
       expect(data.data).toHaveLength(1);
       expect(data.data[0].id).toBe('checklist-001');
+      expect(ComplianceService.getChecklists).toHaveBeenCalledWith(
+        'enterprise-user-1',
+        { category: undefined, status: undefined }
+      );
     });
 
     it('应该支持按类别筛选', async () => {
@@ -82,9 +122,37 @@ describe('合规检查清单API测试', () => {
       const __data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(ComplianceService.getChecklists).toHaveBeenCalledWith({
-        category: ComplianceCategory.LEGAL,
-      });
+      expect(ComplianceService.getChecklists).toHaveBeenCalledWith(
+        'enterprise-user-1',
+        {
+          category: ComplianceCategory.LEGAL,
+          status: undefined,
+        }
+      );
+    });
+
+    it('企业认证未通过时应返回403', async () => {
+      const { ComplianceAccessError, ComplianceService } =
+        await import('@/lib/compliance/compliance-service');
+
+      (ComplianceService.getChecklists as jest.Mock).mockRejectedValue(
+        new ComplianceAccessError(
+          'ENTERPRISE_NOT_APPROVED',
+          '企业认证尚未通过，暂不可使用合规管理功能',
+          403
+        )
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/compliance/checklist'
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('ENTERPRISE_NOT_APPROVED');
     });
 
     it('应该处理服务错误', async () => {
@@ -149,6 +217,46 @@ describe('合规检查清单API测试', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.status).toBe(ComplianceCheckStatus.PASSED);
+      expect(ComplianceService.updateCheckItem).toHaveBeenCalledWith(
+        'enterprise-user-1',
+        {
+          checklistId: 'checklist-001',
+          itemId: 'item-001',
+          status: ComplianceCheckStatus.PASSED,
+          notes: '已完成审查',
+        }
+      );
+    });
+
+    it('检查项不存在时应返回404而不是500', async () => {
+      const { ComplianceRequestError, ComplianceService } =
+        await import('@/lib/compliance/compliance-service');
+
+      (ComplianceService.updateCheckItem as jest.Mock).mockRejectedValue(
+        new ComplianceRequestError('CHECK_ITEM_NOT_FOUND', '检查项不存在', 404)
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/compliance/checklist',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            checklistId: 'checklist-001',
+            itemId: 'missing-item',
+            status: ComplianceCheckStatus.PASSED,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const response = await PUT(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('CHECK_ITEM_NOT_FOUND');
     });
 
     it('应该处理缺少必填字段', async () => {

@@ -112,10 +112,10 @@ export default function DocumentsPage() {
     setDeletingId(id);
     try {
       const res = await fetch(`/api/v1/documents/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      if (res.status === 204) {
         setDocuments(prev => prev.filter(d => d.id !== id));
       } else {
+        const data = await res.json();
         alert(data.message || '删除失败');
       }
     } catch {

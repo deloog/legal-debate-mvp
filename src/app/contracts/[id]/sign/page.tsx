@@ -6,11 +6,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/providers/AuthProvider';
 import SignaturePad from '@/components/contract/SignaturePad';
 
 export default function SignContractPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
   const contractId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -64,6 +68,8 @@ export default function SignContractPage() {
         body: JSON.stringify({
           role: signatureRole,
           signature,
+          signingToken:
+            signatureRole === 'client' ? searchParams.get('token') : undefined,
         }),
       });
 
@@ -116,6 +122,11 @@ export default function SignContractPage() {
   const isClientSigned = !!contract.clientSignature;
   const isLawyerSigned = !!contract.lawyerSignature;
   const isFullySigned = isClientSigned && isLawyerSigned;
+  const signingToken = searchParams.get('token');
+  const isLawyerOwner = !!user && contract.lawyerId === user.id;
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const canActAsLawyer = isLawyerOwner || isAdmin;
+  const canActAsClient = !!signingToken;
 
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
@@ -233,7 +244,7 @@ export default function SignContractPage() {
                   alt='委托人签名'
                   className='h-16 border border-gray-200 rounded'
                 />
-              ) : (
+              ) : canActAsClient ? (
                 <button
                   onClick={() => {
                     setSignatureRole('client');
@@ -243,6 +254,8 @@ export default function SignContractPage() {
                 >
                   立即签署
                 </button>
+              ) : (
+                <span className='text-sm text-gray-400'>委托方待签署</span>
               )}
             </div>
 
@@ -303,7 +316,7 @@ export default function SignContractPage() {
                   alt='律师签名'
                   className='h-16 border border-gray-200 rounded'
                 />
-              ) : (
+              ) : canActAsLawyer ? (
                 <button
                   onClick={() => {
                     setSignatureRole('lawyer');
@@ -313,6 +326,8 @@ export default function SignContractPage() {
                 >
                   立即签署
                 </button>
+              ) : (
+                <span className='text-sm text-gray-400'>仅合同律师可签署</span>
               )}
             </div>
           </div>

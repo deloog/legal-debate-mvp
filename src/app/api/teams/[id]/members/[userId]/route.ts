@@ -51,17 +51,64 @@ async function mapTeamMemberToDetail(
 
 async function checkTeamAccess(
   teamId: string,
-  userId: string
+  userId: string,
+  requireAdmin = true
 ): Promise<boolean> {
   const member = await prisma.teamMember.findFirst({
     where: {
       teamId,
       userId,
+      status: MemberStatus.ACTIVE,
+      ...(requireAdmin ? { role: TeamRole.ADMIN } : {}),
+    },
+  });
+  return member !== null;
+}
+
+async function wouldRemoveLastAdmin(
+  teamId: string,
+  memberUserId: string,
+  nextRole?: TeamRole,
+  nextStatus?: MemberStatus
+): Promise<boolean> {
+  const member = await prisma.teamMember.findUnique({
+    where: {
+      teamId_userId: {
+        teamId,
+        userId: memberUserId,
+      },
+    },
+    select: {
+      role: true,
+      status: true,
+    },
+  });
+
+  if (
+    !member ||
+    member.role !== TeamRole.ADMIN ||
+    member.status !== MemberStatus.ACTIVE
+  ) {
+    return false;
+  }
+
+  const remainsActiveAdmin =
+    (nextRole ?? member.role) === TeamRole.ADMIN &&
+    (nextStatus ?? member.status) === MemberStatus.ACTIVE;
+
+  if (remainsActiveAdmin) {
+    return false;
+  }
+
+  const activeAdminCount = await prisma.teamMember.count({
+    where: {
+      teamId,
       role: TeamRole.ADMIN,
       status: MemberStatus.ACTIVE,
     },
   });
-  return member !== null;
+
+  return activeAdminCount <= 1;
 }
 
 /**
@@ -83,7 +130,7 @@ export const GET = withErrorHandler(
 
     const { id: teamId, userId: memberUserId } = await params;
 
-    const hasAccess = await checkTeamAccess(teamId, authUser.userId);
+    const hasAccess = await checkTeamAccess(teamId, authUser.userId, false);
     if (!hasAccess) {
       return NextResponse.json(
         { error: '权限不足', message: '您没有权限查看此成员' },
@@ -161,6 +208,23 @@ export const PATCH = withErrorHandler(
 
     const body = await request.json();
     const validatedData = updateTeamMemberSchema.parse(body);
+
+    if (
+      await wouldRemoveLastAdmin(
+        teamId,
+        memberUserId,
+        validatedData.role,
+        validatedData.status
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: '非法操作',
+          message: '团队至少需要保留一名活跃管理员',
+        },
+        { status: 400 }
+      );
+    }
 
     const member = await prisma.teamMember.findUnique({
       where: {
@@ -258,6 +322,23 @@ export const DELETE = withErrorHandler(
       return NextResponse.json(
         { error: '成员不存在', message: '未找到指定成员' },
         { status: 404 }
+      );
+    }
+
+    if (
+      await wouldRemoveLastAdmin(
+        teamId,
+        memberUserId,
+        undefined,
+        MemberStatus.REMOVED
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: '非法操作',
+          message: '团队至少需要保留一名活跃管理员',
+        },
+        { status: 400 }
       );
     }
 

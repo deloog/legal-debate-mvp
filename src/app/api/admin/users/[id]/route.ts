@@ -15,6 +15,11 @@ import { UserRole, UserStatus } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import bcrypt from 'bcryptjs';
+import {
+  canManagePrivilegedRole,
+  getFreshUserRole,
+  requiresSuperAdminForUserRoleChange,
+} from '@/lib/admin/role-security';
 
 /**
  * 验证用户ID格式
@@ -225,6 +230,21 @@ export async function PUT(
     // 解析请求体
     const body = (await request.json()) as UpdateUserRequest;
 
+    const [currentUserRole, targetUser] = await Promise.all([
+      getFreshUserRole(user.userId),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      }),
+    ]);
+
+    if (!targetUser) {
+      return Response.json(
+        { error: '未找到', message: '用户不存在' },
+        { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
     // 验证角色和状态
     if (body.role !== undefined && !isValidRole(body.role)) {
       return Response.json(
@@ -233,22 +253,28 @@ export async function PUT(
       ) as unknown as NextResponse;
     }
 
-    // 只有 SUPER_ADMIN 才能将用户设为 SUPER_ADMIN，防止权限提升
-    // 从数据库取最新角色，避免依赖可能已过期的 JWT payload
-    if (body.role === 'SUPER_ADMIN') {
-      const currentUserInDb = await prisma.user.findUnique({
-        where: { id: user.userId },
-        select: { role: true },
-      });
-      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
-        return Response.json(
-          {
-            error: '权限不足',
-            message: '只有超级管理员可以授予超级管理员角色',
-          },
-          { status: 403 }
-        ) as unknown as NextResponse;
-      }
+    if (
+      body.role !== undefined &&
+      userId === user.userId &&
+      body.role !== targetUser.role
+    ) {
+      return Response.json(
+        { error: '禁止操作', message: '不能通过后台修改自己的角色' },
+        { status: 403 }
+      ) as unknown as NextResponse;
+    }
+
+    if (
+      requiresSuperAdminForUserRoleChange(targetUser.role, body.role) &&
+      !canManagePrivilegedRole(currentUserRole)
+    ) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以管理管理员或超级管理员账号',
+        },
+        { status: 403 }
+      ) as unknown as NextResponse;
     }
 
     if (body.status !== undefined && !isValidStatus(body.status)) {
@@ -390,6 +416,34 @@ export async function DELETE(
   }
 
   try {
+    const [currentUserRole, targetUser] = await Promise.all([
+      getFreshUserRole(currentUser.userId),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      }),
+    ]);
+
+    if (!targetUser) {
+      return Response.json(
+        { error: '未找到', message: '用户不存在' },
+        { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
+    if (
+      requiresSuperAdminForUserRoleChange(targetUser.role, targetUser.role) &&
+      !canManagePrivilegedRole(currentUserRole)
+    ) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以删除管理员或超级管理员账号',
+        },
+        { status: 403 }
+      ) as unknown as NextResponse;
+    }
+
     // 软删除用户
     await prisma.user.update({
       where: { id: userId },
@@ -405,15 +459,6 @@ export async function DELETE(
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('删除用户失败:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
-    ) {
-      return Response.json(
-        { error: '未找到', message: '用户不存在' },
-        { status: 404 }
-      ) as unknown as NextResponse;
-    }
     return Response.json(
       { error: '服务器错误', message: '删除用户失败' },
       { status: 500 }

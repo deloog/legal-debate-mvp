@@ -1,5 +1,9 @@
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
+import {
   createNoContentResponse,
   createSuccessResponse,
 } from '@/app/api/lib/responses/success';
@@ -179,10 +183,7 @@ export const GET = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -203,10 +204,7 @@ export const GET = withErrorHandler(
     });
 
     if (!client) {
-      return NextResponse.json(
-        { error: '客户不存在', message: '未找到指定客户' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定客户');
     }
 
     const clientDetail = await mapClientToDetail(client, true, includeCases);
@@ -226,10 +224,7 @@ export const PATCH = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -245,10 +240,7 @@ export const PATCH = withErrorHandler(
     });
 
     if (!client) {
-      return NextResponse.json(
-        { error: '客户不存在', message: '未找到指定客户' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定客户');
     }
 
     const updatedClient = await prisma.client.update({
@@ -292,10 +284,7 @@ export const DELETE = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -309,10 +298,7 @@ export const DELETE = withErrorHandler(
     });
 
     if (!client) {
-      return NextResponse.json(
-        { error: '客户不存在', message: '未找到指定客户' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定客户');
     }
 
     await prisma.client.update({

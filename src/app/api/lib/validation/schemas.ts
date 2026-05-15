@@ -92,6 +92,11 @@ export const caseQuerySchema = paginationSchema.extend({
 export const updateCaseSchema = createCaseSchema
   .omit({ userId: true })
   .partial()
+  // createCaseSchema.status has .default('draft'); strip the default so an
+  // omitted status field is truly undefined rather than 'draft' in updates.
+  .extend({
+    status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+  })
   .strict();
 
 /**

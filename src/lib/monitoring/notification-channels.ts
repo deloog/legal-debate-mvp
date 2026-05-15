@@ -456,11 +456,18 @@ export class LogAlertChannel implements NotificationChannel {
 export function createNotificationChannel(type: string): NotificationChannel {
   switch (type) {
     case 'EMAIL':
-      return new EmailAlertChannel([process.env.ALERT_EMAIL_TO || '']);
+      return new EmailAlertChannel(
+        process.env.ALERT_EMAIL_TO ? [process.env.ALERT_EMAIL_TO] : []
+      );
     case 'WEBHOOK':
       return new WebhookAlertChannel(process.env.ALERT_WEBHOOK_URL || '');
     case 'SMS':
-      return new SMSAlertChannel([]);
+      return new SMSAlertChannel(
+        (process.env.ALERT_SMS_RECIPIENTS || '')
+          .split(',')
+          .map(item => item.trim())
+          .filter(Boolean)
+      );
     case 'LOG':
       return new LogAlertChannel();
     default:
@@ -489,8 +496,12 @@ export function createNotificationChannels(): NotificationChannel[] {
     channels.push(new WebhookAlertChannel(process.env.ALERT_WEBHOOK_URL));
   }
 
-  if (process.env.ALERT_SMS_ENABLED === 'true') {
-    channels.push(new SMSAlertChannel([]));
+  const smsRecipients = (process.env.ALERT_SMS_RECIPIENTS || '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean);
+  if (process.env.ALERT_SMS_ENABLED === 'true' && smsRecipients.length > 0) {
+    channels.push(new SMSAlertChannel(smsRecipients));
   }
 
   return channels;

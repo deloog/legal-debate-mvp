@@ -30,7 +30,15 @@ export async function GET(
     // 验证用户是否有权访问该案件（所有者或管理员）
     const caseRecord = await prisma.case.findUnique({
       where: { id: caseId, deletedAt: null },
-      select: { userId: true },
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        description: true,
+        type: true,
+        cause: true,
+        court: true,
+      },
     });
     if (!caseRecord) {
       return NextResponse.json(
@@ -38,11 +46,17 @@ export async function GET(
         { status: 404 }
       );
     }
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-      select: { role: true },
-    });
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    const dbUser = prisma.user?.findUnique
+      ? await prisma.user.findUnique({
+          where: { id: authUser.userId },
+          select: { role: true },
+        })
+      : null;
+    const isAdmin =
+      dbUser?.role === 'ADMIN' ||
+      dbUser?.role === 'SUPER_ADMIN' ||
+      authUser.role === 'ADMIN' ||
+      authUser.role === 'SUPER_ADMIN';
     if (caseRecord.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
         {
@@ -88,7 +102,6 @@ export async function GET(
       includeWithdraw,
     };
 
-    // 执行分析
     const service = SimilarCaseServiceFactory.getInstance();
     const analysisResult = await service.analyzeSuccessRate(analysisParams);
 
@@ -97,7 +110,8 @@ export async function GET(
       data: analysisResult,
     });
   } catch (_error) {
-    const errorMessage = 'Unknown error';
+    const errorMessage =
+      _error instanceof Error ? _error.message : 'Unknown error';
     logger.error('Failed to analyze success rate', new Error(errorMessage), {
       caseId: (await params).id,
     });

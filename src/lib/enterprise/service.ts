@@ -24,7 +24,6 @@ export async function createEnterpriseAccount(
     creditCode: string;
     legalPerson: string;
     industryType: string;
-    businessLicense?: string;
   }
 ): Promise<EnterpriseAccountPublic> {
   // 检查统一社会信用代码是否已存在
@@ -33,7 +32,9 @@ export async function createEnterpriseAccount(
   });
 
   if (existingAccount) {
-    throw new Error('统一社会信用代码已被注册');
+    const error = new Error('统一社会信用代码已被注册');
+    error.name = 'ENTERPRISE_CREDIT_CODE_EXISTS';
+    throw error;
   }
 
   // 检查用户是否已有企业账号
@@ -42,7 +43,9 @@ export async function createEnterpriseAccount(
   });
 
   if (userEnterpriseAccount) {
-    throw new Error('该用户已注册企业账号');
+    const error = new Error('该用户已注册企业账号');
+    error.name = 'ENTERPRISE_ACCOUNT_EXISTS';
+    throw error;
   }
 
   // 创建企业账号
@@ -53,14 +56,8 @@ export async function createEnterpriseAccount(
       creditCode: data.creditCode,
       legalPerson: data.legalPerson,
       industryType: data.industryType,
-      businessLicense: data.businessLicense || null,
+      businessLicense: null,
     },
-  });
-
-  // 更新用户角色为企业用户
-  await prisma.user.update({
-    where: { id: userId },
-    data: { role: 'ENTERPRISE' as UserRole },
   });
 
   return toPublicEnterpriseAccount(enterpriseAccount);
@@ -210,6 +207,7 @@ function toPublicEnterpriseAccount(account: unknown): EnterpriseAccountPublic {
     creditCode: string;
     legalPerson: string;
     industryType: string;
+    businessLicense: string | null;
     status: string;
     submittedAt: Date;
     expiresAt: Date | null;
@@ -222,6 +220,7 @@ function toPublicEnterpriseAccount(account: unknown): EnterpriseAccountPublic {
     creditCode: acc.creditCode,
     legalPerson: acc.legalPerson,
     industryType: acc.industryType,
+    businessLicense: acc.businessLicense,
     status: acc.status as EnterpriseStatus,
     submittedAt: acc.submittedAt,
     expiresAt: acc.expiresAt,

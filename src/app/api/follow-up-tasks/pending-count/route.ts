@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createUnauthorizedResponse } from '@/app/api/lib/responses/error-response';
 import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -11,10 +12,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return createUnauthorizedResponse();
   }
 
   const count = await FollowUpTaskProcessor.getPendingCount(authUser.userId);

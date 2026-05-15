@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { TaskStatus, TaskPriority } from '@/types/task';
 import { Prisma } from '@prisma/client';
 import { reminderGenerator } from '@/lib/notification/reminder-generator';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 创建任务Schema
@@ -50,6 +52,28 @@ const queryTaskSchema = z.object({
     .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
+
+async function canAssignTaskToUser(
+  creatorId: string,
+  assignedTo?: string,
+  caseId?: string
+): Promise<boolean> {
+  if (!assignedTo || assignedTo === creatorId) {
+    return true;
+  }
+
+  if (!caseId) {
+    return false;
+  }
+
+  const assigneeAccess = await canAccessSharedCase(
+    assignedTo,
+    caseId,
+    CasePermission.VIEW_CASE
+  );
+
+  return assigneeAccess.hasAccess;
+}
 
 /**
  * GET /api/tasks
@@ -244,6 +268,36 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   const body = await request.json();
   const validatedData = createTaskSchema.parse(body);
+
+  if (validatedData.caseId) {
+    const accessResult = await canAccessSharedCase(
+      authUser.userId,
+      validatedData.caseId,
+      CasePermission.VIEW_CASE
+    );
+    if (!accessResult.hasAccess) {
+      return NextResponse.json(
+        { error: '无权操作', message: '您没有权限为此案件创建任务' },
+        { status: 403 }
+      );
+    }
+  }
+
+  if (
+    !(await canAssignTaskToUser(
+      authUser.userId,
+      validatedData.assignedTo,
+      validatedData.caseId
+    ))
+  ) {
+    return NextResponse.json(
+      {
+        error: '无权操作',
+        message: '只能将任务分配给自己或有权访问该案件的成员',
+      },
+      { status: 403 }
+    );
+  }
 
   const task = await prisma.task.create({
     data: {

@@ -3,12 +3,28 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   updateBusinessLicense,
   getEnterpriseAccountByUserId,
 } from '@/lib/enterprise/service';
+import { uploadFile } from '@/lib/storage/storage-service';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+function generateSecureFileName(ext: string): string {
+  const randomPart = randomBytes(16).toString('hex');
+  const timestamp = Date.now().toString(36);
+  return `entqual-${timestamp}-${randomPart}.${ext}`;
+}
 
 /**
  * 更新企业营业执照
@@ -60,7 +76,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查是否为合法 data URL 格式，并白名单 MIME 类型
-    const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
     const dataUrlMatch = businessLicense.match(
       /^data:([^;]+);base64,([\s\S]+)$/
     );
@@ -88,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 限制图片大小（Base64 字符数 ≈ 原始字节数 × 4/3）
-    if (base64Data.length > 5 * 1024 * 1024) {
+    if (base64Data.length > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
           success: false,
@@ -119,6 +134,32 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      const ext = MIME_TO_EXT[mimeType];
+      const fileName = generateSecureFileName(ext);
+      await uploadFile(buf, `enterprise/${fileName}`, {
+        isPrivate: true,
+        contentType: mimeType,
+      });
+      const fileId = fileName.replace(/\.[^/.]+$/, '');
+      const storedLicenseUrl = `/api/enterprise/qualification/${fileId}`;
+
+      // 更新营业执照
+      const enterpriseAccount = await updateBusinessLicense(
+        user.userId,
+        storedLicenseUrl
+      );
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: '营业执照上传成功',
+          data: {
+            ...enterpriseAccount,
+            businessLicense: storedLicenseUrl,
+          },
+        },
+        { status: 200 }
+      );
     } catch {
       return NextResponse.json(
         {
@@ -129,21 +170,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 更新营业执照
-    const enterpriseAccount = await updateBusinessLicense(
-      user.userId,
-      businessLicense
-    );
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: '营业执照上传成功',
-        data: enterpriseAccount,
-      },
-      { status: 200 }
-    );
   } catch (error) {
     logger.error('企业资质上传失败:', error);
     return NextResponse.json(

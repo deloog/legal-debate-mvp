@@ -8,13 +8,31 @@ import {
 } from '@jest/globals';
 /// <reference path="./test-types.d.ts" />
 
-// Mock next-auth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-123',
+    email: 'test@example.com',
+    role: 'USER',
+  }),
 }));
 
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
+jest.mock('@/lib/debate/access', () => ({
+  canAccessDebateByCasePermission: jest.fn().mockResolvedValue({
+    allowed: true,
+    debate: {
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      userId: 'user-123',
+      caseId: 'case-123',
+    },
+  }),
+}));
+
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({
+    allowed: true,
+    remaining: { daily: 999, monthly: 9999 },
+  }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock Prisma
@@ -82,12 +100,6 @@ describe('Debates Stream API - Edge Cases', () => {
     jest.clearAllMocks();
     mockedPrisma = prisma as any;
 
-    // Setup getServerSession mock
-    const { getServerSession } = require('next-auth');
-    (getServerSession as jest.Mock).mockResolvedValue({
-      user: { id: 'user-123', email: 'test@example.com' },
-    });
-
     // Setup debateRound.count mock
     mockedPrisma.debateRound.count.mockResolvedValue(0);
 
@@ -141,7 +153,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       });
@@ -201,7 +214,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       });
@@ -246,7 +260,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 3, // 已经达到最大轮次
         debateConfig: { maxRounds: 3 },
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 3, arguments: 10 },
       });
@@ -268,7 +283,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: {}, // 没有配置最大轮次
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       });
@@ -290,7 +306,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 0 }, // 最大轮次为0
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       });
@@ -317,7 +334,8 @@ describe('Debates Stream API - Edge Cases', () => {
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 2 },
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       });
@@ -345,7 +363,8 @@ describe('Debates Stream API - Edge Cases', () => {
         title: '测试辩论',
         userId: 'user-123',
         status: 'active',
-        case: { title: '测试案件', description: '案件描述' },
+        caseId: 'case-123',
+        case: { title: '测试案件', description: '案件描述', metadata: null },
       });
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);

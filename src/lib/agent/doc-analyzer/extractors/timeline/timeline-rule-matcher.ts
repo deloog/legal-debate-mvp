@@ -1,6 +1,6 @@
 /**
- * 时间线规则匹配器
- * 第二层：规则匹配兜底
+ * 时间线日期模式辅助匹配器
+ * 第二层：正则匹配补充 AI 遗漏的日期事件
  */
 
 import type { ExtractedData, TimelineEvent } from '../../core/types';

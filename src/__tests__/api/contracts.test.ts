@@ -9,9 +9,12 @@ import { NextRequest } from 'next/server';
 
 // Mock 认证中间件 - 使用实际模块路径
 const mockResolveContractUserId = jest.fn();
+const mockGetContractAccess = jest.fn();
+const mockGetAuthUser = jest.fn();
 
 jest.mock('@/app/api/lib/middleware/contract-auth', () => ({
   resolveContractUserId: mockResolveContractUserId,
+  getContractAccess: mockGetContractAccess,
   unauthorizedResponse: () =>
     new Response(
       JSON.stringify({
@@ -36,6 +39,10 @@ jest.mock('@/app/api/lib/middleware/contract-auth', () => ({
     ),
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: mockGetAuthUser,
+}));
+
 // Mock Prisma
 const mockPrisma = {
   contract: {
@@ -53,10 +60,17 @@ const mockPrisma = {
     count: jest.fn(),
     aggregate: jest.fn(),
   },
+  contractVersion: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+  },
   user: {
     findUnique: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+  },
+  lawyerQualification: {
+    findFirst: jest.fn(),
   },
   $transaction: jest.fn((callbacks: any[]) =>
     Promise.all(callbacks.map(cb => cb()))
@@ -84,6 +98,28 @@ describe('Contract API Tests', () => {
 
     // 默认认证通过
     mockResolveContractUserId.mockReturnValue(testUserId);
+    mockGetAuthUser.mockResolvedValue({
+      userId: testUserId,
+      email: 'lawyer@example.com',
+      role: 'LAWYER',
+    });
+    mockPrisma.user.findUnique.mockResolvedValue({ role: 'LAWYER' });
+    mockPrisma.lawyerQualification.findFirst.mockResolvedValue({
+      id: 'qualification-1',
+    });
+    mockPrisma.contractVersion.findFirst.mockResolvedValue(null);
+    mockPrisma.contractVersion.create.mockResolvedValue({
+      id: 'version-1',
+      version: 1,
+    });
+    mockGetContractAccess.mockResolvedValue({
+      exists: true,
+      isAdmin: false,
+      isLawyer: true,
+      isClient: false,
+      canRead: true,
+      canManage: true,
+    });
   });
 
   // 辅助函数：创建 mock NextRequest
@@ -136,9 +172,14 @@ describe('Contract API Tests', () => {
         status: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
+        case: null,
       };
 
       mockPrisma.contract.create.mockResolvedValue(mockCreatedContract);
+      mockPrisma.contract.findUnique.mockResolvedValue({
+        ...mockCreatedContract,
+        payments: [],
+      });
 
       const request = createMockRequest('http://localhost:3000/api/contracts', {
         method: 'POST',
@@ -310,7 +351,14 @@ describe('Contract API Tests', () => {
     });
 
     it('should reject update for non-existent contract', async () => {
-      mockPrisma.contract.findUnique.mockResolvedValue(null);
+      mockGetContractAccess.mockResolvedValueOnce({
+        exists: false,
+        isAdmin: false,
+        isLawyer: false,
+        isClient: false,
+        canRead: false,
+        canManage: false,
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/contracts/${testContractId}`,
@@ -328,13 +376,14 @@ describe('Contract API Tests', () => {
     });
 
     it('should reject update for contracts owned by other lawyers', async () => {
-      const mockExistingContract = {
-        id: testContractId,
-        lawyerId: 'other-user-id', // 不是当前用户
-        status: 'DRAFT',
-      };
-
-      mockPrisma.contract.findUnique.mockResolvedValue(mockExistingContract);
+      mockGetContractAccess.mockResolvedValueOnce({
+        exists: true,
+        isAdmin: false,
+        isLawyer: false,
+        isClient: false,
+        canRead: false,
+        canManage: false,
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/contracts/${testContractId}`,
@@ -354,11 +403,6 @@ describe('Contract API Tests', () => {
 
   describe('GET /api/contracts/[id]/payments', () => {
     it('should get payment records', async () => {
-      const mockContract = {
-        id: testContractId,
-        lawyerId: testUserId,
-      };
-
       const mockPayments = [
         {
           id: 'payment-1',
@@ -374,7 +418,6 @@ describe('Contract API Tests', () => {
         },
       ];
 
-      mockPrisma.contract.findUnique.mockResolvedValue(mockContract);
       mockPrisma.contractPayment.findMany.mockResolvedValue(mockPayments);
 
       const request = createMockRequest(
@@ -391,7 +434,14 @@ describe('Contract API Tests', () => {
     });
 
     it('should return 404 for non-existent contract', async () => {
-      mockPrisma.contract.findUnique.mockResolvedValue(null);
+      mockGetContractAccess.mockResolvedValueOnce({
+        exists: false,
+        isAdmin: false,
+        isLawyer: false,
+        isClient: false,
+        canRead: false,
+        canManage: false,
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/contracts/${testContractId}/payments`
@@ -401,6 +451,19 @@ describe('Contract API Tests', () => {
       });
 
       expect(response.status).toBe(404);
+    });
+
+    it('should return 401 when auth is missing', async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+
+      const request = createMockRequest(
+        `http://localhost:3000/api/contracts/${testContractId}/payments`
+      );
+      const response = await GETPayments(request, {
+        params: Promise.resolve({ id: testContractId }),
+      });
+
+      expect(response.status).toBe(401);
     });
   });
 
@@ -416,7 +479,7 @@ describe('Contract API Tests', () => {
 
       const mockContract = {
         id: testContractId,
-        lawyerId: testUserId,
+        contractNumber: 'HT20260129000002',
         totalFee: 10000,
         paidAmount: 0,
         status: 'DRAFT',
@@ -430,13 +493,24 @@ describe('Contract API Tests', () => {
       };
 
       mockPrisma.contract.findUnique.mockResolvedValue(mockContract);
-      mockPrisma.contractPayment.aggregate.mockResolvedValue({
-        _sum: { amount: 0 },
-      });
       mockPrisma.contractPayment.create.mockResolvedValue(mockCreatedPayment);
       mockPrisma.contract.update.mockResolvedValue({
         ...mockContract,
         paidAmount: 5000,
+      });
+      mockPrisma.$transaction.mockImplementationOnce(async callback => {
+        return callback({
+          contractPayment: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn().mockResolvedValue(mockCreatedPayment),
+          },
+          contract: {
+            update: jest.fn().mockResolvedValue({
+              ...mockContract,
+              paidAmount: 5000,
+            }),
+          },
+        });
       });
 
       const request = createMockRequest(
@@ -459,7 +533,14 @@ describe('Contract API Tests', () => {
     });
 
     it('should return 404 for non-existent contract', async () => {
-      mockPrisma.contract.findUnique.mockResolvedValue(null);
+      mockGetContractAccess.mockResolvedValueOnce({
+        exists: false,
+        isAdmin: false,
+        isLawyer: false,
+        isClient: false,
+        canRead: false,
+        canManage: false,
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/contracts/${testContractId}/payments`,
@@ -474,6 +555,31 @@ describe('Contract API Tests', () => {
       });
 
       expect(response.status).toBe(404);
+    });
+
+    it('should return 403 when client tries to create payment', async () => {
+      mockGetContractAccess.mockResolvedValueOnce({
+        exists: true,
+        isAdmin: false,
+        isLawyer: false,
+        isClient: true,
+        canRead: true,
+        canManage: false,
+      });
+
+      const request = createMockRequest(
+        `http://localhost:3000/api/contracts/${testContractId}/payments`,
+        {
+          method: 'POST',
+          body: { paymentType: '首付款', amount: 5000 },
+        }
+      );
+
+      const response = await POSTPayment(request, {
+        params: Promise.resolve({ id: testContractId }),
+      });
+
+      expect(response.status).toBe(403);
     });
   });
 });

@@ -311,6 +311,7 @@ module.exports = {
         '<rootDir>/src/__tests__/lib/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/ai/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/middleware/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/permission/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/prisma/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/types/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/unit/**/*.{test,spec}.{ts,tsx}',

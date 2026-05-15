@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { createAuditLog } from '@/lib/audit/logger';
+import { contractVersionService } from '@/lib/contract/contract-version-service';
 import {
   resolveContractUserId,
   unauthorizedResponse,
@@ -62,6 +63,12 @@ export async function POST(
       where: { id },
       data: { status: 'EXECUTING' },
     });
+
+    contractVersionService
+      .createVersion(id, 'UPDATE', currentUserId)
+      .catch(error => {
+        logger.error('创建合同履行版本失败:', error);
+      });
 
     createAuditLog({
       userId: currentUserId,

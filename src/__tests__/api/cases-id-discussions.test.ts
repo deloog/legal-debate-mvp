@@ -26,6 +26,32 @@ jest.mock('@/lib/case/share-permission-validator', () => ({
   canAccessSharedCase: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
+jest.mock('@/lib/agent/security/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+  StructuredLogger: {
+    getInstance: jest.fn(() => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    })),
+  },
+}));
+
 jest.mock('@/lib/discussion/mention-parser', () => ({
   mentionParser: {
     parseMentions: jest
@@ -153,31 +179,21 @@ describe('案件讨论API测试', () => {
   });
 
   afterAll(async () => {
-    try {
-      // 清理所有测试数据
-      await prisma.caseDiscussion
-        .deleteMany({
-          where: { userId: { in: [ownerUser.id, memberUser.id] } },
-        })
-        .catch(() => {});
-      await prisma.caseTeamMember
-        .deleteMany({
-          where: { userId: { in: [ownerUser.id, memberUser.id] } },
-        })
-        .catch(() => {});
-      await prisma.case
-        .deleteMany({
-          where: { userId: { in: [ownerUser.id, memberUser.id] } },
-        })
-        .catch(() => {});
-      await prisma.user
-        .deleteMany({
-          where: { id: { in: [ownerUser.id, memberUser.id] } },
-        })
-        .catch(() => {});
-    } catch (error) {
-      console.error('清理测试数据失败:', error);
-    }
+    // 全局 Prisma mock 的 deleteMany 可能未设置返回 Promise；这里兼容真实 DB 与 mock 两种模式。
+    await Promise.allSettled([
+      prisma.caseDiscussion.deleteMany({
+        where: { userId: { in: [ownerUser.id, memberUser.id] } },
+      }),
+      prisma.caseTeamMember.deleteMany({
+        where: { userId: { in: [ownerUser.id, memberUser.id] } },
+      }),
+      prisma.case.deleteMany({
+        where: { userId: { in: [ownerUser.id, memberUser.id] } },
+      }),
+      prisma.user.deleteMany({
+        where: { id: { in: [ownerUser.id, memberUser.id] } },
+      }),
+    ]);
     await prisma.$disconnect();
   });
 
@@ -537,6 +553,31 @@ describe('案件讨论API测试', () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.data.metadata).toEqual(metadata);
+    });
+
+    it('不应通过普通更新接口修改置顶状态', async () => {
+      const request = createMockRequest(
+        `http://localhost:3000/api/discussions/${testDiscussion.id}`,
+        {
+          method: 'PUT',
+          headers: { authorization: 'Bearer owner_token' },
+          body: { content: '只更新内容', isPinned: true },
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: testDiscussion.id }),
+      });
+
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.data.content).toBe('只更新内容');
+      expect(data.data.isPinned).toBe(false);
+      expect(prisma.caseDiscussion.update).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.not.objectContaining({ isPinned: expect.anything() }),
+        })
+      );
     });
 
     it('应验证内容不为空', async () => {

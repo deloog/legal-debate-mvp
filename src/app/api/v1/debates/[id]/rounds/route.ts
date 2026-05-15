@@ -13,6 +13,8 @@ import { uuidSchema } from '@/app/api/lib/validation/schemas';
 import { prisma } from '@/lib/db/prisma';
 import { DebateStatus, RoundStatus } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * POST /api/v1/debates/[id]/rounds
@@ -53,8 +55,12 @@ export const POST = withErrorHandler(
         throw new Error('Debate not found');
       }
 
-      // 所有权校验
-      if (debate.userId !== authUser.userId) {
+      const access = await canAccessDebateByCasePermission(
+        authUser.userId,
+        debateId,
+        CasePermission.EDIT_DEBATES
+      );
+      if (!access.allowed) {
         throw new Error('Forbidden');
       }
 
@@ -134,25 +140,18 @@ export const GET = withErrorHandler(
     const debateId = validatePathParam(resolvedParams.id, uuidSchema);
 
     // 所有权校验
-    const debate = await prisma.debate.findUnique({
-      where: { id: debateId },
-      select: { userId: true },
-    });
-    if (!debate) {
+    const access = await canAccessDebateByCasePermission(
+      authUser.userId,
+      debateId,
+      CasePermission.VIEW_DEBATES
+    );
+    if (!access.allowed || !access.debate) {
       return NextResponse.json(
-        { success: false, error: '辩论不存在' },
-        { status: 404 }
-      );
-    }
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-      select: { role: true },
-    });
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
-    if (debate.userId !== authUser.userId && !isAdmin) {
-      return NextResponse.json(
-        { success: false, error: '无权访问' },
-        { status: 403 }
+        {
+          success: false,
+          error: access.reason === '辩论不存在' ? '辩论不存在' : '无权访问',
+        },
+        { status: access.reason === '辩论不存在' ? 404 : 403 }
       );
     }
 

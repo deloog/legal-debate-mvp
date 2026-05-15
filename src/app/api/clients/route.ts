@@ -1,5 +1,6 @@
 /** @legacy 优先使用 /api/v1/clients，此路由保留以向后兼容 */
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createUnauthorizedResponse } from '@/app/api/lib/responses/error-response';
 import {
   createCreatedResponse,
   createSuccessResponse,
@@ -149,10 +150,7 @@ async function mapClientToDetail(
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return createUnauthorizedResponse();
   }
 
   const { searchParams } = new URL(request.url);
@@ -230,10 +228,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 export const POST = withErrorHandler(async (request: NextRequest) => {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return createUnauthorizedResponse();
   }
 
   const body = await request.json();

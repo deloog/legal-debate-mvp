@@ -4,6 +4,8 @@
 
 import { GET } from '@/app/api/v1/knowledge-graph/conflicts/route';
 import { prisma } from '@/lib/db';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { checkKnowledgeGraphPermission } from '@/lib/middleware/knowledge-graph-permission';
 
 // Mock认证
 jest.mock('@/lib/middleware/auth', () => ({
@@ -38,16 +40,40 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
     VIEW_RELATIONS: 'VIEW_RELATIONS',
   },
   KnowledgeGraphResource: {
-    GRAPH: 'GRAPH',
+    GRAPH: 'knowledge_graph',
   },
 }));
+
+const mockGetAuthUser = getAuthUser as jest.Mock;
+const mockCheckPermission = checkKnowledgeGraphPermission as jest.Mock;
 
 describe('GET /api/v1/knowledge-graph/conflicts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    });
+    mockCheckPermission.mockResolvedValue({ hasPermission: true });
   });
 
   describe('参数验证', () => {
+    it('未登录时返回401', async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/conflicts?lawArticleIds=article-1',
+        {
+          method: 'GET',
+        }
+      );
+
+      const response = await GET(request as any);
+
+      expect(response.status).toBe(401);
+    });
+
     it('应该拒绝缺少lawArticleIds参数的请求', async () => {
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/conflicts',
@@ -254,6 +280,24 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
   });
 
   describe('错误处理', () => {
+    it('应该处理权限不足的情况', async () => {
+      mockCheckPermission.mockResolvedValueOnce({
+        hasPermission: false,
+        reason: '权限不足',
+      });
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/conflicts?lawArticleIds=article-1',
+        {
+          method: 'GET',
+        }
+      );
+
+      const response = await GET(request as any);
+
+      expect(response.status).toBe(403);
+    });
+
     it('应该处理数据库错误', async () => {
       (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
         { id: 'article-1', lawName: '《民法典》', articleNumber: '第123条' },

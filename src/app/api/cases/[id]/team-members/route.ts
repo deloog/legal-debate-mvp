@@ -9,6 +9,7 @@ import {
   CasePermission,
   CaseRole,
   CaseTeamMemberDetail,
+  getRoleDefaultPermissions,
 } from '@/types/case-collaboration';
 import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
@@ -308,11 +309,43 @@ export const POST = withErrorHandler(
       where: {
         caseId,
         userId: validatedData.userId,
-        deletedAt: null,
       },
     });
 
     if (existingMember) {
+      if (existingMember.deletedAt) {
+        const permissions =
+          validatedData.permissions ??
+          getRoleDefaultPermissions(validatedData.role);
+        const member = await prisma.caseTeamMember.update({
+          where: {
+            id: existingMember.id,
+          },
+          data: {
+            role: validatedData.role,
+            permissions: permissions as Prisma.InputJsonValue,
+            notes: validatedData.notes,
+            metadata: (validatedData.metadata || null) as Prisma.InputJsonValue,
+            deletedAt: null,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                avatar: true,
+                role: true,
+              },
+            },
+          },
+        });
+
+        const memberDetail = await mapTeamMemberDetail(member, true);
+
+        return createCreatedResponse(memberDetail);
+      }
+
       return NextResponse.json(
         { error: '已存在', message: '该用户已经是团队成员' },
         { status: 409 }
@@ -320,12 +353,15 @@ export const POST = withErrorHandler(
     }
 
     // 创建团队成员
+    const permissions =
+      validatedData.permissions ??
+      getRoleDefaultPermissions(validatedData.role);
     const member = await prisma.caseTeamMember.create({
       data: {
         caseId,
         userId: validatedData.userId,
         role: validatedData.role,
-        permissions: (validatedData.permissions || []) as Prisma.InputJsonValue,
+        permissions: permissions as Prisma.InputJsonValue,
         notes: validatedData.notes,
         metadata: (validatedData.metadata || null) as Prisma.InputJsonValue,
       },

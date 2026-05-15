@@ -31,6 +31,7 @@ export default function PaymentPage() {
       | 'YEARLY'
       | 'LIFETIME') || 'MONTHLY';
   const orderId = searchParams.get('orderId');
+  const paymentMethodParam = searchParams.get('paymentMethod');
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +40,10 @@ export default function PaymentPage() {
   const [tierInfo, setTierInfo] = useState<MembershipTierInfo | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<{
+    orderId: string;
+    orderNo: string;
+  } | null>(null);
 
   // 加载会员等级信息
   useEffect(() => {
@@ -49,6 +54,15 @@ export default function PaymentPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tierId, orderId]);
+
+  useEffect(() => {
+    if (paymentMethodParam) {
+      const upper = paymentMethodParam.toUpperCase();
+      if (Object.values(PaymentMethod).includes(upper as PaymentMethod)) {
+        setSelectedPaymentMethod(upper as PaymentMethod);
+      }
+    }
+  }, [paymentMethodParam]);
 
   const fetchTierInfo = async (): Promise<void> => {
     try {
@@ -134,6 +148,10 @@ export default function PaymentPage() {
           billingCycle: 'MONTHLY',
         });
         setSelectedPaymentMethod(data.data.paymentMethod as PaymentMethod);
+        setCreatedOrder({
+          orderId: data.data.id,
+          orderNo: data.data.orderNo,
+        });
       } else {
         throw new Error(data.error || '获取订单信息失败');
       }
@@ -153,32 +171,18 @@ export default function PaymentPage() {
       setIsSubmitting(true);
       setError(null);
 
-      // 跳转到支付链接或显示支付二维码
-      if (tierInfo?.id && selectedPaymentMethod) {
-        // 创建订单
-        const response = await fetch('/api/orders/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            membershipTierId: tierInfo.id,
-            paymentMethod: selectedPaymentMethod,
-            billingCycle: tierInfo.billingCycle,
-            description: '会员升级',
-            autoRenew: false,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || '创建订单失败');
-        }
-
-        // 跳转到支付页面
-        router.push(`/payment/success?orderId=${data.data?.orderId}`);
+      if (!createdOrder || !selectedPaymentMethod || !tierInfo) {
+        throw new Error('订单尚未准备完成，请稍候重试');
       }
+
+      const params = new URLSearchParams({
+        orderId: createdOrder.orderId,
+        paymentMethod: selectedPaymentMethod,
+        amount: String(tierInfo.price),
+        currency: tierInfo.currency,
+      });
+
+      router.push(`/payment/processing?${params.toString()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : '支付失败');
     } finally {
@@ -299,12 +303,19 @@ export default function PaymentPage() {
           <PaymentConfirm
             amount={tierInfo.price}
             membershipTierId={tierInfo.id}
+            existingOrderId={orderId ?? undefined}
             billingCycle={tierInfo.billingCycle}
             description='会员升级'
             paymentMethod={selectedPaymentMethod}
             onConfirm={handlePaymentConfirm}
             onCancel={handleCancel}
             isLoading={isSubmitting}
+            onOrderCreated={data => {
+              setCreatedOrder({
+                orderId: data.orderId,
+                orderNo: data.orderNo,
+              });
+            }}
           />
         )}
       </div>

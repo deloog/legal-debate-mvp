@@ -55,24 +55,17 @@ async function verifyWechatSignature(
     // 构造验签消息
     const message = `${timestamp}\n${nonce}\n${rawBody}\n`;
 
-    // 获取平台证书（实际生产环境应该从微信支付API获取或缓存）
-    // 这里使用配置的公钥进行验证
-    const config = paymentConfig.getWechatConfig();
-    if (!(config as { publicKey?: string }).publicKey) {
-      logger.error('[微信支付通知] 微信支付公钥未配置');
-      // 如果没有配置公钥，跳过验签（依赖AES解密作为安全屏障）
-      logger.warn('[微信支付通知] 跳过RSA验签，依赖AES-GCM解密验证');
-      return true;
+    // 获取微信平台证书（certPath 指向平台证书 PEM 文件，用于验证异步通知签名）
+    const platformCert = paymentConfig.getWechatPlatformCert();
+    if (!platformCert) {
+      logger.error('[微信支付通知] 微信平台证书未配置或读取失败，拒绝通知');
+      return false;
     }
 
     // RSA-SHA256 验签
     const verify = crypto.createVerify('RSA-SHA256');
     verify.update(message);
-    const isValid = verify.verify(
-      (config as { publicKey?: string }).publicKey!,
-      signature,
-      'base64'
-    );
+    const isValid = verify.verify(platformCert, signature, 'base64');
 
     if (!isValid) {
       logger.warn('[微信支付通知] RSA签名验证失败');

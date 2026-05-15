@@ -48,6 +48,12 @@ jest.mock('@/lib/api-response', () => ({
   })),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 
@@ -63,6 +69,23 @@ const mockedValidatePermissions = validatePermissions as jest.MockedFunction<
     options?: unknown
   ) => Promise<NextResponse<unknown>>
 >;
+
+function stringifyRawQueries(): string {
+  return (mockedPrisma.$queryRaw as jest.Mock).mock.calls
+    .map(([query]) => {
+      if (typeof query === 'string') {
+        return query;
+      }
+      if (Array.isArray(query?.strings)) {
+        return query.strings.join('?');
+      }
+      if (typeof query?.sql === 'string') {
+        return query.sql;
+      }
+      return String(query);
+    })
+    .join('\n');
+}
 
 describe('案件分析API', () => {
   beforeEach(() => {
@@ -140,6 +163,28 @@ describe('案件分析API', () => {
       );
       const response = await GET(request);
       expect(response.status).toBe(200);
+    });
+
+    it('应该把 caseType 筛选应用到所有核心统计查询', async () => {
+      mockedValidatePermissions.mockResolvedValueOnce(null);
+
+      (mockedPrisma.$queryRaw as jest.Mock).mockResolvedValue([]);
+      (mockedPrisma.case.count as jest.Mock).mockResolvedValue(0);
+
+      const request = new NextRequest(
+        'http://localhost/api/analytics/cases?caseType=CIVIL'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(stringifyRawQueries()).toContain('"type"');
+      expect(mockedPrisma.case.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: 'CIVIL',
+          }),
+        })
+      );
     });
 
     it('应该处理数据库错误', async () => {

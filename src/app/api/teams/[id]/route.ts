@@ -42,14 +42,15 @@ async function getTeamMemberCount(teamId: string): Promise<number> {
 
 async function checkTeamAccess(
   teamId: string,
-  userId: string
+  userId: string,
+  requireAdmin = true
 ): Promise<boolean> {
   const member = await prisma.teamMember.findFirst({
     where: {
       teamId,
       userId,
-      role: TeamRole.ADMIN,
       status: MemberStatus.ACTIVE,
+      ...(requireAdmin ? { role: TeamRole.ADMIN } : {}),
     },
   });
   return member !== null;
@@ -103,7 +104,7 @@ export const GET = withErrorHandler(
 
     const { id } = await params;
 
-    const hasAccess = await checkTeamAccess(id, authUser.userId);
+    const hasAccess = await checkTeamAccess(id, authUser.userId, false);
     if (!hasAccess) {
       return NextResponse.json(
         { error: '权限不足', message: '您没有权限查看此团队' },

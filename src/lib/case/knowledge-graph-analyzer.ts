@@ -19,6 +19,11 @@ import type {
   ArticleRelation,
   InferenceResult,
 } from '@/lib/knowledge-graph/reasoning/types';
+import {
+  buildCaseLawApplicationAnalysis,
+  createEmptyLawApplicationAnalysis,
+  type CaseLawApplicationAnalysis,
+} from '@/lib/case/law-application-analysis';
 
 /** 冲突关系 */
 export interface ConflictInfo {
@@ -54,6 +59,8 @@ export interface CaseLawGraphResult {
     nodes: GraphNode[];
     links: GraphLink[];
   };
+  /** 法条适用分析 2.0：面向律师的解释型结论 */
+  applicationAnalysis: CaseLawApplicationAnalysis;
   /** 是否有足够的数据（false 时提示用户关联法条） */
   hasData: boolean;
 }
@@ -78,6 +85,7 @@ export class CaseKnowledgeGraphAnalyzer {
       recommendedArticleIds: [],
       keyInferences: [],
       graphData: { nodes: [], links: [] },
+      applicationAnalysis: createEmptyLawApplicationAnalysis(),
       hasData: false,
     };
 
@@ -110,6 +118,14 @@ export class CaseKnowledgeGraphAnalyzer {
         conflicts,
         recommendedArticleIds
       );
+      const applicationAnalysis = await buildCaseLawApplicationAnalysis({
+        caseId,
+        articleIds,
+        conflicts,
+        evolutionChain: evolutionItems,
+        recommendedArticleIds,
+        keyInferences,
+      });
 
       return {
         articleIds,
@@ -118,6 +134,7 @@ export class CaseKnowledgeGraphAnalyzer {
         recommendedArticleIds: recommendedArticleIds.slice(0, 5),
         keyInferences: keyInferences.slice(0, 8),
         graphData,
+        applicationAnalysis,
         hasData: true,
       };
     } catch (error) {
@@ -131,29 +148,40 @@ export class CaseKnowledgeGraphAnalyzer {
   }
 
   /**
-   * 从 legal_references 中提取并匹配法条 ID
-   * legal_references 无直接外键，通过 source(法律名) + articleNumber 软匹配
+   * 从 legal_references 中提取并匹配法条 ID。
+   * 新链路优先使用 articleId；旧数据再通过 source(法律名) + articleNumber 软匹配。
    */
   private static async findCaseArticleIds(caseId: string): Promise<string[]> {
     const refs = await prisma.legalReference.findMany({
       where: { caseId },
-      select: { source: true, articleNumber: true },
+      select: { articleId: true, source: true, articleNumber: true },
     });
 
     if (refs.length === 0) return [];
 
+    const directIds = refs
+      .map(ref => ref.articleId)
+      .filter((id): id is string => Boolean(id));
+
     // 批量软匹配
-    const ids: string[] = [];
+    const ids: string[] = [...directIds];
+    const softRefs = refs.filter(ref => !ref.articleId);
     const BATCH = 20;
 
-    for (let i = 0; i < refs.length; i += BATCH) {
-      const batch = refs.slice(i, i + BATCH);
+    for (let i = 0; i < softRefs.length; i += BATCH) {
+      const batch = softRefs.slice(i, i + BATCH);
+      const softMatchConditions = batch
+        .filter(ref => ref.source && ref.source !== 'LAW_ARTICLE')
+        .map(ref => ({
+          lawName: { contains: ref.source, mode: 'insensitive' as const },
+          ...(ref.articleNumber ? { articleNumber: ref.articleNumber } : {}),
+        }));
+
+      if (softMatchConditions.length === 0) continue;
+
       const articles = await prisma.lawArticle.findMany({
         where: {
-          OR: batch.map(ref => ({
-            lawName: { contains: ref.source, mode: 'insensitive' as const },
-            ...(ref.articleNumber ? { articleNumber: ref.articleNumber } : {}),
-          })),
+          OR: softMatchConditions,
         },
         select: { id: true },
         take: BATCH * 3,

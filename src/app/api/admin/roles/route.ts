@@ -15,6 +15,7 @@ import type {
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { isSystemRoleName } from '@/lib/admin/role-security';
 
 // =============================================================================
 // 辅助函数
@@ -185,6 +186,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return Response.json(
         { error: '参数错误', message: '角色名称不能为空' },
         { status: 400 }
+      ) as unknown as NextResponse;
+    }
+
+    if (isSystemRoleName(body.name.trim())) {
+      return Response.json(
+        { error: '操作不允许', message: '系统内置角色不能手动创建' },
+        { status: 403 }
       ) as unknown as NextResponse;
     }
 

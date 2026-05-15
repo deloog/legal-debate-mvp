@@ -45,6 +45,31 @@ interface ShareValidationResult {
   errors: string[];
 }
 
+export function normalizeCasePermissions(
+  storedPermissions: unknown,
+  role: CaseRole
+): CasePermission[] {
+  if (Array.isArray(storedPermissions)) {
+    return storedPermissions.filter(
+      (permission): permission is CasePermission =>
+        Object.values(CasePermission).includes(permission as CasePermission)
+    );
+  }
+
+  if (storedPermissions && typeof storedPermissions === 'object') {
+    const customPermissions = (storedPermissions as Record<string, unknown>)
+      .customPermissions;
+    if (Array.isArray(customPermissions)) {
+      return customPermissions.filter(
+        (permission): permission is CasePermission =>
+          Object.values(CasePermission).includes(permission as CasePermission)
+      );
+    }
+  }
+
+  return getRoleDefaultPermissions(role);
+}
+
 // =============================================================================
 // 权限验证函数
 // =============================================================================
@@ -177,18 +202,10 @@ export async function canAccessSharedCase(
 
     if (caseTeamMember) {
       const role = caseTeamMember.role as CaseRole;
-      const metadata = caseTeamMember.permissions as Record<
-        string,
-        unknown
-      > | null;
-
-      // 获取权限列表
-      let permissions: CasePermission[];
-      if (metadata && Array.isArray(metadata.customPermissions)) {
-        permissions = metadata.customPermissions as CasePermission[];
-      } else {
-        permissions = getRoleDefaultPermissions(role);
-      }
+      const permissions = normalizeCasePermissions(
+        caseTeamMember.permissions,
+        role
+      );
 
       // 检查特定权限
       if (permission && !permissions.includes(permission)) {

@@ -262,7 +262,7 @@ export enum FollowUpTaskPriority {
 export interface FollowUpTask {
   id: string;
   clientId: string;
-  communicationId: string;
+  communicationId: string | null;
   userId: string;
   type: CommunicationType;
   summary: string;
@@ -298,8 +298,11 @@ export interface CreateFollowUpTaskInput {
  * 更新跟进任务输入接口
  */
 export interface UpdateFollowUpTaskInput {
+  type?: CommunicationType;
+  summary?: string;
   status?: FollowUpTaskStatus;
   priority?: FollowUpTaskPriority;
+  dueDate?: Date;
   notes?: string;
   completedAt?: Date | null;
 }

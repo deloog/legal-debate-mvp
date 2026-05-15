@@ -4,6 +4,10 @@
  */
 
 import { logger } from '@/lib/logger';
+import {
+  loadRuntimePolicy,
+  saveRuntimePolicy,
+} from '@/lib/admin/runtime-policy-storage';
 
 /**
  * 速率限制配置
@@ -43,10 +47,102 @@ class RateLimitConfigManager {
     autoBlockThreshold: 10,
     autoBlockDuration: 60,
   };
+  private hydratePromise: Promise<void> | null = null;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastHydratedAt = 0;
 
   constructor() {
     // 初始化默认配置
     this.initializeDefaults();
+    void this.hydrateFromStorage();
+  }
+
+  private shouldUsePersistence(): boolean {
+    return process.env.NODE_ENV !== 'test';
+  }
+
+  private refreshIfStale(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (Date.now() - this.lastHydratedAt > 15000) {
+      void this.hydrateFromStorage();
+    }
+  }
+
+  private async hydrateFromStorage(force = false): Promise<void> {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.hydratePromise && !force) {
+      await this.hydratePromise;
+      return;
+    }
+
+    this.hydratePromise = (async () => {
+      const [globalSettings, endpointConfigs] = await Promise.all([
+        loadRuntimePolicy<GlobalRateLimitSettings>('admin.rate_limit.global'),
+        loadRuntimePolicy<Array<RateLimitConfigItem & { updatedAt: string }>>(
+          'admin.rate_limit.endpoints'
+        ),
+      ]);
+
+      if (globalSettings) {
+        this.globalSettings = globalSettings;
+      }
+
+      if (endpointConfigs) {
+        this.configs.clear();
+        endpointConfigs.forEach(config => {
+          this.configs.set(config.endpoint, {
+            ...config,
+            updatedAt: new Date(config.updatedAt),
+          });
+        });
+      }
+
+      this.lastHydratedAt = Date.now();
+    })();
+
+    try {
+      await this.hydratePromise;
+    } finally {
+      this.hydratePromise = null;
+    }
+  }
+
+  private schedulePersist(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+    }
+
+    this.persistTimer = setTimeout(() => {
+      void this.persistToStorage();
+    }, 100);
+  }
+
+  private async persistToStorage(): Promise<void> {
+    await Promise.all([
+      saveRuntimePolicy(
+        'admin.rate_limit.global',
+        this.globalSettings,
+        '运行时速率限制全局配置'
+      ),
+      saveRuntimePolicy(
+        'admin.rate_limit.endpoints',
+        this.getAllConfigs().map(config => ({
+          ...config,
+          updatedAt: config.updatedAt.toISOString(),
+        })),
+        '运行时速率限制端点配置'
+      ),
+    ]);
   }
 
   /**
@@ -123,6 +219,7 @@ class RateLimitConfigManager {
       ...config,
       updatedAt: new Date(),
     });
+    this.schedulePersist();
 
     if (process.env.NODE_ENV === 'development') {
       logger.info('[RateLimitConfig] Updated config for:', endpoint);
@@ -133,6 +230,7 @@ class RateLimitConfigManager {
    * 获取配置
    */
   getConfig(endpoint: string): RateLimitConfigItem | undefined {
+    this.refreshIfStale();
     // 首先尝试精确匹配
     const exactMatch = this.configs.get(endpoint);
     if (exactMatch) {
@@ -163,6 +261,7 @@ class RateLimitConfigManager {
    * 获取所有配置
    */
   getAllConfigs(): RateLimitConfigItem[] {
+    this.refreshIfStale();
     return Array.from(this.configs.values());
   }
 
@@ -170,7 +269,11 @@ class RateLimitConfigManager {
    * 删除配置
    */
   deleteConfig(endpoint: string): boolean {
-    return this.configs.delete(endpoint);
+    const removed = this.configs.delete(endpoint);
+    if (removed) {
+      this.schedulePersist();
+    }
+    return removed;
   }
 
   /**
@@ -184,6 +287,7 @@ class RateLimitConfigManager {
 
     config.enabled = enabled;
     config.updatedAt = new Date();
+    this.schedulePersist();
     return true;
   }
 
@@ -195,6 +299,7 @@ class RateLimitConfigManager {
       ...this.globalSettings,
       ...settings,
     };
+    this.schedulePersist();
 
     if (process.env.NODE_ENV === 'development') {
       logger.info(
@@ -208,6 +313,7 @@ class RateLimitConfigManager {
    * 获取全局设置
    */
   getGlobalSettings(): GlobalRateLimitSettings {
+    this.refreshIfStale();
     return { ...this.globalSettings };
   }
 
@@ -277,6 +383,7 @@ class RateLimitConfigManager {
         this.setConfig(config.endpoint, config);
       });
     }
+    this.schedulePersist();
 
     if (process.env.NODE_ENV === 'development') {
       logger.info('[RateLimitConfig] Configuration imported');
@@ -297,6 +404,7 @@ class RateLimitConfigManager {
       autoBlockDuration: 60,
     };
     this.initializeDefaults();
+    this.schedulePersist();
 
     if (process.env.NODE_ENV === 'development') {
       logger.info('[RateLimitConfig] Reset to defaults');

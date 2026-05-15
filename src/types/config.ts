@@ -475,6 +475,7 @@ export interface CreateConfigRequest {
   value: unknown;
   type: ConfigType;
   category: ConfigCategory;
+  changeReason?: string;
   description?: string;
   isPublic?: boolean;
   isRequired?: boolean;
@@ -487,6 +488,7 @@ export interface CreateConfigRequest {
  */
 export interface UpdateConfigRequest {
   value: unknown;
+  changeReason?: string;
   description?: string;
   isPublic?: boolean;
   isRequired?: boolean;

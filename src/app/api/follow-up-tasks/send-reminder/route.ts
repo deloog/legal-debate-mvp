@@ -6,6 +6,12 @@
  */
 
 import { logger } from '@/lib/agent/security/logger';
+import {
+  createErrorResponse,
+  createForbiddenResponse,
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -24,17 +30,14 @@ export async function POST(request: NextRequest) {
   // ─── 认证：仅管理员或系统调用 ────────────────────────────────────────────────
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json({ error: '未授权' }, { status: 401 });
+    return createUnauthorizedResponse('未授权');
   }
   const callerDb = await prisma.user.findUnique({
     where: { id: authUser.userId },
     select: { role: true },
   });
   if (callerDb?.role !== 'ADMIN' && callerDb?.role !== 'SUPER_ADMIN') {
-    return NextResponse.json(
-      { error: '权限不足，仅管理员可触发提醒' },
-      { status: 403 }
-    );
+    return createForbiddenResponse('权限不足，仅管理员可触发提醒');
   }
 
   try {
@@ -49,18 +52,18 @@ export async function POST(request: NextRequest) {
       });
 
       if (!prismaTask) {
-        return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+        return createNotFoundResponse('任务不存在');
       }
 
       if (prismaTask.status !== FollowUpTaskStatus.PENDING) {
-        return NextResponse.json(
-          { error: '任务状态不是待处理，无需提醒' },
-          { status: 400 }
+        return createErrorResponse(
+          'INVALID_TASK_STATUS',
+          '任务状态不是待处理，无需提醒',
+          400
         );
       }
 
-      // 转换任务类型
-      const task = FollowUpTaskProcessor['transformTask']({
+      const task = FollowUpTaskProcessor.toFollowUpTask({
         ...prismaTask,
         clientName: prismaTask.client?.name,
         clientPhone: prismaTask.client?.phone ?? null,
@@ -115,8 +118,7 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     for (const pendingTask of pendingTasks) {
-      // 使用 transformTask 方法转换任务
-      const task = FollowUpTaskProcessor['transformTask']({
+      const task = FollowUpTaskProcessor.toFollowUpTask({
         ...pendingTask,
         clientName: pendingTask.client?.name,
         clientPhone: pendingTask.client?.phone ?? null,
@@ -181,8 +183,11 @@ export async function POST(request: NextRequest) {
     logger.error('发送跟进任务提醒失败', error as Error);
     return NextResponse.json(
       {
-        error: '发送提醒失败',
-        message: '未知错误',
+        success: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: '发送提醒失败',
+        },
       },
       { status: 500 }
     );

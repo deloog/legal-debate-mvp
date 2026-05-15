@@ -72,6 +72,7 @@ model User {
   verificationCodes         VerificationCode[]
   conversations             Conversation[]
   annotations               Annotation[]
+  casePackageReviews        CasePackageReview[]
 
   @@index([email])
   @@index([username])
@@ -144,7 +145,8 @@ model Case {
   legalReferences LegalReference[]
   tasks           Task[]
   witnesses       Witness[]
-  conversations   Conversation[]
+  conversations        Conversation[]
+  casePackageReviews   CasePackageReview[]
 
   @@index([userId])
   @@index([clientId])
@@ -1156,7 +1158,7 @@ model CommunicationRecord {
 model FollowUpTask {
   id              String               @id @default(cuid())
   clientId        String
-  communicationId String
+  communicationId String?
   userId          String
   type            CommunicationType    @default(PHONE)
   summary         String
@@ -1169,7 +1171,7 @@ model FollowUpTask {
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   client          Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  communication   CommunicationRecord  @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+  communication   CommunicationRecord? @relation(fields: [communicationId], references: [id], onDelete: Cascade)
   user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([clientId])
@@ -3480,4 +3482,29 @@ model Annotation {
   @@index([messageId])
   @@index([userId])
   @@map("annotations")
+}
+
+model CasePackageReview {
+  id               String              @id @default(cuid())
+  caseId           String
+  reviewerId       String
+  contentHash      String
+  selectedSections Json
+  status           PackageReviewStatus @default(PENDING)
+  reviewNotes      String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  case             Case                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  reviewer         User                @relation(fields: [reviewerId], references: [id])
+
+  @@index([caseId])
+  @@index([reviewerId])
+  @@index([caseId, createdAt])
+  @@map("case_package_reviews")
+}
+
+enum PackageReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

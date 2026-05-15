@@ -4,6 +4,8 @@ import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { normalizeCasePermissions } from '@/lib/case/share-permission-validator';
+import { CasePermission, CaseRole } from '@/types/case-collaboration';
 import { z } from 'zod';
 import type { DiscussionWithAuthor } from '@/types/discussion';
 
@@ -97,18 +99,18 @@ async function canPinDiscussion(
       deletedAt: null,
     },
     select: {
+      role: true,
       permissions: true,
     },
   });
 
   if (caseTeamMember) {
-    const metadata = caseTeamMember.permissions as Record<
-      string,
-      unknown
-    > | null;
-    const permissions = metadata?.customPermissions as string[] | undefined;
+    const permissions = normalizeCasePermissions(
+      caseTeamMember.permissions,
+      caseTeamMember.role as CaseRole
+    );
 
-    if (permissions && permissions.includes('PIN_DISCUSSIONS')) {
+    if (permissions.includes(CasePermission.PIN_DISCUSSIONS)) {
       return { hasPermission: true };
     }
   }

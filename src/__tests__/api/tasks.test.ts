@@ -25,10 +25,30 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 import { prisma } from '@/lib/db/prisma';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 
 // Mock Auth
 jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/case/share-permission-validator', () => ({
+  canAccessSharedCase: jest.fn(),
+}));
+
+jest.mock('@/lib/notification/reminder-generator', () => ({
+  reminderGenerator: {
+    generateTaskItemReminders: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -45,6 +65,10 @@ describe('Tasks API', () => {
       userId: 'cl1234567',
       email: 'test@example.com',
       role: 'lawyer',
+    });
+    (canAccessSharedCase as jest.Mock).mockResolvedValue({
+      hasAccess: true,
+      isOwner: false,
     });
 
     // Default task mocks
@@ -516,6 +540,46 @@ describe('Tasks API', () => {
 
       expect(response.status).toBe(401);
     });
+
+    it('should reject task creation for inaccessible case', async () => {
+      (canAccessSharedCase as jest.Mock).mockResolvedValueOnce({
+        hasAccess: false,
+        reason: '无权访问此案件',
+      });
+
+      const request = createMockRequest('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        body: {
+          title: '无权案件任务',
+          caseId: 'case-no-access',
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(403);
+      expect(mockedPrisma.task.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject assigning new task to user without case access', async () => {
+      (canAccessSharedCase as jest.Mock)
+        .mockResolvedValueOnce({ hasAccess: true })
+        .mockResolvedValueOnce({ hasAccess: false });
+
+      const request = createMockRequest('http://localhost:3000/api/tasks', {
+        method: 'POST',
+        body: {
+          title: '非法分配任务',
+          caseId: 'case-1',
+          assignedTo: 'outsider-user',
+        },
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(403);
+      expect(mockedPrisma.task.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('GET /api/tasks/[id]', () => {
@@ -551,6 +615,25 @@ describe('Tasks API', () => {
       const response = await GET_DETAIL(request);
 
       expect(response.status).toBe(401);
+    });
+
+    it('should reject rebinding task to inaccessible case', async () => {
+      (canAccessSharedCase as jest.Mock).mockResolvedValueOnce({
+        hasAccess: false,
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/tasks/cm1234567',
+        {
+          method: 'PUT',
+          body: { caseId: 'case-no-access' },
+        }
+      );
+
+      const response = await PUT(request);
+
+      expect(response.status).toBe(403);
+      expect(mockedPrisma.task.update).not.toHaveBeenCalled();
     });
   });
 
@@ -637,6 +720,25 @@ describe('Tasks API', () => {
       const response = await PUT(request);
 
       expect(response.status).toBe(401);
+    });
+
+    it('should reject assigning to user without case access', async () => {
+      (canAccessSharedCase as jest.Mock).mockResolvedValueOnce({
+        hasAccess: false,
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/tasks/cm1234567/assign',
+        {
+          method: 'POST',
+          body: { assignedTo: 'outsider-user' },
+        }
+      );
+
+      const response = await ASSIGN(request);
+
+      expect(response.status).toBe(403);
+      expect(mockedPrisma.task.update).not.toHaveBeenCalled();
     });
   });
 

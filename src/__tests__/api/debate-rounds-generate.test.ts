@@ -4,6 +4,14 @@ import {
 } from '@/app/api/v1/debate-rounds/[roundId]/generate/route';
 import { createTestResponse, assertions } from './test-utils';
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-1',
+    email: 'user@example.com',
+    role: 'USER',
+  }),
+}));
+
 /**
  * 辩论论点生成API单元测试
  */
@@ -80,6 +88,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -151,6 +160,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -188,6 +198,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -237,6 +248,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -295,6 +307,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -340,6 +353,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -385,6 +399,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -424,6 +439,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -466,6 +482,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {
@@ -514,6 +531,7 @@ describe('辩论论点生成API', () => {
           id: 'debate-1',
           debateConfig: { maxRounds: 3 },
           case: {
+            userId: 'user-1',
             documents: [
               {
                 analysisResult: {

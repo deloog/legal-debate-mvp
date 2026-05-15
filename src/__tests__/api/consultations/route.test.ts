@@ -19,18 +19,12 @@ jest.mock('@/lib/db/prisma', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 
-// Mock JWT 工具
-jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn(),
-  verifyToken: jest.fn(),
+// Mock 当前认证契约
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
 }));
 
-// Mock NextAuth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // 辅助函数：创建带有 headers 的 mock Request
 function createMockRequest(url: string): NextRequest {
@@ -53,13 +47,10 @@ const mockRequest = createMockRequest(
 describe('GET /api/consultations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // 设置 JWT mock 返回值
-    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
-      header?.replace('Bearer ', '')
-    );
-    (verifyToken as jest.Mock).mockReturnValue({
-      valid: true,
-      payload: { userId: 'test-user-id' },
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'test-user-id',
+      email: 'test@example.com',
+      role: 'LAWYER',
     });
   });
 
@@ -617,6 +608,11 @@ describe('POST /api/consultations', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'test-user-id',
+      email: 'test@example.com',
+      role: 'LAWYER',
+    });
     mockJsonBody = {
       consultType: 'PHONE',
       consultTime: '2026-01-28T10:00:00.000Z',
@@ -969,19 +965,15 @@ describe('POST /api/consultations', () => {
   });
 
   describe('咨询编号生成', () => {
-    test('应该查询当天最大序号', async () => {
-      const mockLatestConsultation = {
-        consultNumber: 'ZX20260128005',
-        id: 'id-123',
-      };
-
-      (prisma.consultation.findFirst as jest.Mock).mockResolvedValue(
-        mockLatestConsultation
+    test('应该使用无查询依赖的咨询编号生成方式', async () => {
+      (prisma.consultation.create as jest.Mock).mockImplementation(
+        async ({ data }) => ({
+          id: 'new-id',
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
       );
-      (prisma.consultation.create as jest.Mock).mockResolvedValue({
-        id: 'new-id',
-        consultNumber: 'ZX20260128006',
-      });
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
@@ -990,25 +982,25 @@ describe('POST /api/consultations', () => {
 
       await POST(mockRequest);
 
-      expect(prisma.consultation.findFirst).toHaveBeenCalledWith({
-        where: {
-          consultNumber: {
-            startsWith: expect.stringMatching(/^ZX\d{8}/),
-          },
-          deletedAt: null,
-        },
-        orderBy: {
-          consultNumber: 'desc',
-        },
-      });
+      expect(prisma.consultation.findFirst).not.toHaveBeenCalled();
+      expect(prisma.consultation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            consultNumber: expect.stringMatching(/^ZX\d{11,}$/),
+          }),
+        })
+      );
     });
 
-    test('当天没有咨询时应从001开始', async () => {
-      (prisma.consultation.findFirst as jest.Mock).mockResolvedValue(null);
-      (prisma.consultation.create as jest.Mock).mockResolvedValue({
-        id: 'new-id',
-        consultNumber: 'ZX20260128001',
-      });
+    test('应该生成带日期前缀的咨询编号', async () => {
+      (prisma.consultation.create as jest.Mock).mockImplementation(
+        async ({ data }) => ({
+          id: 'new-id',
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      );
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
@@ -1018,7 +1010,7 @@ describe('POST /api/consultations', () => {
       const response = await POST(mockRequest);
       const data = await response.json();
 
-      expect(data.data.consultNumber).toBe('ZX20260128001');
+      expect(data.data.consultNumber).toMatch(/^ZX\d{11,}$/);
     });
   });
 

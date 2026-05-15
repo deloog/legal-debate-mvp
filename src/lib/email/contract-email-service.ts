@@ -8,6 +8,7 @@ import * as path from 'path';
 import { prisma } from '@/lib/db/prisma';
 import { generateContractPDF } from '../contract/contract-pdf-generator';
 import { logger } from '@/lib/logger';
+import { generateContractSigningToken } from '@/lib/contract/contract-signing-token';
 
 /**
  * 发送合同邮件输入参数
@@ -176,6 +177,7 @@ export class ContractEmailService {
         lawFirmName: contract.lawFirmName,
         lawyerName: contract.lawyerName,
         contractId,
+        recipientEmail: contract.clientContact,
       });
 
       const mailOptions: nodemailer.SendMailOptions = {
@@ -386,8 +388,14 @@ export class ContractEmailService {
     lawFirmName: string;
     lawyerName: string;
     contractId: string;
+    recipientEmail: string;
   }): string {
-    const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/contracts/${data.contractId}/sign`;
+    const signingToken = generateContractSigningToken({
+      contractId: data.contractId,
+      role: 'client',
+      recipientEmail: data.recipientEmail,
+    });
+    const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/contracts/${data.contractId}/sign?token=${encodeURIComponent(signingToken)}`;
 
     return `
 <!DOCTYPE html>

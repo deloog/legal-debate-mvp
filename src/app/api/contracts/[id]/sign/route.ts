@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db/prisma';
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
 import { logger } from '@/lib/logger';
 import { createAuditLog } from '@/lib/audit/logger';
+import { verifyContractSigningToken } from '@/lib/contract/contract-signing-token';
 import {
   resolveContractUserId,
   unauthorizedResponse,
@@ -84,16 +85,22 @@ export async function POST(
         return forbiddenResponse('您不是此合同的签约律师');
       }
     } else {
-      // 客户端签署：合同中无 clientUserId FK，通过关联案件的所有者校验
-      // 若合同未关联案件，任意已登录用户均可作为委托方签署（系统设计约束）
-      const caseOwnerUserId = contract.case?.userId;
-      if (caseOwnerUserId && caseOwnerUserId !== currentUserId) {
-        logger.warn('[Sign] 非案件所有者尝试以客户身份签署:', {
+      const signingToken =
+        typeof body.signingToken === 'string' ? body.signingToken : '';
+      const verifiedSigning = signingToken
+        ? verifyContractSigningToken(signingToken)
+        : null;
+
+      if (
+        !verifiedSigning ||
+        verifiedSigning.contractId !== id ||
+        verifiedSigning.role !== 'client'
+      ) {
+        logger.warn('[Sign] 缺少或无效的委托方签署令牌:', {
           contractId: id,
           currentUserId,
-          caseOwnerUserId,
         });
-        return forbiddenResponse('您不是此合同的委托方');
+        return forbiddenResponse('委托方签署链接无效或已失效');
       }
     }
 
@@ -222,6 +229,17 @@ export async function POST(
     clearContractPDFCache(id).catch(error => {
       logger.error('清除PDF缓存失败:', error);
     });
+
+    // 记录签署版本（任何一方签署都需要留下快照）
+    void import('@/lib/contract/contract-version-service').then(
+      ({ contractVersionService }) => {
+        contractVersionService
+          .createVersion(id, 'SIGN', currentUserId)
+          .catch(error => {
+            logger.error('创建合同签署版本失败:', error);
+          });
+      }
+    );
 
     // 如果双方都已签署，发送签署确认邮件
     if (willBeFullySigned) {

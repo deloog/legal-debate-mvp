@@ -10,8 +10,10 @@ import { createMockRequest } from './test-utils';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkResourceOwnership,
+  createPermissionErrorResponse,
   ResourceType,
 } from '@/lib/middleware/resource-permission';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 import { prisma } from '@/lib/db/prisma';
 
 // Mock the authentication middleware
@@ -33,10 +35,15 @@ jest.mock('@/lib/middleware/resource-permission', () => ({
   },
 }));
 
+jest.mock('@/lib/case/share-permission-validator', () => ({
+  canAccessSharedCase: jest.fn(),
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     case: {
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
     },
@@ -82,6 +89,10 @@ describe('单个案件API - 权限集成测试', () => {
     (checkResourceOwnership as jest.Mock).mockResolvedValue({
       hasPermission: true,
     });
+    (canAccessSharedCase as jest.Mock).mockResolvedValue({
+      hasAccess: false,
+      reason: '无权访问此案件',
+    });
     (prisma.case.findUnique as jest.Mock).mockResolvedValue({
       id: mockCaseId,
       userId: mockUserId,
@@ -92,6 +103,25 @@ describe('单个案件API - 权限集成测试', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deletedAt: null,
+    });
+    (prisma.case.findFirst as jest.Mock).mockResolvedValue({
+      id: mockCaseId,
+      userId: mockUserId,
+      title: '测试案件',
+      description: '这是一个测试案件',
+      type: 'CIVIL',
+      status: 'DRAFT',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+      documents: [],
+      debates: [],
+      user: {
+        id: mockUserId,
+        username: 'tester',
+        name: 'Test User',
+        email: 'test@example.com',
+      },
     });
     (prisma.case.update as jest.Mock).mockResolvedValue({
       id: mockCaseId,
@@ -136,6 +166,10 @@ describe('单个案件API - 权限集成测试', () => {
         hasPermission: false,
         reason: '您无权访问此案件',
       });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
+        reason: '您无权访问此案件',
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/v1/cases/${mockCaseId}`
@@ -146,7 +180,7 @@ describe('单个案件API - 权限集成测试', () => {
       });
 
       expect(response.status).toBe(403);
-      expect(prisma.case.findUnique).not.toHaveBeenCalled();
+      expect(prisma.case.findFirst).toHaveBeenCalled();
     });
 
     it('管理员可以访问所有案件', async () => {
@@ -177,6 +211,7 @@ describe('单个案件API - 权限集成测试', () => {
       (checkResourceOwnership as jest.Mock).mockResolvedValue({
         hasPermission: true,
       });
+      (prisma.case.findFirst as jest.Mock).mockResolvedValue(null);
       (prisma.case.findUnique as jest.Mock).mockResolvedValue(null);
 
       const request = createMockRequest(
@@ -199,6 +234,10 @@ describe('单个案件API - 权限集成测试', () => {
       // 权限检查应该拒绝已删除的案件
       (checkResourceOwnership as jest.Mock).mockResolvedValue({
         hasPermission: false,
+        reason: '案件已被删除',
+      });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
         reason: '案件已被删除',
       });
 
@@ -246,6 +285,10 @@ describe('单个案件API - 权限集成测试', () => {
       (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
       (checkResourceOwnership as jest.Mock).mockResolvedValue({
         hasPermission: false,
+        reason: '您无权修改此案件',
+      });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
         reason: '您无权修改此案件',
       });
 
@@ -372,6 +415,10 @@ describe('单个案件API - 权限集成测试', () => {
       (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
       (checkResourceOwnership as jest.Mock).mockResolvedValue({
         hasPermission: false,
+        reason: '您无权删除此案件',
+      });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
         reason: '您无权删除此案件',
       });
 
@@ -683,6 +730,10 @@ describe('单个案件API - 权限集成测试', () => {
         hasPermission: false,
         reason: undefined as unknown as string,
       });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
+        reason: undefined,
+      });
 
       const request = createMockRequest(
         `http://localhost:3000/api/v1/cases/${mockCaseId}`
@@ -693,8 +744,7 @@ describe('单个案件API - 权限集成测试', () => {
       });
 
       expect(response.status).toBe(403);
-      const data = await response.json();
-      expect(data.message).toBeDefined();
+      expect(createPermissionErrorResponse).toHaveBeenCalled();
     });
 
     it('普通用户角色无法获取管理员权限', async () => {
@@ -703,6 +753,10 @@ describe('单个案件API - 权限集成测试', () => {
       (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
       (checkResourceOwnership as jest.Mock).mockResolvedValue({
         hasPermission: false,
+        reason: '您无权访问此案件',
+      });
+      (canAccessSharedCase as jest.Mock).mockResolvedValue({
+        hasAccess: false,
         reason: '您无权访问此案件',
       });
 

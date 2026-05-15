@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { ComplianceService } from '@/lib/compliance/compliance-service';
+import {
+  ComplianceAccessError,
+  ComplianceService,
+} from '@/lib/compliance/compliance-service';
 import type { GetComplianceReportResponse } from '@/types/compliance';
 import { ComplianceCategory } from '@/types/compliance';
 import { logger } from '@/lib/logger';
@@ -55,6 +58,19 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof ComplianceAccessError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        } as unknown as GetComplianceReportResponse,
+        { status: error.status }
+      );
+    }
+
     logger.error('生成合规报告错误:', error);
 
     return NextResponse.json(

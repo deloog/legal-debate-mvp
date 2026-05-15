@@ -4,8 +4,9 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
+import { MembershipStatus, Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getNumberConfig } from '@/lib/config/system-config';
 
 // =============================================================================
 // 类型定义
@@ -47,14 +48,25 @@ export interface AIUsageRecord {
   error?: string;
 }
 
+export interface EffectiveQuotaIdentity {
+  role: string;
+  quotaKey: string;
+  source: 'role' | 'membership';
+}
+
 // =============================================================================
 // 配额配置
 // =============================================================================
 
 /**
- * 不同角色的配额配置
+ * 不同角色的默认配额配置
  */
-const QUOTA_CONFIGS: Record<string, QuotaConfig> = {
+const DEFAULT_QUOTA_CONFIGS: Record<string, QuotaConfig> = {
+  USER: {
+    dailyLimit: 10,
+    monthlyLimit: 100,
+    perRequestLimit: 1000,
+  },
   FREE: {
     dailyLimit: 10,
     monthlyLimit: 100,
@@ -92,11 +104,152 @@ const QUOTA_CONFIGS: Record<string, QuotaConfig> = {
   },
 };
 
+const quotaConfigCache = new Map<string, QuotaConfig>();
+
 /**
- * 获取用户配额配置
+ * 从系统配置读取配额配置
+ */
+async function loadQuotaConfig(role: string): Promise<QuotaConfig> {
+  const normalizedRole = role.toUpperCase();
+
+  if (quotaConfigCache.has(normalizedRole)) {
+    return quotaConfigCache.get(normalizedRole)!;
+  }
+
+  const defaults =
+    DEFAULT_QUOTA_CONFIGS[normalizedRole] ?? DEFAULT_QUOTA_CONFIGS.FREE;
+
+  const config = await (async (): Promise<QuotaConfig> => {
+    if (normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN') {
+      return {
+        dailyLimit: -1,
+        monthlyLimit: -1,
+        perRequestLimit: -1,
+      };
+    }
+
+    const monthlyKeyMap: Record<string, string> = {
+      USER: 'business.ai_quota_free_monthly',
+      FREE: 'business.ai_quota_free_monthly',
+      BASIC: 'business.ai_quota_basic_monthly',
+      PROFESSIONAL: 'business.ai_quota_professional_monthly',
+      ENTERPRISE: 'business.ai_quota_enterprise_monthly',
+      LAWYER: 'business.ai_quota_lawyer_monthly',
+    };
+
+    const monthlyLimitKey = monthlyKeyMap[normalizedRole];
+    const monthlyLimit = monthlyLimitKey
+      ? await getNumberConfig(monthlyLimitKey, defaults.monthlyLimit)
+      : defaults.monthlyLimit;
+
+    const perRequestLimit = await getNumberConfig(
+      `business.ai_quota_${normalizedRole.toLowerCase()}_per_request`,
+      defaults.perRequestLimit
+    );
+
+    const dailyLimit = await getNumberConfig(
+      `business.ai_quota_${normalizedRole.toLowerCase()}_daily`,
+      defaults.dailyLimit
+    );
+
+    return {
+      dailyLimit,
+      monthlyLimit,
+      perRequestLimit,
+    };
+  })();
+
+  quotaConfigCache.set(normalizedRole, config);
+  return config;
+}
+
+/**
+ * 解析用户当前真正生效的配额身份：
+ * - 管理员/超管：直接按角色
+ * - 其他用户：优先按活跃会员等级；若无活跃会员，则按角色兜底
+ */
+export async function getEffectiveQuotaIdentity(
+  userId: string,
+  role: string
+): Promise<EffectiveQuotaIdentity> {
+  const normalizedRole = role.toUpperCase();
+
+  if (normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN') {
+    return {
+      role: normalizedRole,
+      quotaKey: normalizedRole,
+      source: 'role',
+    };
+  }
+
+  const membershipModel = (
+    prisma as typeof prisma & {
+      userMembership?: {
+        findFirst: (args: unknown) => Promise<{
+          tier?: { tier?: string | null } | null;
+        } | null>;
+      };
+    }
+  ).userMembership;
+
+  const activeMembership = membershipModel?.findFirst
+    ? await membershipModel.findFirst({
+        where: {
+          userId,
+          status: MembershipStatus.ACTIVE,
+          endDate: {
+            gt: new Date(),
+          },
+        },
+        orderBy: {
+          endDate: 'desc',
+        },
+        select: {
+          tier: {
+            select: {
+              tier: true,
+            },
+          },
+        },
+      })
+    : null;
+
+  const membershipTier = activeMembership?.tier?.tier?.toUpperCase();
+  if (membershipTier && DEFAULT_QUOTA_CONFIGS[membershipTier]) {
+    return {
+      role: normalizedRole,
+      quotaKey: membershipTier,
+      source: 'membership',
+    };
+  }
+
+  const fallbackQuotaKey = normalizedRole === 'USER' ? 'FREE' : normalizedRole;
+
+  return {
+    role: normalizedRole,
+    quotaKey: fallbackQuotaKey,
+    source: 'role',
+  };
+}
+
+/**
+ * 获取用户配额配置（兼容同步调用场景）
+ *
+ * 注意：如果需要读取数据库系统配置，请使用 `getUserQuotaConfigAsync()`
  */
 export function getUserQuotaConfig(role: string): QuotaConfig {
-  return QUOTA_CONFIGS[role] || QUOTA_CONFIGS.FREE;
+  return (
+    DEFAULT_QUOTA_CONFIGS[role.toUpperCase()] || DEFAULT_QUOTA_CONFIGS.FREE
+  );
+}
+
+/**
+ * 读取用户配额配置（优先系统配置）
+ */
+export async function getUserQuotaConfigAsync(
+  role: string
+): Promise<QuotaConfig> {
+  return loadQuotaConfig(role);
 }
 
 // =============================================================================
@@ -117,8 +270,8 @@ export async function checkAIQuota(
   tokensToUse: number = 0
 ): Promise<QuotaCheckResult> {
   try {
-    // 获取用户配额配置
-    const config = getUserQuotaConfig(role);
+    const identity = await getEffectiveQuotaIdentity(userId, role);
+    const config = await loadQuotaConfig(identity.quotaKey);
 
     // 管理员无限制
     if (config.dailyLimit === -1) {
@@ -257,7 +410,8 @@ export async function getUserQuotaUsage(
   monthly: { used: number; limit: number; remaining: number };
 }> {
   try {
-    const config = getUserQuotaConfig(role);
+    const identity = await getEffectiveQuotaIdentity(userId, role);
+    const config = await loadQuotaConfig(identity.quotaKey);
 
     // 管理员返回无限制
     if (config.dailyLimit === -1) {
@@ -315,8 +469,24 @@ export async function getUserQuotaUsage(
  * 检查用户是否有管理员权限（无配额限制）
  */
 export function hasUnlimitedQuota(role: string): boolean {
-  const config = getUserQuotaConfig(role);
+  const config =
+    DEFAULT_QUOTA_CONFIGS[role.toUpperCase()] || DEFAULT_QUOTA_CONFIGS.FREE;
   return config.dailyLimit === -1;
+}
+
+/**
+ * 异步判断用户是否有无限配额
+ */
+export async function hasUnlimitedQuotaAsync(role: string): Promise<boolean> {
+  const config = await loadQuotaConfig(role);
+  return config.dailyLimit === -1;
+}
+
+/**
+ * 清除配额配置缓存（管理员更新系统配置后可调用）
+ */
+export function clearQuotaConfigCache(): void {
+  quotaConfigCache.clear();
 }
 
 /**

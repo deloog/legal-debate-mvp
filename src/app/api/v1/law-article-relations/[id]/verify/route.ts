@@ -14,6 +14,7 @@ import {
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { ExpertService } from '@/lib/knowledge-graph/expert/expert-service';
 
 interface VerifyRequestBody {
   approved: boolean;
@@ -68,6 +69,9 @@ export async function POST(
     }
 
     const relationId = (await params).id;
+    const expert = await new ExpertService().getOrCreateExpertProfile(
+      authUser.userId
+    );
 
     // 查询关系是否存在
     const relation = await prisma.lawArticleRelation.findUnique({
@@ -89,14 +93,14 @@ export async function POST(
       );
     }
 
-    // 更新审核状态（使用 JWT 中的 userId）
+    // 关系表 verifiedBy 外键指向专家档案，而操作日志仍记录真实 userId。
     const updatedRelation = await prisma.lawArticleRelation.update({
       where: { id: relationId },
       data: {
         verificationStatus: body.approved
           ? VerificationStatus.VERIFIED
           : VerificationStatus.REJECTED,
-        verifiedBy: authUser.userId,
+        verifiedBy: expert.id,
         verifiedAt: new Date(),
       },
     });

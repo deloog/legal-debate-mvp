@@ -12,7 +12,6 @@
  *     - targetId: 目标法条ID
  *     - relationType: 关系类型
  *     - confidence: 置信度（可选，默认0.7）
- *     - createdBy: 创建人ID
  *     - evidence: 证据（可选）
  */
 
@@ -34,7 +33,6 @@ interface CreateRelationRequestBody {
   targetId: string;
   relationType: RelationType;
   confidence?: number;
-  createdBy: string;
   evidence?: Record<string, unknown>;
 }
 

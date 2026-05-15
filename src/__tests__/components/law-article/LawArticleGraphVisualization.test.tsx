@@ -70,9 +70,31 @@ jest.mock('d3', () => {
         return this;
       }),
     })),
-    forceCenter: jest.fn(),
+    forceCenter: jest.fn(() => ({
+      strength: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    })),
+    forceX: jest.fn(() => ({
+      strength: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    })),
+    forceY: jest.fn(() => ({
+      strength: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    })),
     forceCollide: jest.fn(() => ({
       radius: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    })),
+    zoom: jest.fn(() => ({
+      scaleExtent: jest.fn(function (this: unknown) {
+        return this;
+      }),
+      on: jest.fn(function (this: unknown) {
         return this;
       }),
     })),
@@ -238,6 +260,27 @@ describe('LawArticleGraphVisualization', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         '/api/v1/law-articles/article-1/graph?depth=2'
       );
+    });
+
+    it('应该兼容法条图谱API的标准响应包装格式', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: mockGraphData,
+        }),
+      });
+
+      const { container } = render(
+        <LawArticleGraphVisualization centerArticleId='article-1' />
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      expect(screen.queryByText('暂无图谱数据')).not.toBeInTheDocument();
+      expect(container.querySelector('svg')).not.toHaveClass('hidden');
     });
   });
 

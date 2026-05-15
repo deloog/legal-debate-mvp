@@ -123,6 +123,29 @@ interface ContractApproval {
   completedAt?: string;
 }
 
+type HeadersWithSetCookie = Headers & {
+  getSetCookie?: () => string[];
+};
+
+function getSetCookieHeaders(headers: Headers): string[] {
+  const cookieHeaders = headers as HeadersWithSetCookie;
+  return typeof cookieHeaders.getSetCookie === 'function'
+    ? cookieHeaders.getSetCookie()
+    : [];
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function getApiErrorCode(error: ApiResponse['error']): string | undefined {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return error?.code;
+}
+
 // =============================================================================
 // 测试框架
 // =============================================================================
@@ -204,7 +227,7 @@ class ApiClient {
   }
 
   private parseCookies(response: Response) {
-    const setCookie = (response.headers as any).getSetCookie?.();
+    const setCookie = getSetCookieHeaders(response.headers);
     if (Array.isArray(setCookie)) {
       for (const cookie of setCookie) {
         const [nameValue] = cookie.split(';');
@@ -610,8 +633,8 @@ async function main() {
           );
           return; // 登录成功，直接返回
         }
-      } catch (err: any) {
-        console.log(`   ⚠️  登录失败: ${err.message}`);
+      } catch (err: unknown) {
+        console.log(`   ⚠️  登录失败: ${toError(err).message}`);
         console.log(`   📝 尝试注册新用户...`);
       }
     }
@@ -645,13 +668,7 @@ async function main() {
         const isUserExists =
           response.message?.includes('邮箱已被注册') ||
           response.message?.includes('USER_EXISTS') ||
-          (typeof response.error === 'object' &&
-            response.error !== null &&
-            (response.error as any).code === 'USER_EXISTS') ||
-          (typeof response.error === 'object' &&
-            response.error !== null &&
-            'code' in response.error &&
-            (response.error as any).code === 'USER_EXISTS');
+          getApiErrorCode(response.error) === 'USER_EXISTS';
 
         if (!isUserExists) {
           throw new Error(
@@ -660,14 +677,14 @@ async function main() {
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
-      } catch (err: any) {
-        lastError = err;
+      } catch (err: unknown) {
+        lastError = toError(err);
 
         if (
-          !err.message?.includes('USER_EXISTS') &&
-          !err.message?.includes('邮箱已被注册')
+          !lastError.message?.includes('USER_EXISTS') &&
+          !lastError.message?.includes('邮箱已被注册')
         ) {
-          throw err;
+          throw lastError;
         }
 
         if (attempt === maxRetries - 1) {
@@ -777,16 +794,20 @@ async function main() {
       testData.testContract = response.data;
       console.log(`   📄 合同ID: ${testData.testContract?.id}`);
       console.log(`   📄 合同编号: ${testData.testContract?.contractNumber}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const normalizedError = toError(err);
       // 如果是因为律师资质未审核通过，跳过合同相关测试
-      if (err.message?.includes('律师资质') || err.message?.includes('403')) {
+      if (
+        normalizedError.message?.includes('律师资质') ||
+        normalizedError.message?.includes('403')
+      ) {
         console.log(`   ⚠️  律师资质未审核通过，跳过合同相关测试`);
-        console.log(`   ⚠️  错误: ${err.message}`);
+        console.log(`   ⚠️  错误: ${normalizedError.message}`);
         // 标记合同创建失败，后续测试会跳过
-        testData.testContract = undefined as any;
+        testData.testContract = undefined;
         return;
       }
-      throw err;
+      throw normalizedError;
     }
   });
 
@@ -965,11 +986,12 @@ async function main() {
         mockSignature
       );
       assert(false, '重复签署应该失败');
-    } catch (error: any) {
-      assert(error instanceof Error, 'should throw error');
+    } catch (error: unknown) {
+      const normalizedError = toError(error);
+      assert(normalizedError instanceof Error, 'should throw error');
       assert(
-        error.message?.includes('已签署') ||
-          error.message?.includes('ALREADY_SIGNED'),
+        normalizedError.message?.includes('已签署') ||
+          normalizedError.message?.includes('ALREADY_SIGNED'),
         'error should indicate already signed'
       );
       console.log('   ✓ 重复签署被正确阻止');

@@ -96,11 +96,14 @@ class ReminderGenerator {
         reminderTime.setDate(reminderTime.getDate() - days);
 
         const input: CreateReminderInput = {
-          type: ReminderTypeValues.HEARING_DATE,
+          userId: courtSchedule.case.userId,
+          type: ReminderTypeValues.COURT_SCHEDULE,
           title: `法庭提醒: ${courtSchedule.title}`,
           content: `您的案件"${courtSchedule.case.title}"将于${days}天后开庭，请提前做好准备。\n\n开庭时间：${courtSchedule.startTime.toLocaleString('zh-CN')}\n地点：${courtSchedule.location || '待定'}`,
           scheduledAt: reminderTime,
           channels: config.channels,
+          relatedType: 'CourtSchedule',
+          relatedId: courtScheduleId,
           metadata: {
             courtScheduleId,
             caseId: courtSchedule.caseId,
@@ -159,11 +162,14 @@ class ReminderGenerator {
           reminderTime.setHours(reminderTime.getHours() - hoursBefore);
 
           const input: CreateReminderInput = {
+            userId: task.userId,
             type: ReminderTypeValues.FOLLOW_UP,
             title: `跟进任务提醒: ${task.summary}`,
             content: `客户"${task.client.name}"的跟进任务将于${hoursBefore}小时后到期。\n\n任务：${task.summary}\n截止时间：${task.dueDate.toLocaleString('zh-CN')}`,
             scheduledAt: reminderTime,
             channels: config.channels,
+            relatedType: 'FollowUpTask',
+            relatedId: taskId,
             metadata: {
               taskId,
               clientId: task.clientId,
@@ -208,6 +214,16 @@ class ReminderGenerator {
         return;
       }
 
+      const caseRecord = await prisma.case.findUnique({
+        where: { id: caseId },
+        select: { userId: true },
+      });
+
+      if (!caseRecord) {
+        logger.warn(`案件不存在，跳过截止日期提醒: ${caseId}`);
+        return;
+      }
+
       const inputs: CreateReminderInput[] = [];
 
       for (const days of config.advanceDays) {
@@ -215,11 +231,14 @@ class ReminderGenerator {
         reminderTime.setDate(reminderTime.getDate() - days);
 
         const input: CreateReminderInput = {
-          type: ReminderTypeValues.CASE_DEADLINE,
+          userId: caseRecord.userId,
+          type: ReminderTypeValues.DEADLINE,
           title: `截止日期提醒: ${title}`,
           content: `${description}\n\n案件：${caseTitle}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
           scheduledAt: reminderTime,
           channels: config.channels,
+          relatedType: 'CaseDeadline',
+          relatedId: caseId,
           metadata: {
             caseId,
             caseTitle,
@@ -259,6 +278,16 @@ class ReminderGenerator {
         return;
       }
 
+      const caseRecord = await prisma.case.findUnique({
+        where: { id: caseId },
+        select: { userId: true },
+      });
+
+      if (!caseRecord) {
+        logger.warn(`案件不存在，跳过案件状态截止提醒: ${caseId}`);
+        return;
+      }
+
       const advanceDays = config.advanceDays;
 
       for (const daysBefore of Array.isArray(advanceDays)
@@ -269,11 +298,14 @@ class ReminderGenerator {
 
         try {
           const input: CreateReminderInput = {
-            type: ReminderTypeValues.CASE_DEADLINE,
+            userId: caseRecord.userId,
+            type: ReminderTypeValues.DEADLINE,
             title: `案件截止提醒: ${statusTitle}`,
             content: `您的案件截止日期即将到来，请及时处理。\n\n截止时间：${deadline.toLocaleString('zh-CN')}`,
             scheduledAt: reminderTime,
             channels: config.channels,
+            relatedType: 'CaseStatusDeadline',
+            relatedId: caseId,
             metadata: {
               caseId,
               statusTitle,
@@ -526,11 +558,14 @@ class ReminderGenerator {
       const caseInfo = task.case ? `案件「${task.case.title}」` : '';
 
       const input: CreateReminderInput = {
+        userId: task.assignedTo ?? task.createdBy,
         type: ReminderTypeValues.FOLLOW_UP,
         title: `任务提醒: ${task.title}`,
         content: `${caseInfo}的任务将于${hoursBefore}小时后截止。\n\n任务：${task.title}\n截止时间：${task.dueDate.toLocaleString('zh-CN')}`,
         scheduledAt: reminderTime,
         channels: config.channels,
+        relatedType: 'Task',
+        relatedId: taskId,
         metadata: {
           taskId,
           taskType: 'Task',

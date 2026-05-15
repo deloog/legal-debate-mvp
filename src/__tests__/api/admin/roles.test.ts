@@ -28,6 +28,7 @@ const mockPrisma = {
   },
   user: {
     count: jest.fn(),
+    findUnique: jest.fn(),
   },
 };
 
@@ -72,6 +73,7 @@ describe('Role API Security Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrisma.user.findUnique.mockResolvedValue({ role: 'ADMIN' });
   });
 
   function createMockRequest(
@@ -186,6 +188,72 @@ describe('Role API Security Tests', () => {
   });
 
   describe('系统角色保护', () => {
+    it('should prevent manual creation of system roles', async () => {
+      mockGetAuthUser.mockResolvedValue(adminUser);
+      mockValidatePermissions.mockResolvedValue(null);
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles',
+        {
+          method: 'POST',
+          body: { name: 'ADMIN' },
+        }
+      );
+      const response = await POST(request);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should require super admin to update system roles', async () => {
+      mockGetAuthUser.mockResolvedValue(adminUser);
+      mockValidatePermissions.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue({ role: 'ADMIN' });
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'ADMIN',
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'PUT',
+          body: { description: 'new description' },
+        }
+      );
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should require super admin to modify system role permissions', async () => {
+      mockGetAuthUser.mockResolvedValue(adminUser);
+      mockValidatePermissions.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue({ role: 'ADMIN' });
+      mockPrisma.role.findUnique
+        .mockResolvedValueOnce({
+          id: 'r-123',
+          name: 'ADMIN',
+        })
+        .mockResolvedValueOnce({
+          name: 'ADMIN',
+        });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123/permissions',
+        {
+          method: 'POST',
+          body: { permissionId: 'perm-1' },
+        }
+      );
+      const response = await POSTPermission(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
     it('should prevent deletion of system roles', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);

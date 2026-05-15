@@ -14,6 +14,7 @@ import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/v1/knowledge-graph/browse/route';
 import { prisma } from '@/lib/db';
 import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock prisma
 jest.mock('@/lib/db', () => ({
@@ -28,9 +29,14 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
 describe('GET /api/v1/knowledge-graph/browse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({ userId: 'user-1' });
   });
 
   describe('基础功能', () => {
@@ -85,7 +91,7 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       expect(data.data.links).toHaveLength(1);
       expect(data.pagination).toEqual({
         page: 1,
-        pageSize: 100,
+        pageSize: 80,
         total: 2,
         totalPages: 1,
       });
@@ -175,9 +181,12 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             OR: expect.arrayContaining([
-              { lawName: { contains: '民法典', mode: 'insensitive' } },
-              { articleNumber: { contains: '民法典', mode: 'insensitive' } },
-              { fullText: { contains: '民法典', mode: 'insensitive' } },
+              expect.objectContaining({
+                lawName: { contains: '民法典', mode: 'insensitive' },
+              }),
+              expect.objectContaining({
+                articleNumber: { contains: '民法典', mode: 'insensitive' },
+              }),
             ]),
           }),
         })
@@ -380,7 +389,7 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       expect(response.status).toBe(200);
       // 应该使用默认值
       expect(data.pagination.page).toBe(1);
-      expect(data.pagination.pageSize).toBe(100);
+      expect(data.pagination.pageSize).toBe(80);
     });
 
     it('应该限制最大页面大小', async () => {
@@ -459,8 +468,15 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
     });
 
     it('应该只查询已验证的关系', async () => {
-      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([]);
-      (prisma.lawArticle.count as jest.Mock).mockResolvedValue(0);
+      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'article1',
+          lawName: '民法典',
+          articleNumber: '第1条',
+          category: LawCategory.CIVIL,
+        },
+      ]);
+      (prisma.lawArticle.count as jest.Mock).mockResolvedValue(1);
       (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([]);
 
       const request = new NextRequest(
@@ -474,6 +490,82 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             verificationStatus: VerificationStatus.VERIFIED,
+          }),
+        })
+      );
+    });
+
+    it('应该把只有入边的法条纳入种子和图谱关系', async () => {
+      const seedArticle = {
+        id: 'article-target',
+        lawName: '民法典',
+        articleNumber: '第2条',
+        category: LawCategory.CIVIL,
+      };
+      const neighborArticle = {
+        id: 'article-source',
+        lawName: '民法典',
+        articleNumber: '第1条',
+        category: LawCategory.CIVIL,
+      };
+
+      (prisma.lawArticle.count as jest.Mock).mockResolvedValue(1);
+      (prisma.lawArticle.findMany as jest.Mock)
+        .mockResolvedValueOnce([seedArticle])
+        .mockResolvedValueOnce([neighborArticle]);
+      (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([
+        {
+          sourceId: 'article-source',
+          targetId: 'article-target',
+          relationType: RelationType.CITES,
+          strength: 0.8,
+          confidence: 0.9,
+        },
+      ]);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/v1/knowledge-graph/browse?search=第2条'
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.nodes.map((node: { id: string }) => node.id)).toEqual([
+        'article-target',
+        'article-source',
+      ]);
+      expect(data.data.links[0]).toMatchObject({
+        source: 'article-source',
+        target: 'article-target',
+      });
+      expect(prisma.lawArticle.findMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              expect.objectContaining({
+                targetRelations: expect.objectContaining({
+                  some: expect.objectContaining({
+                    verificationStatus: VerificationStatus.VERIFIED,
+                  }),
+                }),
+              }),
+            ]),
+          }),
+          orderBy: expect.arrayContaining([
+            { sourceRelations: { _count: 'desc' } },
+            { targetRelations: { _count: 'desc' } },
+          ]),
+        })
+      );
+      expect(prisma.lawArticleRelation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [
+              { sourceId: { in: ['article-target'] } },
+              { targetId: { in: ['article-target'] } },
+            ],
           }),
         })
       );

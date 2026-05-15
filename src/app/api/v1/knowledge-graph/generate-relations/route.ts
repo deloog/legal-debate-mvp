@@ -18,8 +18,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkKnowledgeGraphPermission,
+  KnowledgeGraphAction,
+  KnowledgeGraphResource,
+} from '@/lib/middleware/knowledge-graph-permission';
 import {
   generateLayer1Relations,
   getLastGeneratedAt,
@@ -32,15 +37,29 @@ interface RequestBody {
 
 export async function POST(request: NextRequest) {
   try {
-    // 认证
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader ?? '');
-    const tokenResult = verifyToken(token ?? '');
-
-    if (!tokenResult.valid || !tokenResult.payload) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
         { status: 401 }
+      );
+    }
+
+    const permissionResult = await checkKnowledgeGraphPermission(
+      authUser.userId,
+      KnowledgeGraphAction.MANAGE_RELATIONS,
+      KnowledgeGraphResource.RELATION
+    );
+    if (!permissionResult.hasPermission) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: permissionResult.reason || '权限不足',
+          },
+        },
+        { status: 403 }
       );
     }
 
@@ -106,7 +125,7 @@ export async function POST(request: NextRequest) {
     // 全量模式提示
     if (mode === 'full') {
       logger.warn(
-        `[knowledge-graph] 用户 ${tokenResult.payload.userId} 触发全量关系重生成，这可能耗时很长`
+        `[knowledge-graph] 用户 ${authUser.userId} 触发全量关系重生成，这可能耗时很长`
       );
     }
 
@@ -161,14 +180,29 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader ?? '');
-    const tokenResult = verifyToken(token ?? '');
-
-    if (!tokenResult.valid || !tokenResult.payload) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
         { status: 401 }
+      );
+    }
+
+    const permissionResult = await checkKnowledgeGraphPermission(
+      authUser.userId,
+      KnowledgeGraphAction.VIEW_STATS,
+      KnowledgeGraphResource.STATS
+    );
+    if (!permissionResult.hasPermission) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: permissionResult.reason || '权限不足',
+          },
+        },
+        { status: 403 }
       );
     }
 

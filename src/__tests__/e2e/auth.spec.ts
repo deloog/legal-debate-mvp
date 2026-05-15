@@ -74,6 +74,11 @@ interface CurrentUserResponseData {
       status: string;
       createdAt: Date | string;
       updatedAt: Date | string;
+      preferences?: {
+        onboarding?: {
+          intendedRole?: 'LAWYER' | 'ENTERPRISE';
+        };
+      } | null;
     };
   };
 }
@@ -127,7 +132,7 @@ interface EnterpriseResponseData {
 /**
  * 创建测试用户
  * @param apiContext - Playwright API请求上下文
- * @param role - 用户角色，默认为USER，可选LAWYER或ENTERPRISE
+ * @param role - 注册时选择的目标身份，注册后仍先创建为 USER
  */
 async function createTestUser(
   apiContext: APIRequestContext,
@@ -156,7 +161,7 @@ async function createTestUser(
     password,
     username: `test${shortId}`,
     name: `TestUser${shortId}`,
-    role: data.data?.user.role || role,
+    role: data.data?.user.role || 'USER',
     token: data.data?.token,
     refreshToken: data.data?.refreshToken,
   };
@@ -498,7 +503,7 @@ test.describe('密码找回与重置', () => {
 
 test.describe('律师资格验证流程', () => {
   test('应该提交律师资格申请', async ({ request }) => {
-    // 使用LAWYER角色创建用户，因为平台仅对认证律师及企业法务开放
+    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
 
     const { token } = await loginUser(
@@ -530,7 +535,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证执业证号格式', async ({ request }) => {
-    // 使用LAWYER角色，因为需要访问业务API
+    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -557,7 +562,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证身份证号格式', async ({ request }) => {
-    // 使用LAWYER角色，因为需要访问业务API
+    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -584,7 +589,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该获取当前用户的资格状态', async ({ request }) => {
-    // 使用LAWYER角色，因为需要访问业务API
+    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -702,7 +707,7 @@ test.describe('律师资格验证流程', () => {
 
 test.describe('企业认证流程', () => {
   test('应该提交企业注册申请', async ({ request }) => {
-    // 使用ENTERPRISE角色，因为需要访问企业API
+    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -730,7 +735,7 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该验证统一社会信用代码格式', async ({ request }) => {
-    // 使用ENTERPRISE角色，因为需要访问企业API
+    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -754,7 +759,7 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该获取当前用户的企业信息', async ({ request }) => {
-    // 使用ENTERPRISE角色，因为需要访问企业API
+    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -838,7 +843,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const email = `lifecycle-${timestamp}@example.com`;
     const password = 'Lifecycle123';
 
-    // 使用LAWYER角色注册，因为需要访问业务API
+    // 使用 LAWYER 意向注册，但账号角色仍应先保持 USER
     const registerResponse = await request.post(
       `${BASE_URL}/api/auth/register`,
       {
@@ -855,6 +860,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const registerData: AuthResponseData = await registerResponse.json();
     expect(registerResponse.ok()).toBeTruthy();
     expect(registerData.success).toBe(true);
+    expect(registerData.data?.user.role).toBe('USER');
 
     // 2. 登录
     const { token, refreshToken: rt } = await loginUser(
@@ -873,6 +879,10 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const meData: CurrentUserResponseData = await meResponse.json();
     expect(meResponse.ok()).toBeTruthy();
     expect(meData.data?.user.email).toBe(email);
+    expect(meData.data?.user.role).toBe('USER');
+    expect(meData.data?.user.preferences?.onboarding?.intendedRole).toBe(
+      'LAWYER'
+    );
 
     // 4. 刷新令牌
     const newToken = await refreshToken(request, rt);

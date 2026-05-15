@@ -3,6 +3,12 @@ import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
+  buildScheduleAccessWhere,
+  buildScheduleOverlapWhere,
+  parseScheduleDate,
+} from '@/lib/court-schedule/schedule-access';
+import { CasePermission } from '@/types/case-collaboration';
+import {
   CourtScheduleDetail,
   CourtScheduleStatus,
   CourtScheduleType,
@@ -77,13 +83,15 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: '日程ID不能为空' }, { status: 400 });
   }
 
+  const accessWhere = await buildScheduleAccessWhere(
+    authUser.userId,
+    CasePermission.VIEW_SCHEDULES
+  );
+
   const schedule = await prisma.courtSchedule.findFirst({
     where: {
       id,
-      case: {
-        userId: authUser.userId,
-        deletedAt: null,
-      },
+      AND: [accessWhere],
     },
     include: {
       case: {
@@ -125,13 +133,15 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   const validatedData = updateScheduleSchema.parse(body);
 
+  const accessWhere = await buildScheduleAccessWhere(
+    authUser.userId,
+    CasePermission.EDIT_SCHEDULES
+  );
+
   const existingSchedule = await prisma.courtSchedule.findFirst({
     where: {
       id,
-      case: {
-        userId: authUser.userId,
-        deletedAt: null,
-      },
+      AND: [accessWhere],
     },
   });
 
@@ -141,53 +151,70 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
 
   const updateData: Record<string, unknown> = {};
 
-  if (validatedData.title) {
+  if (validatedData.title !== undefined) {
     updateData.title = validatedData.title;
   }
-  if (validatedData.type) {
+  if (validatedData.type !== undefined) {
     updateData.type = validatedData.type;
   }
-  if (validatedData.startTime) {
-    updateData.startTime = new Date(validatedData.startTime);
+  if (validatedData.startTime !== undefined) {
+    const startDate = parseScheduleDate(validatedData.startTime);
+    if (!startDate) {
+      return NextResponse.json({ error: '开始时间格式无效' }, { status: 400 });
+    }
+    updateData.startTime = startDate;
   }
-  if (validatedData.endTime) {
-    updateData.endTime = new Date(validatedData.endTime);
+  if (validatedData.endTime !== undefined) {
+    const endDate = parseScheduleDate(validatedData.endTime);
+    if (!endDate) {
+      return NextResponse.json({ error: '结束时间格式无效' }, { status: 400 });
+    }
+    updateData.endTime = endDate;
   }
-  if (validatedData.location) {
+  if (validatedData.location !== undefined) {
     updateData.location = validatedData.location;
   }
-  if (validatedData.judge) {
+  if (validatedData.judge !== undefined) {
     updateData.judge = validatedData.judge;
   }
-  if (validatedData.notes) {
+  if (validatedData.notes !== undefined) {
     updateData.notes = validatedData.notes;
   }
-  if (validatedData.status) {
+  if (validatedData.status !== undefined) {
     updateData.status = validatedData.status;
   }
-  if (validatedData.metadata) {
+  if (validatedData.metadata !== undefined) {
     updateData.metadata = validatedData.metadata;
   }
 
-  if (updateData.startTime && updateData.endTime) {
-    const startDate = updateData.startTime as Date;
-    const endDate = updateData.endTime as Date;
-    if (startDate >= endDate) {
-      return NextResponse.json(
-        { error: '开始时间必须早于结束时间' },
-        { status: 400 }
-      );
-    }
+  const nextStartDate =
+    (updateData.startTime as Date | undefined) ?? existingSchedule.startTime;
+  const nextEndDate =
+    (updateData.endTime as Date | undefined) ?? existingSchedule.endTime;
+
+  if (nextStartDate >= nextEndDate) {
+    return NextResponse.json(
+      { error: '开始时间必须早于结束时间' },
+      { status: 400 }
+    );
   }
 
-  if (updateData.startTime) {
+  const nextStatus =
+    (updateData.status as CourtScheduleStatus | undefined) ??
+    (existingSchedule.status as CourtScheduleStatus);
+  const shouldCheckConflict =
+    updateData.startTime !== undefined ||
+    updateData.endTime !== undefined ||
+    (existingSchedule.status === 'CANCELLED' && nextStatus !== 'CANCELLED');
+
+  if (nextStatus !== 'CANCELLED' && shouldCheckConflict) {
     const conflict = await prisma.courtSchedule.findFirst({
-      where: {
-        id: { not: id },
-        caseId: existingSchedule.caseId,
-        startTime: updateData.startTime as Date,
-        status: { notIn: ['CANCELLED'] },
-      },
+      where: buildScheduleOverlapWhere(
+        existingSchedule.caseId,
+        nextStartDate,
+        nextEndDate,
+        id
+      ),
     });
 
     if (conflict) {
@@ -234,13 +261,15 @@ export const DELETE = withErrorHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: '日程ID不能为空' }, { status: 400 });
   }
 
+  const accessWhere = await buildScheduleAccessWhere(
+    authUser.userId,
+    CasePermission.DELETE_SCHEDULES
+  );
+
   const existingSchedule = await prisma.courtSchedule.findFirst({
     where: {
       id,
-      case: {
-        userId: authUser.userId,
-        deletedAt: null,
-      },
+      AND: [accessWhere],
     },
   });
 

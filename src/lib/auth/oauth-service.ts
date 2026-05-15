@@ -7,6 +7,7 @@ import { generateAccessToken, generateRefreshToken } from './jwt';
 import type { OAuthUserInfo } from '../../types/oauth';
 import type { OAuthAccount } from '../../types/oauth';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'crypto';
 
 /**
  * OAuth 登录结果
@@ -54,16 +55,27 @@ export class OAuthService {
       // 如果已存在，直接登录
       if (existingAccount) {
         const user = existingAccount.user;
-        const payload = { userId: user.id, email: user.email, role: user.role };
+        const session = await prisma.session.create({
+          data: {
+            userId: user.id,
+            sessionToken: `pending:${randomUUID()}`,
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
+        });
+        const payload = {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          jti: session.id,
+        };
         const token = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
 
-        // 创建 session，使得 refresh token 接口可正常使用
-        await prisma.session.create({
+        // 更新 placeholder sessionToken
+        await prisma.session.update({
+          where: { id: session.id },
           data: {
-            userId: user.id,
             sessionToken: refreshToken,
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           },
         });
 
@@ -89,20 +101,28 @@ export class OAuthService {
         userInfo
       );
 
+      const session = await prisma.session.create({
+        data: {
+          userId: newUser.id,
+          sessionToken: `pending:${randomUUID()}`,
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
       const newPayload = {
         userId: newUser.id,
         email: newUser.email,
         role: newUser.role,
+        jti: session.id,
       };
       const token = generateAccessToken(newPayload);
       const refreshToken = generateRefreshToken(newPayload);
 
-      // 创建 session
-      await prisma.session.create({
+      // 更新 placeholder sessionToken
+      await prisma.session.update({
+        where: { id: session.id },
         data: {
-          userId: newUser.id,
           sessionToken: refreshToken,
-          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       });
 

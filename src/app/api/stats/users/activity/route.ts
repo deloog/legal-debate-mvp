@@ -131,15 +131,31 @@ function getDateRange(timeRange: TimeRange): {
 /**
  * 解析查询参数
  */
-function parseQueryParams(request: NextRequest): ActivityQueryParams {
+function parseQueryParams(request: NextRequest): ActivityQueryParams | null {
   const url = new URL(request.url);
+  const timeRange = url.searchParams.get('timeRange') as TimeRange;
+  const role = url.searchParams.get('role');
+  const status = url.searchParams.get('status');
+
+  const validTimeRanges = Object.values(TimeRange);
+  if (timeRange && !validTimeRanges.includes(timeRange)) {
+    return null;
+  }
+
+  const validRoles = ['USER', 'LAWYER', 'ADMIN', 'SUPER_ADMIN', 'ENTERPRISE'];
+  if (role && !validRoles.includes(role)) {
+    return null;
+  }
+
+  const validStatuses = ['ACTIVE', 'SUSPENDED', 'BANNED', 'INACTIVE'];
+  if (status && !validStatuses.includes(status)) {
+    return null;
+  }
 
   return {
-    timeRange:
-      (url.searchParams.get('timeRange') as TimeRange) ??
-      TimeRange.LAST_30_DAYS,
-    role: url.searchParams.get('role') ?? undefined,
-    status: url.searchParams.get('status') ?? undefined,
+    timeRange: timeRange ?? TimeRange.LAST_30_DAYS,
+    role: role ?? undefined,
+    status: status ?? undefined,
   };
 }
 
@@ -147,7 +163,9 @@ function parseQueryParams(request: NextRequest): ActivityQueryParams {
  * 构建查询条件
  */
 function buildWhereClause(params: ActivityQueryParams) {
-  const where: Record<string, unknown> = {};
+  const where: Record<string, unknown> = {
+    deletedAt: null,
+  };
 
   if (params.role) {
     where.role = params.role;
@@ -231,6 +249,7 @@ async function getActivityData(
   const trendWhereConditions: Prisma.Sql[] = [
     Prisma.sql`"users"."lastLoginAt" >= ${startDate.toISOString()}::timestamp`,
     Prisma.sql`"users"."lastLoginAt" <= ${endDate.toISOString()}::timestamp`,
+    Prisma.sql`"users"."deletedAt" IS NULL`,
   ];
 
   if (whereClause.role) {
@@ -264,6 +283,7 @@ async function getActivityData(
   const newUsersWhereConditions: Prisma.Sql[] = [
     Prisma.sql`"createdAt" >= ${startDate.toISOString()}::timestamp`,
     Prisma.sql`"createdAt" <= ${endDate.toISOString()}::timestamp`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
 
   if (whereClause.role) {
@@ -329,6 +349,13 @@ async function getActivityData(
     totalUsers > 0 ? ((veryActive + active) / totalUsers) * 100 : 0;
 
   // 计算平均登录频率（基于ActionLog）
+  const activeUserIds = await prisma.user.findMany({
+    where: whereClause,
+    select: {
+      id: true,
+    },
+  });
+
   const actionLogResults = await prisma.actionLog.findMany({
     where: {
       actionType: 'LOGIN',
@@ -336,7 +363,7 @@ async function getActivityData(
         gte: startDate,
         lte: endDate,
       },
-      userId: { not: undefined },
+      userId: { in: activeUserIds.map(user => user.id) },
     },
     select: {
       userId: true,
@@ -404,6 +431,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
+    if (!params) {
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          message: '无效的查询参数',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     const { startDate, endDate } = getDateRange(
       params.timeRange ?? TimeRange.LAST_30_DAYS
     );

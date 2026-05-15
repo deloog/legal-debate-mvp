@@ -164,6 +164,44 @@ class PaymentConfig {
   }
 
   /**
+   * 读取微信支付平台证书（用于验证异步通知签名）
+   * certPath 应指向从微信平台下载的平台证书（PEM 格式）
+   * 返回 null 表示证书未配置或读取失败（调用方应拒绝通知）
+   */
+  public getWechatPlatformCert(): string | null {
+    const config = this.getWechatConfig();
+    const certPath = config.certPath;
+
+    if (!certPath) {
+      return null;
+    }
+
+    try {
+      const absolutePath = path.isAbsolute(certPath)
+        ? certPath
+        : path.resolve(process.cwd(), certPath);
+
+      const certContent = fs.readFileSync(absolutePath, 'utf-8');
+
+      if (
+        !certContent.includes('-----BEGIN CERTIFICATE-----') &&
+        !certContent.includes('-----BEGIN PUBLIC KEY-----')
+      ) {
+        logger.error('[PaymentConfig] 微信平台证书格式不正确:', certPath);
+        return null;
+      }
+
+      return certContent;
+    } catch (error) {
+      logger.error('[PaymentConfig] 读取微信平台证书失败:', {
+        certPath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
+
+  /**
    * 获取支付宝私钥
    */
   public getAlipayPrivateKey(): string {

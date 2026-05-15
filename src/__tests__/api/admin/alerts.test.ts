@@ -43,9 +43,16 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { prisma } from '@/lib/db/prisma';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 测试数据
@@ -301,7 +308,6 @@ describe('告警API', () => {
     });
 
     test('应记录错误日志', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       setupMocks();
       (prisma.alert.findMany as jest.Mock).mockRejectedValue(
         new Error('Database error')
@@ -310,10 +316,10 @@ describe('告警API', () => {
       const request = createAlertRequest('/api/admin/alerts');
       await GET(request);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('获取告警列表失败:')
+      expect(logger.error).toHaveBeenCalledWith(
+        '获取告警列表失败:',
+        expect.any(Error)
       );
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -467,7 +473,6 @@ describe('告警API', () => {
     });
 
     test('应记录错误日志', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       setupMocks({ alert: mockAlerts[0] });
       (prisma.alert.update as jest.Mock).mockRejectedValue(
         new Error('Database error')
@@ -480,10 +485,10 @@ describe('告警API', () => {
         params: Promise.resolve({ id: 'alert-1' }),
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('确认告警失败:')
+      expect(logger.error).toHaveBeenCalledWith(
+        '确认告警失败:',
+        expect.any(Error)
       );
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -589,7 +594,6 @@ describe('告警API', () => {
     });
 
     test('应记录错误日志', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       setupMocks({ alert: mockAlerts[0] });
       (prisma.alert.update as jest.Mock).mockRejectedValue(
         new Error('Database error')
@@ -600,10 +604,10 @@ describe('告警API', () => {
         params: Promise.resolve({ id: 'alert-1' }),
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('处理告警失败:')
+      expect(logger.error).toHaveBeenCalledWith(
+        '处理告警失败:',
+        expect.any(Error)
       );
-      consoleErrorSpy.mockRestore();
     });
 
     test('应接受处理备注', async () => {

@@ -1,26 +1,27 @@
 import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
+import { Noto_Serif_SC, Noto_Sans_SC } from 'next/font/google';
 import { AuthProvider } from './providers/AuthProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
 import { UserModeProvider } from '@/contexts/UserModeContext';
 import './globals.css';
 
-// 注意：由于网络问题，暂时移除 Google Fonts
-// 使用系统字体作为后备方案
-// 如果需要 Google Fonts，请确保网络连接正常后取消注释以下代码：
-// import { Geist, Geist_Mono } from 'next/font/google';
-// const geistSans = Geist({
-//   variable: '--font-geist-sans',
-//   subsets: ['latin'],
-//   display: 'swap',
-//   preload: true,
-// });
-// const geistMono = Geist_Mono({
-//   variable: '--font-geist-mono',
-//   subsets: ['latin'],
-//   display: 'swap',
-//   preload: false,
-// });
+// next/font/google 在构建时下载字体并自托管，运行时无需访问 Google
+const notoSerifSC = Noto_Serif_SC({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-noto-serif-sc',
+  preload: false,
+});
+
+const notoSansSC = Noto_Sans_SC({
+  weight: ['300', '400', '500', '600'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-noto-sans-sc',
+  preload: false,
+});
 
 // 配置元数据优化
 export const metadata: Metadata = {
@@ -91,8 +92,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='zh-CN'>
-      <body className='antialiased flex flex-col min-h-screen'>
+    <html
+      lang='zh-CN'
+      className={`${notoSerifSC.variable} ${notoSansSC.variable}`}
+    >
+      <body className='font-sans antialiased flex flex-col min-h-screen'>
         <AuthProvider>
           <UserModeProvider>
             <ToastProvider />

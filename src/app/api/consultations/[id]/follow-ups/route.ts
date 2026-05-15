@@ -47,11 +47,12 @@ export async function GET(
       );
     }
 
-    // 检查咨询记录是否存在
+    // 检查咨询记录是否存在且属于当前用户（防止 IDOR）
     const consultation = await prisma.consultation.findFirst({
       where: {
         id,
         deletedAt: null,
+        userId: authUser.userId,
       },
     });
 
@@ -144,11 +145,12 @@ export async function POST(
       );
     }
 
-    // 检查咨询记录是否存在
+    // 检查咨询记录是否存在且属于当前用户（防止 IDOR）
     const consultation = await prisma.consultation.findFirst({
       where: {
         id,
         deletedAt: null,
+        userId: authUser.userId,
       },
     });
 

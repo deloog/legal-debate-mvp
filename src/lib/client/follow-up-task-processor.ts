@@ -94,7 +94,7 @@ export class FollowUpTaskProcessor {
         Array<{
           id: string;
           clientId: string;
-          communicationId: string;
+          communicationId: string | null;
           userId: string;
           type: string;
           summary: string;
@@ -141,7 +141,7 @@ export class FollowUpTaskProcessor {
       logger.info(`获取跟进任务列表: ${tasks.length} 条记录，共 ${total} 条`);
 
       return {
-        tasks: tasks.map(this.transformTask),
+        tasks: tasks.map(this.toFollowUpTask),
         total,
         page,
         limit,
@@ -173,7 +173,7 @@ export class FollowUpTaskProcessor {
         Array<{
           id: string;
           clientId: string;
-          communicationId: string;
+          communicationId: string | null;
           userId: string;
           type: string;
           summary: string;
@@ -218,7 +218,7 @@ export class FollowUpTaskProcessor {
         return null;
       }
 
-      return this.transformTask(result[0]);
+      return this.toFollowUpTask(result[0]);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -304,11 +304,27 @@ export class FollowUpTaskProcessor {
       const setClauses: Prisma.Sql[] = [];
 
       if (input.status) {
-        setClauses.push(Prisma.sql`status = ${input.status}`);
+        setClauses.push(
+          Prisma.sql`status = ${input.status}::"FollowUpTaskStatus"`
+        );
+      }
+
+      if (input.type) {
+        setClauses.push(Prisma.sql`type = ${input.type}::"CommunicationType"`);
+      }
+
+      if (input.summary !== undefined) {
+        setClauses.push(Prisma.sql`summary = ${input.summary}`);
       }
 
       if (input.priority) {
-        setClauses.push(Prisma.sql`priority = ${input.priority}`);
+        setClauses.push(
+          Prisma.sql`priority = ${input.priority}::"FollowUpTaskPriority"`
+        );
+      }
+
+      if (input.dueDate) {
+        setClauses.push(Prisma.sql`"dueDate" = ${input.dueDate}`);
       }
 
       if (input.notes !== undefined) {
@@ -362,7 +378,7 @@ export class FollowUpTaskProcessor {
       const task = await prisma.followUpTask.create({
         data: {
           clientId: input.clientId,
-          communicationId: input.communicationId || '',
+          communicationId: input.communicationId ?? null,
           userId: input.userId,
           type: input.type,
           summary: input.summary,
@@ -478,7 +494,7 @@ export class FollowUpTaskProcessor {
         Array<{
           id: string;
           clientId: string;
-          communicationId: string;
+          communicationId: string | null;
           userId: string;
           type: string;
           summary: string;
@@ -522,7 +538,7 @@ export class FollowUpTaskProcessor {
       `;
 
       logger.info(`获取即将到期的任务: ${result.length} 条`);
-      return result.map(this.transformTask);
+      return result.map(this.toFollowUpTask);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -539,10 +555,10 @@ export class FollowUpTaskProcessor {
    * @param task 原始任务数据
    * @returns 标准化任务对象
    */
-  private static transformTask(task: {
+  public static toFollowUpTask(task: {
     id: string;
     clientId: string;
-    communicationId: string;
+    communicationId: string | null;
     userId: string;
     type: string;
     summary: string;

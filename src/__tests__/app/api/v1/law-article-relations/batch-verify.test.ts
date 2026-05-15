@@ -6,6 +6,7 @@
 
 import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/v1/law-article-relations/batch-verify/route';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Override global prisma mock with specific implementations needed by the route
 jest.mock('@/lib/db/prisma', () => {
@@ -37,6 +38,28 @@ jest.mock('@/lib/db/prisma', () => {
   return { default: mock, prisma: mock };
 });
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/knowledge-graph/expert/expert-service', () => ({
+  ExpertService: jest.fn().mockImplementation(() => ({
+    getOrCreateExpertProfile: jest.fn().mockResolvedValue({
+      id: 'expert-admin-id-001',
+      userId: 'admin-user-id-001',
+      userName: 'Admin',
+      userEmail: 'admin@example.com',
+      expertiseAreas: [],
+      expertLevel: 'JUNIOR',
+      certifiedBy: null,
+      certifiedAt: null,
+      notes: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+  })),
+}));
+
 // Mock permission middleware
 jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   checkKnowledgeGraphPermission: jest.fn(() =>
@@ -63,10 +86,19 @@ const getPermissionMock = () => {
 // Pre-defined IDs used as admin/normal user IDs in tests
 const ADMIN_USER_ID = 'admin-user-id-001';
 const NORMAL_USER_ID = 'normal-user-id-001';
+const ADMIN_EXPERT_ID = 'expert-admin-id-001';
+
+const mockGetAuthUser = getAuthUser as jest.MockedFunction<typeof getAuthUser>;
 
 describe('批量审核API测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockGetAuthUser.mockResolvedValue({
+      userId: ADMIN_USER_ID,
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    });
 
     // Default: permission granted
     (
@@ -91,7 +123,7 @@ describe('批量审核API测试', () => {
     (getPrisma().lawArticleRelation.update as jest.Mock).mockResolvedValue({
       id: 'relation-1',
       verificationStatus: 'VERIFIED',
-      verifiedBy: ADMIN_USER_ID,
+      verifiedBy: ADMIN_EXPERT_ID,
       verifiedAt: new Date(),
     });
   });
@@ -114,7 +146,7 @@ describe('批量审核API测试', () => {
           Promise.resolve({
             id: args.where.id,
             verificationStatus: 'VERIFIED',
-            verifiedBy: ADMIN_USER_ID,
+            verifiedBy: args.data.verifiedBy,
             verifiedAt: new Date(),
           })
       );
@@ -122,7 +154,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds,
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
         note: '批量审核通过',
       };
 
@@ -161,7 +192,7 @@ describe('批量审核API测试', () => {
           Promise.resolve({
             id: args.where.id,
             verificationStatus: 'REJECTED',
-            verifiedBy: ADMIN_USER_ID,
+            verifiedBy: args.data.verifiedBy,
             verifiedAt: new Date(),
           })
       );
@@ -169,7 +200,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds,
         approved: false,
-        verifiedBy: ADMIN_USER_ID,
         note: '关系不准确，批量拒绝',
       };
 
@@ -194,6 +224,12 @@ describe('批量审核API测试', () => {
 
   describe('权限检查', () => {
     it('应该拒绝普通用户批量审核', async () => {
+      mockGetAuthUser.mockResolvedValue({
+        userId: NORMAL_USER_ID,
+        email: 'user@example.com',
+        role: 'USER',
+      });
+
       (
         getPermissionMock().checkKnowledgeGraphPermission as jest.Mock
       ).mockResolvedValue({
@@ -204,7 +240,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds: ['test-id-1', 'test-id-2'],
         approved: true,
-        verifiedBy: NORMAL_USER_ID,
       };
 
       const request = new NextRequest(
@@ -230,7 +265,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds: [], // 空数组
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(
@@ -256,7 +290,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds: tooManyIds,
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(
@@ -279,7 +312,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds: ['test-id'],
         approved: 'true', // 错误的类型
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(
@@ -320,7 +352,7 @@ describe('批量审核API测试', () => {
       (getPrisma().lawArticleRelation.update as jest.Mock).mockResolvedValue({
         id: validRelationId,
         verificationStatus: 'VERIFIED',
-        verifiedBy: ADMIN_USER_ID,
+        verifiedBy: ADMIN_EXPERT_ID,
         verifiedAt: new Date(),
       });
 
@@ -331,7 +363,6 @@ describe('批量审核API测试', () => {
           'non-existent-id-2',
         ],
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(
@@ -364,7 +395,7 @@ describe('批量审核API测试', () => {
           return Promise.resolve({
             id: verifiedId,
             verificationStatus: 'VERIFIED',
-            verifiedBy: ADMIN_USER_ID,
+            verifiedBy: ADMIN_EXPERT_ID,
             verifiedAt: new Date(),
           });
         }
@@ -377,7 +408,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds: [verifiedId, pendingId],
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(
@@ -415,7 +445,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds,
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
         note: '批量审核测试',
       };
 
@@ -455,11 +484,11 @@ describe('批量审核API测试', () => {
         Promise.resolve({ id: args.where.id, verificationStatus: 'PENDING' })
       );
       (getPrisma().lawArticleRelation.update as jest.Mock).mockImplementation(
-        (args: { where: { id: string } }) =>
+        (args: { where: { id: string }; data: Record<string, unknown> }) =>
           Promise.resolve({
             id: args.where.id,
             verificationStatus: 'VERIFIED',
-            verifiedBy: ADMIN_USER_ID,
+            verifiedBy: args.data.verifiedBy,
             verifiedAt: new Date(),
           })
       );
@@ -467,7 +496,6 @@ describe('批量审核API测试', () => {
       const requestBody = {
         relationIds,
         approved: true,
-        verifiedBy: ADMIN_USER_ID,
       };
 
       const request = new NextRequest(

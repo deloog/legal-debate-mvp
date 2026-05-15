@@ -323,6 +323,7 @@ describe('POST /api/admin/configs', () => {
         type: 'STRING',
         category: 'general',
         description: '新配置',
+        changeReason: '初始化配置',
       })
     );
 
@@ -337,6 +338,7 @@ describe('POST /api/admin/configs', () => {
     const response = await POST(
       mockRequest('/api/admin/configs', 'POST', {
         key: 'test',
+        changeReason: '测试缺少字段',
       })
     );
 
@@ -353,6 +355,7 @@ describe('POST /api/admin/configs', () => {
         value: 'value',
         type: 'INVALID',
         category: 'general',
+        changeReason: '测试非法类型',
       })
     );
 
@@ -369,6 +372,7 @@ describe('POST /api/admin/configs', () => {
         value: 'value',
         type: 'STRING',
         category: 'INVALID',
+        changeReason: '测试非法分类',
       })
     );
 
@@ -385,6 +389,7 @@ describe('POST /api/admin/configs', () => {
         value: 'not-a-number',
         type: 'NUMBER',
         category: 'general',
+        changeReason: '测试类型不匹配',
       })
     );
 
@@ -406,6 +411,7 @@ describe('POST /api/admin/configs', () => {
         value: 'value',
         type: 'STRING',
         category: 'general',
+        changeReason: '测试重复键',
       })
     );
 
@@ -450,6 +456,7 @@ describe('PUT /api/admin/configs (批量更新)', () => {
           { key: 'test.config1', value: 'new value1' },
           { key: 'test.config2', value: 'new value2' },
         ],
+        changeReason: '批量更新测试',
       })
     );
 
@@ -492,6 +499,7 @@ describe('PUT /api/admin/configs (批量更新)', () => {
           { key: 'test.config1', value: 'new value' },
           { key: 'test.config2', value: 'new value2' }, // 不存在
         ],
+        changeReason: '部分失败测试',
       })
     );
 
@@ -605,6 +613,7 @@ describe('PUT /api/admin/configs/[key]', () => {
       mockRequest('/api/admin/configs/test.config1', 'PUT', {
         value: 'new value',
         description: '更新后的描述',
+        changeReason: '单项更新测试',
       }),
       { params: Promise.resolve({ key: 'test.config1' }) }
     );
@@ -622,6 +631,7 @@ describe('PUT /api/admin/configs/[key]', () => {
     const response = await PUT(
       mockRequest('/api/admin/configs/nonexistent', 'PUT', {
         value: 'new value',
+        changeReason: '不存在配置测试',
       }),
       { params: Promise.resolve({ key: 'nonexistent' }) }
     );
@@ -647,6 +657,7 @@ describe('PUT /api/admin/configs/[key]', () => {
     const response = await PUT(
       mockRequest('/api/admin/configs/test.config1', 'PUT', {
         value: 'not-a-number',
+        changeReason: '类型不匹配测试',
       }),
       { params: Promise.resolve({ key: 'test.config1' }) }
     );
@@ -685,7 +696,10 @@ describe('DELETE /api/admin/configs/[key]', () => {
     (prisma.systemConfig.delete as jest.Mock).mockResolvedValue(config);
 
     const response = await DELETE(
-      mockRequest('/api/admin/configs/test.config1', 'DELETE'),
+      mockRequest(
+        '/api/admin/configs/test.config1?changeReason=%E5%88%A0%E9%99%A4%E6%B5%8B%E8%AF%95',
+        'DELETE'
+      ),
       { params: Promise.resolve({ key: 'test.config1' }) }
     );
 
@@ -702,7 +716,10 @@ describe('DELETE /api/admin/configs/[key]', () => {
     (prisma.systemConfig.findUnique as jest.Mock).mockResolvedValue(null);
 
     const response = await DELETE(
-      mockRequest('/api/admin/configs/nonexistent', 'DELETE'),
+      mockRequest(
+        '/api/admin/configs/nonexistent?changeReason=%E4%B8%8D%E5%AD%98%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%B5%8B%E8%AF%95',
+        'DELETE'
+      ),
       { params: Promise.resolve({ key: 'nonexistent' }) }
     );
 
@@ -723,7 +740,10 @@ describe('DELETE /api/admin/configs/[key]', () => {
     (prisma.systemConfig.findUnique as jest.Mock).mockResolvedValue(config);
 
     const response = await DELETE(
-      mockRequest('/api/admin/configs/test.config1', 'DELETE'),
+      mockRequest(
+        '/api/admin/configs/test.config1?changeReason=%E5%BF%85%E5%A1%AB%E9%85%8D%E7%BD%AE%E5%88%A0%E9%99%A4%E6%B5%8B%E8%AF%95',
+        'DELETE'
+      ),
       { params: Promise.resolve({ key: 'test.config1' }) }
     );
 

@@ -87,6 +87,37 @@ export async function GET(
   }
 
   try {
+    const enterpriseAccount = await prisma.enterpriseAccount.findUnique({
+      where: { userId: authUser.userId },
+      select: { status: true },
+    });
+
+    if (!enterpriseAccount) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'ENTERPRISE_ACCOUNT_NOT_FOUND',
+            message: '未找到企业账号',
+          },
+        } as EnterpriseDashboardResponse,
+        { status: 404 }
+      );
+    }
+
+    if (enterpriseAccount.status !== 'APPROVED') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'ENTERPRISE_NOT_APPROVED',
+            message: '企业认证尚未通过，暂不可访问企业工作台',
+          },
+        } as EnterpriseDashboardResponse,
+        { status: 403 }
+      );
+    }
+
     // 1. 获取统计数据（仅限当前用户关联的数据）
     const [
       pendingReviewContracts,
@@ -96,12 +127,15 @@ export async function GET(
     ] = await Promise.all([
       // 待审查合同数（状态为PENDING，仅当前用户关联的案件）
       prisma.contract.count({
-        where: { status: 'PENDING', case: { userId: authUser.userId } },
+        where: {
+          status: 'PENDING',
+          case: { is: { userId: authUser.userId, deletedAt: null } },
+        },
       }),
       // 高风险合同数：含有 HIGH 或 CRITICAL 级别条款风险的合同
       prisma.contract.count({
         where: {
-          case: { userId: authUser.userId },
+          case: { is: { userId: authUser.userId, deletedAt: null } },
           clauseRisks: {
             some: { riskLevel: { in: ['HIGH', 'CRITICAL'] } },
           },
@@ -115,7 +149,11 @@ export async function GET(
         },
       }),
       // 总合同数（仅当前用户关联的案件）
-      prisma.contract.count({ where: { case: { userId: authUser.userId } } }),
+      prisma.contract.count({
+        where: {
+          case: { is: { userId: authUser.userId, deletedAt: null } },
+        },
+      }),
     ]);
 
     // 计算合规评分
@@ -140,7 +178,7 @@ export async function GET(
     // 3. 获取最近审查的合同（最多5条，仅当前用户关联案件）
     const recentContractsData = await prisma.contract.findMany({
       where: {
-        case: { userId: authUser.userId },
+        case: { is: { userId: authUser.userId, deletedAt: null } },
         status: {
           in: ['SIGNED', 'EXECUTING', 'COMPLETED'],
         },

@@ -32,6 +32,14 @@ function isContractSnapshot(value: unknown): value is ContractSnapshot {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function toNullableJsonInput(
+  value: unknown
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.JsonNull;
+  return value as Prisma.InputJsonValue;
+}
+
 /**
  * 合同版本服务类
  */
@@ -72,8 +80,20 @@ export class ContractVersionService {
       const newVersion = (lastVersion?.version || 0) + 1;
 
       // 创建快照
+      const totalFee =
+        contract.totalFee && typeof contract.totalFee.toString === 'function'
+          ? contract.totalFee.toString()
+          : String(contract.totalFee ?? '0');
+      const paidAmount =
+        contract.paidAmount &&
+        typeof contract.paidAmount.toString === 'function'
+          ? contract.paidAmount.toString()
+          : String(contract.paidAmount ?? '0');
+
       const snapshot = {
         contractNumber: contract.contractNumber,
+        caseId: contract.caseId,
+        consultationId: contract.consultationId,
         clientType: contract.clientType,
         clientName: contract.clientName,
         clientIdNumber: contract.clientIdNumber,
@@ -86,8 +106,8 @@ export class ContractVersionService {
         caseSummary: contract.caseSummary,
         scope: contract.scope,
         feeType: contract.feeType,
-        totalFee: contract.totalFee.toString(),
-        paidAmount: contract.paidAmount.toString(),
+        totalFee,
+        paidAmount,
         feeDetails: contract.feeDetails,
         terms: contract.terms,
         specialTerms: contract.specialTerms,
@@ -98,10 +118,13 @@ export class ContractVersionService {
         clientSignedAt: contract.clientSignedAt,
         lawyerSignature: contract.lawyerSignature,
         lawyerSignedAt: contract.lawyerSignedAt,
-        payments: contract.payments.map(p => ({
+        payments: (contract.payments ?? []).map(p => ({
           id: p.id,
           paymentNumber: p.paymentNumber,
-          amount: p.amount.toString(),
+          amount:
+            p.amount && typeof p.amount.toString === 'function'
+              ? p.amount.toString()
+              : String(p.amount ?? '0'),
           paymentType: p.paymentType,
           paymentMethod: p.paymentMethod,
           status: p.status,
@@ -247,6 +270,9 @@ export class ContractVersionService {
         clientIdNumber: snapshot.clientIdNumber as string | undefined,
         clientAddress: snapshot.clientAddress as string | undefined,
         clientContact: snapshot.clientContact as string | undefined,
+        caseId: (snapshot.caseId as string | null | undefined) ?? null,
+        consultationId:
+          (snapshot.consultationId as string | null | undefined) ?? null,
         lawFirmName: snapshot.lawFirmName as string | undefined,
         lawyerName: snapshot.lawyerName as string | undefined,
         lawyerId: snapshot.lawyerId as string | undefined,
@@ -255,10 +281,27 @@ export class ContractVersionService {
         scope: snapshot.scope as string | undefined,
         feeType: snapshot.feeType as FeeType | undefined,
         totalFee: snapshot.totalFee as number | string | undefined,
-        feeDetails: snapshot.feeDetails as Prisma.InputJsonValue,
-        terms: snapshot.terms as Prisma.InputJsonValue,
+        feeDetails: toNullableJsonInput(snapshot.feeDetails),
+        terms: toNullableJsonInput(snapshot.terms),
         specialTerms: snapshot.specialTerms as string | undefined,
         status: snapshot.status as ContractStatus | undefined,
+        signedAt:
+          (snapshot.signedAt as Date | string | null | undefined) ?? null,
+        signatureData: toNullableJsonInput(snapshot.signatureData),
+        clientSignature:
+          (snapshot.clientSignature as string | null | undefined) ?? null,
+        clientSignedAt:
+          (snapshot.clientSignedAt as Date | string | null | undefined) ?? null,
+        clientSignedIp:
+          (snapshot.clientSignedIp as string | null | undefined) ?? null,
+        lawyerSignature:
+          (snapshot.lawyerSignature as string | null | undefined) ?? null,
+        lawyerSignedAt:
+          (snapshot.lawyerSignedAt as Date | string | null | undefined) ?? null,
+        lawyerSignedIp:
+          (snapshot.lawyerSignedIp as string | null | undefined) ?? null,
+        signatureDevice:
+          (snapshot.signatureDevice as string | null | undefined) ?? null,
       },
     });
 

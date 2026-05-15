@@ -238,7 +238,7 @@ export function DebateArena({
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isCurrentRoundInProgress]);
+  }, [isCurrentRoundInProgress, isSSEManuallyEnabled]);
 
   // SSE 连接条件：
   //   - 用户手动点击"开始辩论"（isSSEManuallyEnabled）→ SSE 激活 PENDING/IN_PROGRESS 轮次

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * 从请求中解析 JWT，返回 userId 或 null
@@ -35,4 +36,58 @@ export function forbiddenResponse(message = '无权操作此合同'): NextRespon
     { success: false, error: { code: 'FORBIDDEN', message } },
     { status: 403 }
   );
+}
+
+export interface ContractAccessResult {
+  exists: boolean;
+  isAdmin: boolean;
+  isLawyer: boolean;
+  isClient: boolean;
+  canRead: boolean;
+  canManage: boolean;
+}
+
+/**
+ * 校验当前用户对合同的访问级别。
+ * - `canRead`: 管理员 / 合同归属律师 / 关联案件委托方
+ * - `canManage`: 管理员 / 合同归属律师
+ */
+export async function getContractAccess(
+  contractId: string,
+  userId: string
+): Promise<ContractAccessResult> {
+  const [contract, user] = await Promise.all([
+    prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { lawyerId: true, case: { select: { userId: true } } },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    }),
+  ]);
+
+  if (!contract) {
+    return {
+      exists: false,
+      isAdmin: false,
+      isLawyer: false,
+      isClient: false,
+      canRead: false,
+      canManage: false,
+    };
+  }
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isLawyer = contract.lawyerId === userId;
+  const isClient = contract.case?.userId === userId;
+
+  return {
+    exists: true,
+    isAdmin,
+    isLawyer,
+    isClient,
+    canRead: isAdmin || isLawyer || isClient,
+    canManage: isAdmin || isLawyer,
+  };
 }

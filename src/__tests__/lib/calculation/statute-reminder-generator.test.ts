@@ -30,6 +30,15 @@ jest.mock('@/lib/db/prisma', () => ({
   },
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 describe('StatuteReminderGenerator', () => {
   let generator: StatuteReminderGenerator;
 

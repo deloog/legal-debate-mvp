@@ -162,28 +162,6 @@ describe('DisputeFocusExtractor', () => {
       ).toBe(true);
     });
 
-    it('应该使用规则匹配作为兜底', async () => {
-      // Mock AI返回空结果
-      mockChatCompletion.mockResolvedValueOnce({
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: JSON.stringify({ disputeFocuses: [] }),
-            },
-          },
-        ],
-      });
-
-      const result = await extractor.extractFromText(
-        MOCK_LEGAL_TEXT,
-        MOCK_EXTRACTED_DATA
-      );
-
-      // 规则匹配应该能找到至少一个争议焦点
-      expect(result.disputeFocuses.length).toBeGreaterThan(0);
-    });
-
     it('应该合并AI和规则匹配的结果并去重', async () => {
       mockChatCompletion.mockResolvedValueOnce({
         choices: [

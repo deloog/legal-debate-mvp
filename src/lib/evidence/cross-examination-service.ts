@@ -2,7 +2,7 @@
  * 质证预判服务
  *
  * 功能：
- * - AI预判对方可能的质证意见
+ * - AI 预判对方可能的质证意见
  * - 分类质证类型（真实性/合法性/关联性）
  * - 评估每种意见的可能性
  * - 生成应对建议
@@ -11,49 +11,41 @@
  */
 
 import type { Evidence } from '@prisma/client';
-import { AIService } from '@/lib/ai/clients';
+import { AIServiceFactory } from '@/lib/ai/service-refactored';
+import { getDefaultModel } from '@/lib/ai/config';
 import { logger } from '@/lib/logger';
+
+const CROSS_EXAM_MODEL =
+  process.env.CASE_CROSS_EXAM_MODEL ?? getDefaultModel('deepseek', 'chat');
 
 /**
  * 质证预判输入
  */
 export interface CrossExaminationInput {
   evidence: Evidence;
-  ourPosition: 'plaintiff' | 'defendant'; // 我方立场
-  caseType?: string; // 案件类型
+  ourPosition: 'plaintiff' | 'defendant';
+  caseType?: string;
 }
 
-/**
- * 质证意见
- */
 export interface CrossExaminationChallenge {
-  type: 'authenticity' | 'legality' | 'relevance'; // 质证类型
-  content: string; // 质证内容
-  likelihood: number; // 可能性 0-100
+  type: 'authenticity' | 'legality' | 'relevance';
+  content: string;
+  likelihood: number;
 }
 
-/**
- * 应对建议
- */
 export interface CrossExaminationResponse {
-  challenge: string; // 针对的质证意见
-  response: string; // 应对方案
-  supportingEvidence?: string; // 补充证据建议
+  challenge: string;
+  response: string;
+  supportingEvidence?: string;
 }
 
-/**
- * 质证预判结果
- */
 export interface CrossExaminationResult {
-  possibleChallenges: CrossExaminationChallenge[]; // 可能的质证意见
-  responses: CrossExaminationResponse[]; // 应对建议
-  overallRisk: 'low' | 'medium' | 'high'; // 总体风险等级
-  riskNote: string; // 风险说明
+  possibleChallenges: CrossExaminationChallenge[];
+  responses: CrossExaminationResponse[];
+  overallRisk: 'low' | 'medium' | 'high';
+  riskNote: string;
 }
 
-/**
- * AI响应结构
- */
 interface AIPreAssessmentResponse {
   possibleChallenges: CrossExaminationChallenge[];
   responses: CrossExaminationResponse[];
@@ -61,37 +53,37 @@ interface AIPreAssessmentResponse {
   riskNote: string;
 }
 
-/**
- * 质证预判服务类
- */
 export class CrossExaminationService {
-  constructor() {
-    // AIService是静态类，不需要实例化
-  }
-
   /**
    * 预判质证意见
    */
   async preAssess(
     input: CrossExaminationInput
   ): Promise<CrossExaminationResult> {
-    // 验证输入
     this.validateInput(input);
-
-    // 生成AI提示词
     const prompt = this.buildPreAssessmentPrompt(input);
 
     try {
-      // 调用AI服务
-      const aiResponse = await AIService.analyzeDocument(
-        prompt,
-        'cross-examination'
-      );
+      const aiService = await AIServiceFactory.getInstance();
+      const response = await aiService.chatCompletion({
+        model: CROSS_EXAM_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是一位经验丰富的中国诉讼律师，擅长从真实性、合法性、关联性三方面预判对方质证意见，并输出严格 JSON。',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.2,
+        maxTokens: 1400,
+      });
 
-      // 解析AI响应
-      const result = this.parseAIResponse(aiResponse.content);
-
-      return result;
+      const rawText = response.choices[0]?.message?.content ?? '';
+      return this.parseAIResponse(rawText);
     } catch (error) {
       logger.error('质证预判失败:', error);
       throw new Error(
@@ -100,9 +92,6 @@ export class CrossExaminationService {
     }
   }
 
-  /**
-   * 验证输入参数
-   */
   private validateInput(input: CrossExaminationInput): void {
     if (!input.evidence) {
       throw new Error('证据不能为空');
@@ -121,9 +110,6 @@ export class CrossExaminationService {
     }
   }
 
-  /**
-   * 构建AI预判提示词
-   */
   private buildPreAssessmentPrompt(input: CrossExaminationInput): string {
     const { evidence, ourPosition, caseType } = input;
 
@@ -142,25 +128,14 @@ export class CrossExaminationService {
 - 证据类型: ${this.getEvidenceTypeLabel(evidence.type)}
 - 证据描述: ${evidence.description || '无'}
 - 证据状态: ${this.getEvidenceStatusLabel(evidence.status)}
-- 相关性评分: ${evidence.relevanceScore || '未评分'}
+- 相关性评分: ${evidence.relevanceScore ?? '未评分'}
 
 ## 分析要求
 请从以下三个方面预判对方可能的质证意见：
 
-1. **真实性质证** (authenticity)
-   - 证据是否真实
-   - 是否存在伪造、变造的可能
-   - 原件与复印件问题
-
-2. **合法性质证** (legality)
-   - 证据来源是否合法
-   - 取证程序是否合法
-   - 是否侵犯他人合法权益
-
-3. **关联性质证** (relevance)
-   - 证据与待证事实的关联性
-   - 证明力强弱
-   - 是否具有证明价值
+1. 真实性质证 (authenticity)
+2. 合法性质证 (legality)
+3. 关联性质证 (relevance)
 
 对于每种可能的质证意见：
 - 评估其可能性（0-100）
@@ -170,8 +145,7 @@ export class CrossExaminationService {
 最后，评估该证据的总体质证风险等级（low/medium/high）。
 
 ## 输出格式
-请严格按照以下JSON格式输出（不要包含任何其他文字）：
-
+请严格按照以下 JSON 输出，不要包含任何其他文字：
 \`\`\`json
 {
   "possibleChallenges": [
@@ -191,80 +165,71 @@ export class CrossExaminationService {
   "overallRisk": "low|medium|high",
   "riskNote": "风险说明"
 }
-\`\`\`
-
-注意：
-- possibleChallenges数组应包含所有可能的质证意见
-- likelihood是0-100的整数
-- responses数组应为每个主要质证意见提供应对建议
-- overallRisk必须是low、medium或high之一
-- 必须返回有效的JSON格式`;
+\`\`\``;
   }
 
-  /**
-   * 解析AI响应
-   */
   private parseAIResponse(response: string): CrossExaminationResult {
     try {
-      // 提取JSON内容（处理可能的markdown代码块）
       let jsonStr = response.trim();
 
-      // 移除markdown代码块标记
       if (jsonStr.startsWith('```json')) {
         jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/\s*```$/, '');
       } else if (jsonStr.startsWith('```')) {
         jsonStr = jsonStr.replace(/^```\s*/, '').replace(/\s*```$/, '');
       }
 
-      // 解析JSON
-      const parsed: AIPreAssessmentResponse = JSON.parse(jsonStr);
+      const start = jsonStr.indexOf('{');
+      const end = jsonStr.lastIndexOf('}');
+      if (start === -1 || end <= start) {
+        throw new Error('AI 未返回有效 JSON');
+      }
 
-      // 验证响应结构
+      const parsed: AIPreAssessmentResponse = JSON.parse(
+        jsonStr.slice(start, end + 1)
+      );
+
       if (
         !parsed.possibleChallenges ||
         !Array.isArray(parsed.possibleChallenges)
       ) {
         throw new Error('AI响应缺少possibleChallenges字段');
       }
-
       if (!parsed.responses || !Array.isArray(parsed.responses)) {
         throw new Error('AI响应缺少responses字段');
       }
-
       if (!parsed.overallRisk) {
         throw new Error('AI响应缺少overallRisk字段');
       }
-
       if (!['low', 'medium', 'high'].includes(parsed.overallRisk)) {
         throw new Error('AI响应的overallRisk值无效');
       }
-
       if (!parsed.riskNote) {
         throw new Error('AI响应缺少riskNote字段');
       }
 
-      // 验证并规范化质证意见
       const validatedChallenges = parsed.possibleChallenges.map(challenge => {
-        // 验证type
         if (
           !['authenticity', 'legality', 'relevance'].includes(challenge.type)
         ) {
           throw new Error(`无效的质证类型: ${challenge.type}`);
         }
 
-        // 确保likelihood在0-100范围内
-        const likelihood = Math.max(0, Math.min(100, challenge.likelihood));
-
         return {
           type: challenge.type,
-          content: challenge.content,
-          likelihood,
-        };
+          content: String(challenge.content || ''),
+          likelihood: Math.max(0, Math.min(100, challenge.likelihood)),
+        } as CrossExaminationChallenge;
       });
 
       return {
         possibleChallenges: validatedChallenges,
-        responses: parsed.responses,
+        responses: parsed.responses.map(item => ({
+          challenge: String(item.challenge || ''),
+          response: String(item.response || ''),
+          ...(item.supportingEvidence
+            ? { supportingEvidence: String(item.supportingEvidence) }
+            : {}),
+        })),
         overallRisk: parsed.overallRisk,
         riskNote: parsed.riskNote,
       };
@@ -277,40 +242,30 @@ export class CrossExaminationService {
     }
   }
 
-  /**
-   * 获取证据类型标签
-   */
   private getEvidenceTypeLabel(type: string): string {
     const typeMap: Record<string, string> = {
       DOCUMENT: '书证',
       PHYSICAL: '物证',
       WITNESS: '证人证言',
-      AUDIO: '视听资料',
-      ELECTRONIC: '电子数据',
-      APPRAISAL: '鉴定意见',
-      INSPECTION: '勘验笔录',
+      EXPERT_OPINION: '鉴定意见',
+      AUDIO_VIDEO: '视听资料/电子数据',
+      OTHER: '其他',
     };
 
     return typeMap[type] || type;
   }
 
-  /**
-   * 获取证据状态标签
-   */
   private getEvidenceStatusLabel(status: string): string {
     const statusMap: Record<string, string> = {
       PENDING: '待审核',
-      APPROVED: '已采纳',
+      ACCEPTED: '已采纳',
       REJECTED: '已驳回',
-      CHALLENGED: '被质疑',
+      QUESTIONED: '被质疑',
     };
 
     return statusMap[status] || status;
   }
 
-  /**
-   * 获取服务实例（单例模式）
-   */
   private static instance: CrossExaminationService | null = null;
 
   static getInstance(): CrossExaminationService {

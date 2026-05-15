@@ -77,7 +77,7 @@ export class EnterpriseRiskProfileService {
       // 获取企业的所有合同
       const contracts = await this.prisma.contract.findMany({
         where: {
-          clientName: enterprise.enterpriseName,
+          case: { is: { userId: enterprise.userId, deletedAt: null } },
           status: { notIn: ['DRAFT', 'TERMINATED'] as ContractStatus[] },
         },
       });
@@ -423,9 +423,9 @@ export class EnterpriseRiskProfileService {
     riskDescription: string;
   }> {
     const highRiskContracts = contractRisks
-      .filter(r => ['high', 'critical'].includes(r.riskLevel))
+      .filter(r => ['HIGH', 'CRITICAL'].includes(r.riskLevel))
       .sort((a, b) => {
-        const levelOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        const levelOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
         return (
           levelOrder[b.riskLevel as keyof typeof levelOrder] -
           levelOrder[a.riskLevel as keyof typeof levelOrder]

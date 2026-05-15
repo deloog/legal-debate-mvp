@@ -4,13 +4,11 @@ import { uuidSchema } from '@/app/api/lib/validation/schemas';
 import { validatePathParam } from '@/app/api/lib/validation/validator';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import {
-  checkResourceOwnership,
-  createPermissionErrorResponse,
-  ResourceType,
-} from '@/lib/middleware/resource-permission';
+import { createPermissionErrorResponse } from '@/lib/middleware/resource-permission';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 辩论状态更新请求Schema
@@ -68,14 +66,12 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    const permissionResult = await canAccessDebateByCasePermission(
       authUser.userId,
       debateId,
-      ResourceType.DEBATE
+      CasePermission.EDIT_DEBATES
     );
-
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权修改此辩论状态'
       );
@@ -169,14 +165,12 @@ export const GET = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    const permissionResult = await canAccessDebateByCasePermission(
       authUser.userId,
       debateId,
-      ResourceType.DEBATE
+      CasePermission.VIEW_DEBATES
     );
-
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权访问此辩论状态'
       );

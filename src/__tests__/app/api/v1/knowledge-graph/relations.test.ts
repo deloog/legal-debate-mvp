@@ -4,6 +4,8 @@
 
 import { POST } from '@/app/api/v1/knowledge-graph/relations/route';
 import { prisma } from '@/lib/db';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { checkKnowledgeGraphPermission } from '@/lib/middleware/knowledge-graph-permission';
 
 // Mock数据库
 jest.mock('@/lib/db', () => ({
@@ -18,6 +20,10 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
 // Mock权限检查
 jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   checkKnowledgeGraphPermission: jest.fn(() =>
@@ -28,22 +34,46 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
     MANAGE_RELATIONS: 'MANAGE_RELATIONS',
   },
   KnowledgeGraphResource: {
-    RELATION: 'RELATION',
+    RELATION: 'law_article_relation',
   },
 }));
+
+const mockGetAuthUser = getAuthUser as jest.Mock;
+const mockCheckPermission = checkKnowledgeGraphPermission as jest.Mock;
 
 describe('POST /api/v1/knowledge-graph/relations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const {
-      checkKnowledgeGraphPermission,
-    } = require('@/lib/middleware/knowledge-graph-permission');
-    (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
-      hasPermission: true,
+    mockGetAuthUser.mockResolvedValue({
+      userId: 'auth-user-123',
+      email: 'user@example.com',
+      role: 'ADMIN',
     });
+    mockCheckPermission.mockResolvedValue({ hasPermission: true });
   });
 
   describe('参数验证', () => {
+    it('应该拒绝未登录请求', async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/relations',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourceId: 'article-1',
+            targetId: 'article-2',
+            relationType: 'CITES',
+          }),
+        }
+      );
+
+      const response = await POST(request as any);
+
+      expect(response.status).toBe(401);
+    });
+
     it('应该拒绝缺少sourceId的请求', async () => {
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/relations',
@@ -53,7 +83,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
           body: JSON.stringify({
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -74,7 +103,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
           body: JSON.stringify({
             sourceId: 'article-1',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -95,7 +123,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
           body: JSON.stringify({
             sourceId: 'article-1',
             targetId: 'article-2',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -107,7 +134,26 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
       expect(data.error).toBe('缺少必需参数: relationType');
     });
 
-    it('应该拒绝缺少createdBy的请求', async () => {
+    it('应该不再要求客户端传createdBy', async () => {
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+        lawName: '《民法典》',
+        articleNumber: '第123条',
+      });
+      (prisma.lawArticleRelation.findFirst as jest.Mock).mockResolvedValue(
+        null
+      );
+      (prisma.lawArticleRelation.create as jest.Mock).mockResolvedValue({
+        id: 'relation-1',
+        sourceId: 'article-1',
+        targetId: 'article-2',
+        relationType: 'CITES',
+        confidence: 0.7,
+        strength: 0.7,
+        verificationStatus: 'PENDING',
+        createdBy: 'auth-user-123',
+      });
+
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/relations',
         {
@@ -124,30 +170,15 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
       const response = await POST(request as any);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.error).toBe('缺少必需参数: createdBy');
-    });
-
-    it('应该拒绝空的createdBy参数', async () => {
-      const request = new Request(
-        'http://localhost:3000/api/v1/knowledge-graph/relations',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sourceId: 'article-1',
-            targetId: 'article-2',
-            relationType: 'CITES',
-            createdBy: '  ',
+      expect(response.status).toBe(201);
+      expect(data.success).toBe(true);
+      expect(prisma.lawArticleRelation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            createdBy: 'auth-user-123',
           }),
-        }
+        })
       );
-
-      const response = await POST(request as any);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toBe('createdBy不能为空');
     });
 
     it('应该拒绝无效的confidence参数', async () => {
@@ -160,7 +191,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
             confidence: 1.5,
           }),
         }
@@ -197,7 +227,7 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
         confidence: 0.9,
         strength: 0.9,
         verificationStatus: 'PENDING',
-        createdBy: 'user-123',
+        createdBy: 'auth-user-123',
         createdAt: new Date('2026-01-01T00:00:00Z'),
       });
     });
@@ -213,7 +243,7 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             targetId: 'article-2',
             relationType: 'CITES',
             confidence: 0.9,
-            createdBy: 'user-123',
+            createdBy: 'forged-user-id',
           }),
         }
       );
@@ -227,6 +257,13 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
       expect(data.relation.sourceId).toBe('article-1');
       expect(data.relation.targetId).toBe('article-2');
       expect(data.relation.relationType).toBe('CITES');
+      expect(prisma.lawArticleRelation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            createdBy: 'auth-user-123',
+          }),
+        })
+      );
     });
 
     it('应该使用默认confidence值', async () => {
@@ -239,7 +276,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -268,7 +304,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
             evidence: { description: '人工创建的关系' },
           }),
         }
@@ -300,7 +335,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -330,7 +364,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -377,10 +410,7 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
     });
 
     it('应该处理权限不足的情况', async () => {
-      const {
-        checkKnowledgeGraphPermission,
-      } = require('@/lib/middleware/knowledge-graph-permission');
-      (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
+      mockCheckPermission.mockResolvedValue({
         hasPermission: false,
         reason: '权限不足',
       });
@@ -394,7 +424,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );
@@ -428,7 +457,6 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
             sourceId: 'article-1',
             targetId: 'article-2',
             relationType: 'CITES',
-            createdBy: 'user-123',
           }),
         }
       );

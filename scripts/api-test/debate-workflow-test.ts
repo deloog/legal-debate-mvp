@@ -106,6 +106,36 @@ interface Argument {
   createdAt: string;
 }
 
+type HeadersWithSetCookie = Headers & {
+  getSetCookie?: () => string[];
+};
+
+interface DebateExportPayload {
+  debate?: Debate;
+}
+
+type DebateExportResponse = ApiResponse<DebateExportPayload> &
+  DebateExportPayload;
+
+function getSetCookieHeaders(headers: Headers): string[] {
+  const cookieHeaders = headers as HeadersWithSetCookie;
+  return typeof cookieHeaders.getSetCookie === 'function'
+    ? cookieHeaders.getSetCookie()
+    : [];
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function getApiErrorCode(error: ApiResponse['error']): string | undefined {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return error?.code;
+}
+
 // =============================================================================
 // 测试框架
 // =============================================================================
@@ -187,7 +217,7 @@ class ApiClient {
   }
 
   private parseCookies(response: Response) {
-    const setCookie = (response.headers as any).getSetCookie?.();
+    const setCookie = getSetCookieHeaders(response.headers);
     if (Array.isArray(setCookie)) {
       for (const cookie of setCookie) {
         const [nameValue] = cookie.split(';');
@@ -413,7 +443,7 @@ class ApiClient {
   async exportDebate(
     debateId: string,
     format: 'pdf' | 'docx' | 'json' = 'json'
-  ): Promise<ApiResponse<unknown>> {
+  ): Promise<DebateExportResponse> {
     return this.request(
       'GET',
       `/api/v1/debates/${debateId}/export?format=${format}`
@@ -494,8 +524,8 @@ async function main() {
           );
           return; // 登录成功，直接返回
         }
-      } catch (err: any) {
-        console.log(`   ⚠️  登录失败: ${err.message}`);
+      } catch (err: unknown) {
+        console.log(`   ⚠️  登录失败: ${toError(err).message}`);
         console.log(`   📝 尝试注册新用户...`);
       }
     }
@@ -529,10 +559,7 @@ async function main() {
           break;
         }
 
-        const errorCode =
-          typeof response.error === 'object' && response.error !== null
-            ? (response.error as any).code
-            : response.error;
+        const errorCode = getApiErrorCode(response.error);
         const isUserExists =
           response.message?.includes('邮箱已被注册') ||
           response.message?.includes('USER_EXISTS') ||
@@ -545,18 +572,20 @@ async function main() {
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
-      } catch (err: any) {
-        lastError = err;
+      } catch (err: unknown) {
+        lastError = toError(err);
 
         if (
-          !err.message?.includes('USER_EXISTS') &&
-          !err.message?.includes('邮箱已被注册')
+          !lastError.message?.includes('USER_EXISTS') &&
+          !lastError.message?.includes('邮箱已被注册')
         ) {
-          throw err;
+          throw lastError;
         }
 
         if (attempt === maxRetries - 1) {
-          throw new Error(`注册失败，已重试 ${maxRetries} 次: ${err.message}`);
+          throw new Error(
+            `注册失败，已重试 ${maxRetries} 次: ${lastError.message}`
+          );
         }
 
         console.log(`   ⚠️  邮箱冲突，准备重试...`);
@@ -785,11 +814,14 @@ async function main() {
       // IN_PROGRESS 不能直接回到 DRAFT
       await client.updateDebateStatus(testData.testDebate!.id, 'DRAFT');
       assert(false, '非法状态转换应该失败');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const normalizedError = toError(error);
       // 预期会失败
-      assert(error instanceof Error, 'should throw error');
+      assert(normalizedError instanceof Error, 'should throw error');
       assert(
-        error.message?.includes('无法从 IN_PROGRESS 状态转换为 DRAFT'),
+        normalizedError.message?.includes(
+          '无法从 IN_PROGRESS 状态转换为 DRAFT'
+        ),
         'error message should indicate invalid transition'
       );
       console.log('   ✓ 非法状态转换被正确阻止');
@@ -886,10 +918,7 @@ async function main() {
   // 阶段 8: 导出功能测试
   // ==========================================================================
   runner.test('8.1 导出辩论 (JSON格式)', async () => {
-    const response = (await client.exportDebate(
-      testData.testDebate!.id,
-      'json'
-    )) as any;
+    const response = await client.exportDebate(testData.testDebate!.id, 'json');
 
     // 导出接口返回直接的 JSON 内容，不是 { success, data } 包装格式
     assertExists(response.debate, '导出响应中应包含 debate 字段');

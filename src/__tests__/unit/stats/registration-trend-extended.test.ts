@@ -279,7 +279,7 @@ describe('用户注册趋势API - 扩展测试', () => {
       expect(response.status).toBe(200);
     });
 
-    it('应该正确筛选PARTY角色用户', async () => {
+    it('应该正确筛选ENTERPRISE角色用户', async () => {
       mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
       mockValidatePermissions.mockResolvedValue(null);
       mockUserCount.mockResolvedValue(80);
@@ -288,7 +288,7 @@ describe('用户注册趋势API - 扩展测试', () => {
       ]);
 
       const request = new NextRequest(
-        'http://localhost/api/stats/users/registration-trend?role=PARTY'
+        'http://localhost/api/stats/users/registration-trend?role=ENTERPRISE'
       );
       const response = await GET(request);
 
@@ -341,7 +341,7 @@ describe('用户注册趋势API - 扩展测试', () => {
       expect(response.status).toBe(200);
     });
 
-    it('应该正确筛选PENDING状态用户', async () => {
+    it('应该正确筛选SUSPENDED状态用户', async () => {
       mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
       mockValidatePermissions.mockResolvedValue(null);
       mockUserCount.mockResolvedValue(5);
@@ -350,7 +350,7 @@ describe('用户注册趋势API - 扩展测试', () => {
       ]);
 
       const request = new NextRequest(
-        'http://localhost/api/stats/users/registration-trend?status=PENDING'
+        'http://localhost/api/stats/users/registration-trend?status=SUSPENDED'
       );
       const response = await GET(request);
 

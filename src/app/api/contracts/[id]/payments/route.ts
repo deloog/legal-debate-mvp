@@ -5,6 +5,7 @@
  */
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { getContractAccess } from '@/app/api/lib/middleware/contract-auth';
 import {
   getFirstZodError,
   validateCreatePayment,
@@ -17,25 +18,6 @@ import { logger } from '@/lib/logger';
  * 校验合同访问权限（律师 / 委托方 / 管理员）
  * 返回合同对象，或 null 表示无权访问。
  */
-async function resolveContractAccess(
-  id: string,
-  userId: string,
-  _dbRole: string | undefined
-) {
-  const [contract, user] = await Promise.all([
-    prisma.contract.findUnique({
-      where: { id },
-      select: { lawyerId: true, case: { select: { userId: true } } },
-    }),
-    prisma.user.findUnique({ where: { id: userId }, select: { role: true } }),
-  ]);
-  if (!contract) return { contract: null, allowed: false };
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
-  const isLawyer = contract.lawyerId === userId;
-  const isClient = contract.case?.userId === userId;
-  return { contract, allowed: isAdmin || isLawyer || isClient };
-}
-
 /**
  * GET /api/contracts/[id]/payments
  * 获取合同的付款记录列表
@@ -58,12 +40,8 @@ export async function GET(
 
     const { id } = await params;
 
-    const { contract, allowed } = await resolveContractAccess(
-      id,
-      authUser.userId,
-      authUser.role
-    );
-    if (!contract) {
+    const access = await getContractAccess(id, authUser.userId);
+    if (!access.exists) {
       return NextResponse.json(
         {
           success: false,
@@ -72,7 +50,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    if (!allowed) {
+    if (!access.canRead) {
       return NextResponse.json(
         {
           success: false,
@@ -113,7 +91,7 @@ export async function GET(
       success: true,
       data: responseData,
     });
-  } catch (_error) {
+  } catch (error) {
     logger.error('获取付款记录失败:', error);
 
     return NextResponse.json(
@@ -151,12 +129,8 @@ export async function POST(
 
     const { id } = await params;
 
-    const { contract, allowed } = await resolveContractAccess(
-      id,
-      authUser.userId,
-      authUser.role
-    );
-    if (!contract) {
+    const access = await getContractAccess(id, authUser.userId);
+    if (!access.exists) {
       return NextResponse.json(
         {
           success: false,
@@ -165,7 +139,7 @@ export async function POST(
         { status: 404 }
       );
     }
-    if (!allowed) {
+    if (!access.canManage) {
       return NextResponse.json(
         {
           success: false,
@@ -281,7 +255,7 @@ export async function POST(
       },
       { status: 201 }
     );
-  } catch (_error) {
+  } catch (error) {
     logger.error('创建付款记录失败:', error);
 
     return NextResponse.json(

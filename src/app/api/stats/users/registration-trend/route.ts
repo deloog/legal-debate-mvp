@@ -194,13 +194,13 @@ function parseQueryParams(
   }
 
   // 验证role
-  const validRoles = ['ADMIN', 'LAWYER', 'PARTY'];
+  const validRoles = ['USER', 'LAWYER', 'ADMIN', 'SUPER_ADMIN', 'ENTERPRISE'];
   if (role && !validRoles.includes(role)) {
     return null;
   }
 
   // 验证status
-  const validStatuses = ['ACTIVE', 'INACTIVE', 'PENDING'];
+  const validStatuses = ['ACTIVE', 'SUSPENDED', 'BANNED', 'INACTIVE'];
   if (status && !validStatuses.includes(status)) {
     return null;
   }
@@ -217,7 +217,9 @@ function parseQueryParams(
  * 构建查询条件
  */
 function buildWhereClause(params: RegistrationTrendQueryParams) {
-  const where: Record<string, unknown> = {};
+  const where: Record<string, unknown> = {
+    deletedAt: null,
+  };
 
   if (params.role) {
     where.role = params.role;
@@ -260,6 +262,7 @@ async function getRegistrationTrend(
   const whereConditions: Prisma.Sql[] = [
     Prisma.sql`"createdAt" >= ${startDate.toISOString()}::timestamp`,
     Prisma.sql`"createdAt" <= ${endDate.toISOString()}::timestamp`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
 
   if (whereClause.role) {

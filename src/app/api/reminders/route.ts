@@ -69,8 +69,8 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     status: query.status as ReminderStatus | undefined,
     page: query.page?.toString(),
     limit: query.limit?.toString(),
-    startTime: undefined,
-    endTime: undefined,
+    startTime: query.startTime,
+    endTime: query.endTime,
   });
 
   return createSuccessResponse(
@@ -101,9 +101,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     userId: authUser.userId,
     type: validatedData.type as ReminderType,
     title: validatedData.title,
-    content: validatedData.message,
+    message: validatedData.message,
     scheduledAt: validatedData.reminderTime,
     channels: validatedData.channels as NotificationChannel[],
+    relatedType: validatedData.relatedType,
+    relatedId: validatedData.relatedId,
     metadata: validatedData.metadata,
   };
 

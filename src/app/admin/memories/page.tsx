@@ -110,7 +110,6 @@ export default function MemoryManagementPage() {
     showExpired,
     pagination.page,
     pagination.pageSize,
-    toast,
   ]);
 
   // 执行清理

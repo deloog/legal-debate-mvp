@@ -7,13 +7,14 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { normalizeCasePermissions } from '@/lib/case/share-permission-validator';
+import { CasePermission, CaseRole } from '@/types/case-collaboration';
 import { z } from 'zod';
 import type { DiscussionWithAuthor } from '@/types/discussion';
 
 const updateDiscussionSchema = z.object({
   content: z.string().min(1, '讨论内容不能为空').max(10000).optional(),
   mentions: z.array(z.string()).optional(),
-  isPinned: z.boolean().optional(),
   metadata: z
     .union([
       z.object({}).passthrough(),
@@ -69,7 +70,8 @@ async function mapDiscussionWithAuthor(
  */
 async function canEditOrDeleteDiscussion(
   userId: string,
-  discussionId: string
+  discussionId: string,
+  requiredPermission: CasePermission
 ): Promise<{ hasPermission: boolean; reason?: string }> {
   const discussion = await prisma.caseDiscussion.findFirst({
     where: {
@@ -118,18 +120,18 @@ async function canEditOrDeleteDiscussion(
       deletedAt: null,
     },
     select: {
+      role: true,
       permissions: true,
     },
   });
 
   if (caseTeamMember) {
-    const metadata = caseTeamMember.permissions as Record<
-      string,
-      unknown
-    > | null;
-    const permissions = metadata?.customPermissions as string[] | undefined;
+    const permissions = normalizeCasePermissions(
+      caseTeamMember.permissions,
+      caseTeamMember.role as CaseRole
+    );
 
-    if (permissions && permissions.includes('EDIT_DISCUSSIONS')) {
+    if (permissions.includes(requiredPermission)) {
       return { hasPermission: true };
     }
   }
@@ -162,7 +164,8 @@ export const PUT = withErrorHandler(
     // 检查编辑权限
     const permissionResult = await canEditOrDeleteDiscussion(
       authUser.userId,
-      discussionId
+      discussionId,
+      CasePermission.EDIT_DISCUSSIONS
     );
     if (!permissionResult.hasPermission) {
       if (permissionResult.reason === '讨论不存在') {
@@ -186,9 +189,6 @@ export const PUT = withErrorHandler(
       }),
       ...(validatedData.mentions !== undefined && {
         mentions: validatedData.mentions,
-      }),
-      ...(validatedData.isPinned !== undefined && {
-        isPinned: validatedData.isPinned,
       }),
       ...(validatedData.metadata !== undefined && {
         metadata: validatedData.metadata,
@@ -240,7 +240,8 @@ export const DELETE = withErrorHandler(
     // 检查编辑权限
     const permissionResult = await canEditOrDeleteDiscussion(
       authUser.userId,
-      discussionId
+      discussionId,
+      CasePermission.DELETE_DISCUSSIONS
     );
     if (!permissionResult.hasPermission) {
       if (permissionResult.reason === '讨论不存在') {

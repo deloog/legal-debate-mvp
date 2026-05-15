@@ -12,6 +12,7 @@ import type { AuthResponse, RegisterRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'crypto';
 
 /**
  * POST /api/auth/register
@@ -22,14 +23,6 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     // 解析请求体
     const body: RegisterRequest = await request.json();
     const { email, password, username, name, role: requestedRole } = body;
-
-    // 只允许用户自选 LAWYER 或 ENTERPRISE；其他值回退到 USER
-    const allowedSelfRoles = ['LAWYER', 'ENTERPRISE'] as const;
-    const assignedRole = allowedSelfRoles.includes(
-      requestedRole as (typeof allowedSelfRoles)[number]
-    )
-      ? (requestedRole as 'LAWYER' | 'ENTERPRISE')
-      : 'USER';
 
     // 验证输入数据
     const validation = validateRegisterRequest(email, password, username);
@@ -90,7 +83,14 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
         name: name || username || null,
         status: 'ACTIVE',
         password: hashedPassword,
-        role: assignedRole,
+        role: 'USER',
+        preferences: requestedRole
+          ? ({
+              onboarding: {
+                intendedRole: requestedRole,
+              },
+            } as const)
+          : undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -104,31 +104,40 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       },
     });
 
+    // 先创建 session，使用 session.id 绑定 access/refresh token
+    const sessionExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天后过期
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        sessionToken: `pending:${randomUUID()}`,
+        expires: sessionExpires,
+      },
+    });
+
     // 生成 JWT Token
     const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
+      jti: session.id,
     };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
     logger.info('[REGISTER] Tokens generated for user:', { userId: user.id });
 
-    // 创建session记录
-    const sessionExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天后过期
-    const session = await prisma.session.create({
+    // 用真实 refreshToken 更新 placeholder sessionToken
+    await prisma.session.update({
+      where: { id: session.id },
       data: {
-        userId: user.id,
         sessionToken: refreshToken,
-        expires: sessionExpires,
       },
     });
 
     logger.info('[REGISTER] Created session:', {
       sessionId: session.id,
-      tokenLength: session.sessionToken.length,
-      expires: session.expires,
+      tokenLength: refreshToken.length,
+      expires: sessionExpires,
     });
 
     const expiresIn = 15 * 60; // 15分钟

@@ -29,6 +29,15 @@ jest.mock('@/lib/team/permission-inheritance', () => ({
   getUserTeamPermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { prisma } from '@/lib/db/prisma';
 import { getUserTeamPermissions } from '@/lib/team/permission-inheritance';
 import { CasePermission, CaseRole } from '@/types/case-collaboration';
@@ -159,6 +168,35 @@ describe('案件共享权限验证 - canAccessSharedCase', () => {
     expect(result.permissions).toContain(CasePermission.VIEW_TIMELINE);
     expect(result.permissions).toContain(CasePermission.VIEW_EVIDENCE);
     expect(result.permissions).not.toContain(CasePermission.EDIT_CASE);
+  });
+
+  it('应该兼容数组格式的案件团队权限', async () => {
+    (prisma.case.findUnique as jest.Mock).mockResolvedValue({
+      userId: 'user-456',
+      ownerType: 'USER',
+      sharedWithTeam: false,
+      deletedAt: null,
+    });
+    (prisma.caseTeamMember.findFirst as jest.Mock).mockResolvedValue({
+      role: CaseRole.OBSERVER,
+      permissions: [
+        CasePermission.VIEW_CASE,
+        CasePermission.EDIT_DISCUSSIONS,
+        'invalid_permission',
+      ],
+    });
+
+    const result = await canAccessSharedCase(
+      'user-123',
+      'case-123',
+      CasePermission.EDIT_DISCUSSIONS
+    );
+
+    expect(result.hasAccess).toBe(true);
+    expect(result.permissions).toEqual([
+      CasePermission.VIEW_CASE,
+      CasePermission.EDIT_DISCUSSIONS,
+    ]);
   });
 
   it('应该拒绝案件团队成员缺少所需权限', async () => {

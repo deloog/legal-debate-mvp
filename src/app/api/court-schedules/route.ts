@@ -7,11 +7,18 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
+  buildScheduleAccessWhere,
+  buildScheduleOverlapWhere,
+  checkCaseSchedulePermission,
+  parseScheduleDate,
+} from '@/lib/court-schedule/schedule-access';
+import {
   CourtScheduleDetail,
   CourtScheduleStatus,
   CourtScheduleType,
   ScheduleWithCase,
 } from '@/types/court-schedule';
+import { CasePermission } from '@/types/case-collaboration';
 import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -97,11 +104,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const query = queryScheduleSchema.parse(Object.fromEntries(searchParams));
 
-  const where: Record<string, unknown> = {
-    case: {
-      userId: authUser.userId,
-      deletedAt: null,
-    },
+  const accessWhere = await buildScheduleAccessWhere(
+    authUser.userId,
+    CasePermission.VIEW_SCHEDULES
+  );
+  const where: Prisma.CourtScheduleWhereInput = {
+    AND: [accessWhere],
   };
 
   if (query.caseId) {
@@ -119,14 +127,24 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   if (query.startDate || query.endDate) {
     where.startTime = {};
     if (query.startDate) {
-      (where.startTime as Record<string, unknown>).gte = new Date(
-        query.startDate
-      );
+      const startDate = parseScheduleDate(query.startDate);
+      if (!startDate) {
+        return NextResponse.json(
+          { error: '开始日期格式无效' },
+          { status: 400 }
+        );
+      }
+      (where.startTime as Record<string, unknown>).gte = startDate;
     }
     if (query.endDate) {
-      (where.startTime as Record<string, unknown>).lte = new Date(
-        query.endDate
-      );
+      const endDate = parseScheduleDate(query.endDate);
+      if (!endDate) {
+        return NextResponse.json(
+          { error: '结束日期格式无效' },
+          { status: 400 }
+        );
+      }
+      (where.startTime as Record<string, unknown>).lte = endDate;
     }
   }
 
@@ -187,8 +205,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   const validatedData = createScheduleSchema.parse(body);
 
-  const startDate = new Date(validatedData.startTime);
-  const endDate = new Date(validatedData.endTime);
+  const startDate = parseScheduleDate(validatedData.startTime);
+  const endDate = parseScheduleDate(validatedData.endTime);
+
+  if (!startDate || !endDate) {
+    return NextResponse.json({ error: '时间格式无效' }, { status: 400 });
+  }
 
   if (startDate >= endDate) {
     return NextResponse.json(
@@ -197,27 +219,21 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  const caseRecord = await prisma.case.findUnique({
-    where: {
-      id: validatedData.caseId,
-      userId: authUser.userId,
-      deletedAt: null,
-    },
-  });
+  const access = await checkCaseSchedulePermission(
+    authUser.userId,
+    validatedData.caseId,
+    CasePermission.EDIT_SCHEDULES
+  );
 
-  if (!caseRecord) {
+  if (!access.hasAccess) {
     return NextResponse.json(
-      { error: '案件不存在或无权访问' },
-      { status: 404 }
+      { error: access.message },
+      { status: access.status }
     );
   }
 
   const conflict = await prisma.courtSchedule.findFirst({
-    where: {
-      caseId: validatedData.caseId,
-      startTime: startDate,
-      status: { notIn: ['CANCELLED'] },
-    },
+    where: buildScheduleOverlapWhere(validatedData.caseId, startDate, endDate),
   });
 
   if (conflict) {

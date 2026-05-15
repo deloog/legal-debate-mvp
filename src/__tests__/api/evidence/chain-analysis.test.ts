@@ -11,6 +11,14 @@
 
 import { POST } from '@/app/api/evidence/chain-analysis/route';
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-123',
+    email: 'test@example.com',
+    role: 'USER',
+  }),
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -65,6 +73,7 @@ describe('POST /api/evidence/chain-analysis', () => {
       prisma.case.findUnique.mockResolvedValue({
         id: 'case-1',
         title: '测试案件',
+        userId: 'user-123',
       });
 
       prisma.evidence.findMany.mockResolvedValue([
@@ -138,7 +147,10 @@ describe('POST /api/evidence/chain-analysis', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.case.findUnique.mockResolvedValue({ id: 'case-1' });
+      prisma.case.findUnique.mockResolvedValue({
+        id: 'case-1',
+        userId: 'user-123',
+      });
       prisma.evidence.findMany.mockResolvedValue([
         {
           id: 'evidence-1',
@@ -344,7 +356,10 @@ describe('POST /api/evidence/chain-analysis', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.case.findUnique.mockResolvedValue({ id: 'case-1' });
+      prisma.case.findUnique.mockResolvedValue({
+        id: 'case-1',
+        userId: 'user-123',
+      });
       prisma.evidence.findMany.mockResolvedValue([]);
 
       const response = await POST(mockRequest);
@@ -373,7 +388,10 @@ describe('POST /api/evidence/chain-analysis', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.case.findUnique.mockResolvedValue({ id: 'case-1' });
+      prisma.case.findUnique.mockResolvedValue({
+        id: 'case-1',
+        userId: 'user-123',
+      });
       prisma.evidence.findMany.mockResolvedValue([
         {
           id: 'evidence-1',
@@ -466,7 +484,10 @@ describe('POST /api/evidence/chain-analysis', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.case.findUnique.mockResolvedValue({ id: 'case-1' });
+      prisma.case.findUnique.mockResolvedValue({
+        id: 'case-1',
+        userId: 'user-123',
+      });
       prisma.evidence.findMany.mockResolvedValue(
         evidenceIds.map(id => ({
           id,
@@ -511,7 +532,10 @@ describe('POST /api/evidence/chain-analysis', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.case.findUnique.mockResolvedValue({ id: 'case-1' });
+      prisma.case.findUnique.mockResolvedValue({
+        id: 'case-1',
+        userId: 'user-123',
+      });
       prisma.evidence.findMany.mockResolvedValue([
         {
           id: 'evidence-1',

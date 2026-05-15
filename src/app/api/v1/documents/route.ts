@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 获取当前用户的文档列表
@@ -26,10 +28,43 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       parseInt(searchParams.get('pageSize') ?? '20', 10)
     );
 
+    let accessibleCaseIds: string[] | null = null;
+    if (caseId) {
+      const access = await canAccessSharedCase(
+        authUser.userId,
+        caseId,
+        CasePermission.VIEW_DOCUMENTS
+      );
+      if (!access.hasAccess) {
+        return NextResponse.json(
+          { success: false, message: '无权查看该案件文档' },
+          { status: 403 }
+        );
+      }
+    } else {
+      const directCases = await prisma.case.findMany({
+        where: { userId: authUser.userId, deletedAt: null },
+        select: { id: true },
+      });
+      const caseIds = directCases.map(item => item.id);
+      const teamMembers = await prisma.caseTeamMember.findMany({
+        where: {
+          userId: authUser.userId,
+          deletedAt: null,
+        },
+        select: { caseId: true },
+      });
+      const teamCaseIds = teamMembers.map(item => item.caseId);
+      accessibleCaseIds = [...new Set([...caseIds, ...teamCaseIds])];
+    }
+
     const where = {
-      userId: authUser.userId,
       deletedAt: null,
-      ...(caseId ? { caseId } : {}),
+      ...(caseId
+        ? { caseId }
+        : accessibleCaseIds
+          ? { caseId: { in: accessibleCaseIds } }
+          : { userId: authUser.userId }),
       ...(search
         ? { filename: { contains: search, mode: 'insensitive' as const } }
         : {}),

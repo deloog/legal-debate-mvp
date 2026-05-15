@@ -8,6 +8,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { generateCaseNumber } from '@/lib/case/case-number-service';
 import { logger } from '@/lib/logger';
 import { ConsultStatus } from '@/types/consultation';
 import { CaseType, CaseStatus } from '@prisma/client';
@@ -55,6 +56,7 @@ export class ConversionService {
         where: {
           id: input.consultationId,
           deletedAt: null,
+          userId: input.userId,
         },
       });
 
@@ -100,6 +102,12 @@ export class ConversionService {
 
       // 4. 使用事务创建案件和更新咨询
       const result = await prisma.$transaction(async tx => {
+        const caseNumber = await generateCaseNumber(
+          tx,
+          caseType,
+          CaseStatus.DRAFT
+        );
+
         // 可选：创建客户记录
         let clientId: string | undefined;
         if (input.createClient && consultation.clientName) {
@@ -126,6 +134,7 @@ export class ConversionService {
             description: input.description || consultation.caseSummary,
             type: caseType,
             status: CaseStatus.DRAFT,
+            caseNumber,
             plaintiffName: input.plaintiffName || consultation.clientName,
             defendantName: input.defendantName,
             amount: input.amount,
@@ -179,7 +188,10 @@ export class ConversionService {
   /**
    * 获取转化预览数据
    */
-  public async getConversionPreview(consultationId: string): Promise<{
+  public async getConversionPreview(
+    consultationId: string,
+    userId?: string
+  ): Promise<{
     success: boolean;
     data?: {
       consultNumber: string;
@@ -203,6 +215,7 @@ export class ConversionService {
         where: {
           id: consultationId,
           deletedAt: null,
+          ...(userId ? { userId } : {}),
         },
       });
 

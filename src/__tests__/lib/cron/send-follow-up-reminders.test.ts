@@ -21,6 +21,10 @@ jest.mock('@/lib/db/prisma', () => ({
       count: jest.fn(),
       updateMany: jest.fn(),
     },
+    notification: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+    },
   },
 }));
 
@@ -42,6 +46,10 @@ jest.mock('@/lib/agent/security/logger', () => ({
 describe('sendFollowUpReminders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (prisma.notification.findFirst as jest.Mock).mockResolvedValue(null);
+    (prisma.notification.create as jest.Mock).mockResolvedValue({
+      id: 'notification-log-1',
+    });
   });
 
   it('应该在没有待处理任务时返回空结果', async () => {

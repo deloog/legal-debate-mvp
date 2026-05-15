@@ -51,6 +51,14 @@ jest.mock('@/lib/notification/in-app-message-service', () => ({
   },
 }));
 
+jest.mock('@/lib/agent/security/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
 describe('ReminderSender', () => {
   const mockUser = {
     id: 'user-1',

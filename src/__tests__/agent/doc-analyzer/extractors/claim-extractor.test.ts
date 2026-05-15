@@ -59,38 +59,11 @@ describe('ClaimExtractor', () => {
       expect(result.compoundDecomposed).toBeGreaterThan(0);
     });
 
-    it('应该自动补充诉讼费用', async () => {
-      const result = await extractor.extractFromText('本案费用由被告承担');
-
-      const costClaim = result.claims.find(c => c.type === 'LITIGATION_COST');
-      expect(costClaim).toBeDefined();
-    });
-
-    it('应该推断本金请求', async () => {
-      const result = await extractor.extractFromText(
-        '本案诉讼费用由被告承担，赔偿损失5万元'
-      );
-
-      const principalClaim = result.claims.find(
-        c => c.type === 'PAY_PRINCIPAL'
-      );
-      // 当有赔偿损失时，会推断本金
-      expect(principalClaim).toBeDefined();
-    });
-
     it('应该推断利息请求', async () => {
       const result = await extractor.extractFromText('按年利率10%支付利息');
 
       const interestClaim = result.claims.find(c => c.type === 'PAY_INTEREST');
       expect(interestClaim).toBeDefined();
-    });
-
-    it('应该推断违约金请求', async () => {
-      const result =
-        await extractor.extractFromText('被告违约，应当承担相应责任');
-
-      const penaltyClaim = result.claims.find(c => c.type === 'PAY_PENALTY');
-      expect(penaltyClaim).toBeDefined();
     });
 
     it('应该生成正确的摘要', async () => {

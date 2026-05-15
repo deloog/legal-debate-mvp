@@ -34,6 +34,15 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
@@ -90,7 +99,18 @@ describe('Teams API - Members Management', () => {
       },
     ]);
 
-    (mockedPrisma as any).teamMember.count.mockResolvedValue(1);
+    (mockedPrisma as any).teamMember.count.mockImplementation(
+      (query: unknown) => {
+        const where = (query as any)?.where;
+        if (
+          where?.role === TeamRoleValues.ADMIN &&
+          where?.status === MemberStatusValues.ACTIVE
+        ) {
+          return Promise.resolve(2);
+        }
+        return Promise.resolve(1);
+      }
+    );
 
     (mockedPrisma as any).teamMember.findUnique.mockImplementation(
       (query: unknown) => {
@@ -294,6 +314,8 @@ describe('Teams API - Members Management', () => {
         id: 'member-1',
         teamId: 'team-1',
         userId: 'user-456',
+        role: TeamRoleValues.LAWYER,
+        status: MemberStatusValues.ACTIVE,
       });
 
       const memberData = {
@@ -313,6 +335,41 @@ describe('Teams API - Members Management', () => {
       });
 
       expect(response.status).toBe(409);
+    });
+
+    it('应该恢复已移除的成员而不是返回冲突', async () => {
+      (mockedPrisma as any).teamMember.findUnique.mockResolvedValue({
+        id: 'member-removed',
+        teamId: 'team-1',
+        userId: 'user-456',
+        role: TeamRoleValues.LAWYER,
+        status: MemberStatusValues.REMOVED,
+      });
+
+      const memberData = {
+        userId: 'user-456',
+        role: TeamRoleValues.LAWYER,
+      };
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/teams/team-1/members',
+        {
+          method: 'POST',
+          body: memberData,
+        }
+      );
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'team-1' }),
+      });
+
+      expect(response.status).toBe(201);
+      expect((mockedPrisma as any).teamMember.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: MemberStatusValues.ACTIVE,
+          }),
+        })
+      );
     });
 
     it('应该验证必填字段', async () => {
@@ -375,6 +432,24 @@ describe('Teams API - Members Management', () => {
 
       expect(response.status).toBe(403);
     });
+
+    it('不应允许降级最后一名活跃管理员', async () => {
+      (mockedPrisma as any).teamMember.count.mockResolvedValueOnce(1);
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/teams/team-1/members/user-123',
+        {
+          method: 'PATCH',
+          body: { role: TeamRoleValues.LAWYER },
+        }
+      );
+      const response = await PATCH_MEMBER(request, {
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
+      });
+
+      expect(response.status).toBe(400);
+      expect((mockedPrisma as any).teamMember.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('GET /api/teams/[id]/members/[userId]', () => {
@@ -429,6 +504,23 @@ describe('Teams API - Members Management', () => {
       });
 
       expect(response.status).toBe(403);
+    });
+
+    it('不应允许移除最后一名活跃管理员', async () => {
+      (mockedPrisma as any).teamMember.count.mockResolvedValueOnce(1);
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/teams/team-1/members/user-123',
+        {
+          method: 'DELETE',
+        }
+      );
+      const response = await DELETE_MEMBER(request, {
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
+      });
+
+      expect(response.status).toBe(400);
+      expect((mockedPrisma as any).teamMember.delete).not.toHaveBeenCalled();
     });
   });
 

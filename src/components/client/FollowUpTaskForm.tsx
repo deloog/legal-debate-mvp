@@ -84,7 +84,7 @@ export function FollowUpTaskForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // 验证表单
-  const validate = (): boolean => {
+  const validate = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!summary.trim()) {
@@ -99,7 +99,7 @@ export function FollowUpTaskForm({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [summary, dueDate]);
 
   // 处理提交
   const handleSubmit = useCallback(
@@ -153,7 +153,17 @@ export function FollowUpTaskForm({
         setIsSubmitting(false);
       }
     },
-    [clientId, summary, type, priority, dueDate, notes, editingTask, onSuccess]
+    [
+      clientId,
+      summary,
+      type,
+      priority,
+      dueDate,
+      notes,
+      editingTask,
+      onSuccess,
+      validate,
+    ]
   );
 
   return (

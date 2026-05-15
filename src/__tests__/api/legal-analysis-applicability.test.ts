@@ -21,20 +21,15 @@ jest.mock('@/lib/law-article/applicability/applicability-analyzer', () => ({
   })),
 }));
 
-// Mock JWT auth
-jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn((header: string) =>
-    header?.startsWith('Bearer ') ? header.slice(7) : null
-  ),
-  verifyToken: jest.fn((token: string) => {
-    if (token === 'valid-token') {
-      return { valid: true, payload: { userId: 'user-1' } };
-    }
-    return { valid: false };
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-1',
+    role: 'USER',
+    email: 'user@test.com',
   }),
 }));
 
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock prisma
 const mockLegalReferenceUpsert = jest.fn();
@@ -61,6 +56,7 @@ jest.mock('@/lib/db/prisma', () => ({
 
 const mockCaseWithDocs = {
   id: 'case-1',
+  userId: 'user-1',
   documents: [
     {
       analysisStatus: 'COMPLETED',
@@ -156,23 +152,14 @@ const mockAnalyzeResult = {
   },
 };
 
-const authHeader = { authorization: 'Bearer valid-token' };
-
 describe('法条适用性分析API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
-
-    // Re-setup JWT mocks after clearAllMocks (clearAllMocks also clears implementations)
-    (extractTokenFromHeader as jest.Mock).mockImplementation(
-      (header: string) =>
-        header?.startsWith('Bearer ') ? header.slice(7) : null
-    );
-    (verifyToken as jest.Mock).mockImplementation((token: string) => {
-      if (token === 'valid-token') {
-        return { valid: true, payload: { userId: 'user-1' } };
-      }
-      return { valid: false };
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'user-1',
+      role: 'USER',
+      email: 'user@test.com',
     });
   });
 
@@ -186,7 +173,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: ['article-1', 'article-2'] },
         }
       );
@@ -203,6 +189,7 @@ describe('法条适用性分析API', () => {
     });
 
     it('应该在未提供 Token 时返回 401', async () => {
+      (getAuthUser as jest.Mock).mockResolvedValueOnce(null);
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
@@ -219,11 +206,11 @@ describe('法条适用性分析API', () => {
     });
 
     it('应该在提供无效 Token 时返回 401', async () => {
+      (getAuthUser as jest.Mock).mockResolvedValueOnce(null);
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: { Authorization: 'Bearer invalid-token' },
           body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
@@ -239,7 +226,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { articleIds: ['article-1'] },
         }
       );
@@ -256,7 +242,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: [] },
         }
       );
@@ -273,7 +258,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: 'invalid' },
         }
       );
@@ -292,7 +276,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'non-existent', articleIds: ['article-1'] },
         }
       );
@@ -312,7 +295,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
@@ -339,7 +321,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
@@ -352,12 +333,22 @@ describe('法条适用性分析API', () => {
             caseId_articleId: { caseId: 'case-1', articleId: 'article-1' },
           },
           update: expect.objectContaining({
+            source: '合同法',
+            articleNumber: '第一百零七条',
+            content: '当事人一方不履行合同义务...',
+            lawType: 'LAW',
+            category: 'CIVIL',
             applicabilityScore: 0.85,
             status: 'VALID',
           }),
           create: expect.objectContaining({
             caseId: 'case-1',
             articleId: 'article-1',
+            source: '合同法',
+            articleNumber: '第一百零七条',
+            content: '当事人一方不履行合同义务...',
+            lawType: 'LAW',
+            category: 'CIVIL',
           }),
         })
       );
@@ -372,7 +363,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
@@ -393,7 +383,6 @@ describe('法条适用性分析API', () => {
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          headers: authHeader,
           body: { caseId: 'case-1', articleIds: ['article-1', 'article-2'] },
         }
       );
@@ -418,7 +407,9 @@ describe('法条适用性分析API', () => {
       const response = await OPTIONS(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toContain(
         'POST'
       );

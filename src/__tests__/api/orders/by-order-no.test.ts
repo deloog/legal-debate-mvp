@@ -3,30 +3,18 @@
  * 测试 GET /api/orders/by-order-no/[orderNo]
  */
 
-// Mock JWT 工具
-jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn(),
-  verifyToken: jest.fn(),
-}));
-
-// Mock NextAuth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
-}));
-
 jest.mock('@/lib/order/order-service', () => ({
   getOrderByOrderNo: jest.fn(),
 }));
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/orders/by-order-no/[orderNo]/route';
-import { getServerSession } from 'next-auth';
 import { getOrderByOrderNo } from '@/lib/order/order-service';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
+
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
 
 describe('GET /api/orders/by-order-no/[orderNo]', () => {
   let mockRequest: unknown;
@@ -34,20 +22,13 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
-      header?.replace('Bearer ', '')
-    );
-    (verifyToken as jest.Mock).mockReturnValue({
-      valid: true,
-      payload: { userId: 'test-user-id' },
-    });
     mockRequest = {};
     mockParams = { orderNo: 'ORD20250117001' };
   });
 
   describe('未授权情况', () => {
     it('应该返回401当用户未登录', async () => {
-      (getServerSession as jest.Mock).mockResolvedValueOnce(null);
+      (getAuthUser as jest.Mock).mockResolvedValueOnce(null);
 
       const response = await GET(mockRequest as NextRequest, {
         params: mockParams,
@@ -65,8 +46,8 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
 
   describe('参数验证', () => {
     it('应该返回400当订单号为空', async () => {
-      (getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: { id: 'user-123' },
+      (getAuthUser as jest.Mock).mockResolvedValueOnce({
+        userId: 'user-123',
       });
 
       const response = await GET(mockRequest as NextRequest, {
@@ -101,8 +82,8 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
         },
       };
 
-      (getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: { id: 'user-123' },
+      (getAuthUser as jest.Mock).mockResolvedValueOnce({
+        userId: 'user-123',
       });
       (getOrderByOrderNo as jest.Mock).mockResolvedValueOnce(mockOrder);
 
@@ -123,8 +104,8 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
     });
 
     it('应该返回404当订单不存在', async () => {
-      (getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: { id: 'user-123' },
+      (getAuthUser as jest.Mock).mockResolvedValueOnce({
+        userId: 'user-123',
       });
       (getOrderByOrderNo as jest.Mock).mockResolvedValueOnce(null);
 
@@ -155,8 +136,8 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
         createdAt: new Date(),
       };
 
-      (getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: { id: 'user-123' },
+      (getAuthUser as jest.Mock).mockResolvedValueOnce({
+        userId: 'user-123',
       });
       (getOrderByOrderNo as jest.Mock).mockResolvedValueOnce(mockOrder);
 
@@ -176,8 +157,8 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
 
   describe('错误处理', () => {
     it('应该返回500当查询失败', async () => {
-      (getServerSession as jest.Mock).mockResolvedValueOnce({
-        user: { id: 'user-123' },
+      (getAuthUser as jest.Mock).mockResolvedValueOnce({
+        userId: 'user-123',
       });
       (getOrderByOrderNo as jest.Mock).mockRejectedValueOnce(
         new Error('Database error')

@@ -114,6 +114,21 @@ interface FeeCalculation {
   notes?: string[];
 }
 
+type HeadersWithSetCookie = Headers & {
+  getSetCookie?: () => string[];
+};
+
+function getSetCookieHeaders(headers: Headers): string[] {
+  const cookieHeaders = headers as HeadersWithSetCookie;
+  return typeof cookieHeaders.getSetCookie === 'function'
+    ? cookieHeaders.getSetCookie()
+    : [];
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 // =============================================================================
 // 测试框架
 // =============================================================================
@@ -194,7 +209,7 @@ class ApiClient {
   }
 
   private parseCookies(response: Response) {
-    const setCookie = (response.headers as any).getSetCookie?.();
+    const setCookie = getSetCookieHeaders(response.headers);
     if (Array.isArray(setCookie)) {
       for (const cookie of setCookie) {
         const [nameValue] = cookie.split(';');
@@ -463,8 +478,8 @@ async function main() {
         ) {
           throw lastError;
         }
-      } catch (err: any) {
-        lastError = err instanceof Error ? err : new Error(String(err));
+      } catch (err: unknown) {
+        lastError = toError(err);
         if (
           lastError.message.includes('409') ||
           lastError.message.includes('已存在')
@@ -518,8 +533,8 @@ async function main() {
       console.log(
         `   ⚠️  登录返回失败: ${loginResponse.message || loginResponse.error?.message || 'Unknown'}`
       );
-    } catch (err: any) {
-      console.log(`   ⚠️  登录失败: ${err.message}`);
+    } catch (err: unknown) {
+      console.log(`   ⚠️  登录失败: ${toError(err).message}`);
     }
 
     // 2) 登录失败则尝试注册新用户（测试脚本以保证通过为第一目标）
@@ -559,8 +574,8 @@ async function main() {
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
-      } catch (err: any) {
-        lastError = err instanceof Error ? err : new Error(String(err));
+      } catch (err: unknown) {
+        lastError = toError(err);
         const isUserExists =
           lastError.message?.includes('USER_EXISTS') ||
           lastError.message?.includes('邮箱已被注册');
@@ -780,9 +795,10 @@ async function main() {
       assert(response.success === true, '咨询转案件应该成功');
       assertExists(response.data?.caseId, 'caseId');
       console.log(`   📝 已转为案件: ${response.data?.caseId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const normalizedError = toError(error);
       // 如果是因为已转化导致失败，视为业务正常，否则抛错
-      const msg = error.message || '';
+      const msg = normalizedError.message || '';
       if (
         msg.includes('已转化') ||
         msg.includes('CONVERTED') ||
@@ -792,7 +808,7 @@ async function main() {
         return;
       }
       console.log(`   ⚠️  转案件测试遇到错误: ${msg}`);
-      throw error;
+      throw normalizedError;
     }
   });
 
@@ -827,8 +843,8 @@ async function main() {
         try {
           await client.deleteConsultation(id);
           console.log(`   ✅ 已清理: ${id}`);
-        } catch (err: any) {
-          console.log(`   ⚠️  清理失败: ${id} (${err.message || ''})`);
+        } catch (err: unknown) {
+          console.log(`   ⚠️  清理失败: ${id} (${toError(err).message || ''})`);
         }
       }
     }

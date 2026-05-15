@@ -150,6 +150,19 @@ function parseQueryParams(
     return null;
   }
 
+  const validSeverities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  if (minSeverity && !validSeverities.includes(minSeverity)) {
+    return null;
+  }
+
+  if (
+    includeRecovered !== null &&
+    includeRecovered !== 'true' &&
+    includeRecovered !== 'false'
+  ) {
+    return null;
+  }
+
   return {
     timeRange: timeRange ?? TimeRange.LAST_30_DAYS,
     provider: provider ?? undefined,
@@ -172,7 +185,9 @@ async function getErrorRateData(
   endDate: Date,
   provider: string | undefined,
   model: string | undefined,
-  errorType: string | undefined
+  errorType: string | undefined,
+  minSeverity: string | undefined,
+  includeRecovered: boolean
 ): Promise<PerformanceErrorRateData> {
   const aiConditions: Prisma.Sql[] = [
     Prisma.sql`"createdAt" >= ${startDate}`,
@@ -191,6 +206,18 @@ async function getErrorRateData(
   ];
   if (errorType) {
     errorLogConditions.push(Prisma.sql`"errorType" = ${errorType}`);
+  }
+  if (minSeverity) {
+    const severityOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+    const allowedSeverities = severityOrder.slice(
+      severityOrder.indexOf(minSeverity)
+    );
+    errorLogConditions.push(
+      Prisma.sql`"severity" IN (${Prisma.join(allowedSeverities)})`
+    );
+  }
+  if (!includeRecovered) {
+    errorLogConditions.push(Prisma.sql`"recovered" = false`);
   }
 
   // 查询AI交互统计
@@ -423,7 +450,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       endDate,
       params.provider,
       params.model,
-      params.errorType
+      params.errorType,
+      params.minSeverity,
+      params.includeRecovered ?? false
     );
 
     return successResponse(data, '获取错误率统计成功');

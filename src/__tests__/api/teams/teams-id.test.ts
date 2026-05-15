@@ -193,9 +193,14 @@ describe('Teams API - Detail, Update, Delete', () => {
       expect(response.status).toBe(403);
     });
 
-    it('应该在非管理员访问时返回403错误', async () => {
-      // 重置findFirst返回非管理员成员，确保认证用户不是团队成员
-      (mockedPrisma as any).teamMember.findFirst.mockResolvedValue(null);
+    it('应该允许活跃非管理员成员查看团队详情', async () => {
+      (mockedPrisma as any).teamMember.findFirst.mockResolvedValue({
+        id: 'member-1',
+        teamId: 'team-1',
+        userId: 'user-123',
+        role: TeamRoleValues.LAWYER,
+        status: MemberStatusValues.ACTIVE,
+      });
 
       const request = createMockRequest(
         'http://localhost:3000/api/teams/team-1'
@@ -203,8 +208,11 @@ describe('Teams API - Detail, Update, Delete', () => {
       const response = await GET_BY_ID(request, {
         params: Promise.resolve({ id: 'team-1' }),
       });
+      const testResponse = await response.clone().json();
 
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(200);
+      expect(testResponse.success).toBe(true);
+      expect(testResponse.data.id).toBe('team-1');
     });
   });
 

@@ -10,6 +10,22 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import { UpdateConfigRequest } from '@/types/config';
 import { logger } from '@/lib/logger';
 import { clearConfigCache } from '@/lib/config/system-config';
+import { clearQuotaConfigCache } from '@/lib/ai/quota';
+import {
+  recordSystemConfigHistory,
+  snapshotSystemConfig,
+} from '@/lib/admin/system-config-governance';
+import {
+  validateAdminStepUpToken,
+  validateSensitiveOperationReason,
+} from '@/lib/admin/step-up';
+
+function invalidateConfigCaches(key: string): void {
+  clearConfigCache(key);
+  if (key.startsWith('business.ai_quota_')) {
+    clearQuotaConfigCache();
+  }
+}
 
 // =============================================================================
 // 辅助函数
@@ -112,9 +128,30 @@ export async function PUT(
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason,
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const { key } = await params;
     const body: UpdateConfigRequest = await request.json();
+    const reasonCheck = validateSensitiveOperationReason(body.changeReason);
+    if (!reasonCheck.valid) {
+      return Response.json(
+        { error: '参数错误', message: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     // 查找配置
     const existingConfig = await prisma.systemConfig.findUnique({
@@ -173,7 +210,17 @@ export async function PUT(
     });
 
     // 清除内存缓存，确保下次读取到最新值
-    clearConfigCache(key);
+    invalidateConfigCaches(key);
+
+    await recordSystemConfigHistory({
+      userId: user.userId,
+      configKey: key,
+      operation: 'update',
+      reason: body.changeReason!.trim(),
+      before: snapshotSystemConfig(existingConfig),
+      after: snapshotSystemConfig(updatedConfig),
+      request,
+    });
 
     return Response.json(
       {
@@ -215,8 +262,30 @@ export async function DELETE(
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason,
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const { key } = await params;
+    const reason = new URL(request.url).searchParams.get('changeReason') ?? '';
+    const reasonCheck = validateSensitiveOperationReason(reason);
+    if (!reasonCheck.valid) {
+      return Response.json(
+        { error: '参数错误', message: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     // 查找配置
     const existingConfig = await prisma.systemConfig.findUnique({
@@ -244,6 +313,18 @@ export async function DELETE(
     // 删除配置
     await prisma.systemConfig.delete({
       where: { key },
+    });
+
+    invalidateConfigCaches(key);
+
+    await recordSystemConfigHistory({
+      userId: user.userId,
+      configKey: key,
+      operation: 'delete',
+      reason: reason.trim(),
+      before: snapshotSystemConfig(existingConfig),
+      after: null,
+      request,
     });
 
     return Response.json(

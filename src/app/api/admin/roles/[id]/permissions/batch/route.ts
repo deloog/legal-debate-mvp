@@ -12,6 +12,11 @@ import type {
 } from '@/types/admin-role';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  canManagePrivilegedRole,
+  getFreshUserRole,
+  isSystemRoleName,
+} from '@/lib/admin/role-security';
 
 // =============================================================================
 // API处理函数
@@ -68,6 +73,20 @@ export async function PUT(
       return Response.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
+    const currentUserRole = await getFreshUserRole(user.userId);
+    if (
+      isSystemRoleName(role.name) &&
+      !canManagePrivilegedRole(currentUserRole)
+    ) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以修改系统内置角色的权限',
+        },
+        { status: 403 }
       ) as unknown as NextResponse;
     }
 
@@ -161,6 +180,20 @@ export async function DELETE(
       return Response.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
+    const currentUserRole = await getFreshUserRole(user.userId);
+    if (
+      isSystemRoleName(role.name) &&
+      !canManagePrivilegedRole(currentUserRole)
+    ) {
+      return Response.json(
+        {
+          error: '权限不足',
+          message: '只有超级管理员可以修改系统内置角色的权限',
+        },
+        { status: 403 }
       ) as unknown as NextResponse;
     }
 

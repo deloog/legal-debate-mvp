@@ -2,24 +2,20 @@
  * EvidenceClassifier - 证据分类器
  *
  * 功能：
- * 1. 确定证据类型（物证、书证、证人证言等）
- * 2. 提取原始证据
- * 3. 从文本中识别证据描述
+ * 1. 从已提取数据和文本中收集证据字符串（结构型辅助）
+ * 2. 根据关键词将证据映射到枚举类型（元数据分类，非语义法律推理）
+ *
+ * 注意：determineEvidenceType 使用关键词枚举映射（物证/书证/证人证言/鉴定意见），
+ * 这属于结构型元数据分类，不是语义法律分析，无需 AI。
  */
 
 import type { ExtractedData, EvidenceType } from '../core/types';
 
 // =============================================================================
-// EvidenceClassifier类
+// EvidenceClassifier 类
 // =============================================================================
 
 export class EvidenceClassifier {
-  private readonly evidenceTypePatterns: Map<EvidenceType, RegExp[]>;
-
-  constructor() {
-    this.evidenceTypePatterns = this.initializeEvidencePatterns();
-  }
-
   /**
    * 从各个模块提取原始证据
    */
@@ -29,7 +25,6 @@ export class EvidenceClassifier {
   ): Map<string, string> {
     const evidence = new Map<string, string>();
 
-    // 从诉讼请求提取证据
     if (extractedData.claims) {
       for (const claim of extractedData.claims) {
         if (claim.evidence) {
@@ -42,7 +37,6 @@ export class EvidenceClassifier {
       }
     }
 
-    // 从争议焦点提取证据
     if (extractedData.disputeFocuses) {
       for (const focus of extractedData.disputeFocuses) {
         if (focus.evidence) {
@@ -55,7 +49,6 @@ export class EvidenceClassifier {
       }
     }
 
-    // 从关键事实提取证据
     if (extractedData.keyFacts) {
       for (const fact of extractedData.keyFacts) {
         if (fact.evidence) {
@@ -68,7 +61,6 @@ export class EvidenceClassifier {
       }
     }
 
-    // 从文本中直接提取证据描述
     const textEvidence = this.extractEvidenceFromText(text);
     for (const ev of textEvidence) {
       if (!evidence.has(ev)) {
@@ -80,7 +72,7 @@ export class EvidenceClassifier {
   }
 
   /**
-   * 从文本中提取证据描述
+   * 从文本中提取证据描述（正则匹配证据标记词）
    */
   extractEvidenceFromText(text: string): string[] {
     const evidence: string[] = [];
@@ -101,62 +93,23 @@ export class EvidenceClassifier {
       }
     }
 
-    return [...new Set(evidence)]; // 去重
+    return [...new Set(evidence)];
   }
 
   /**
-   * 确定证据类型
+   * 根据内容关键词确定证据枚举类型（结构型元数据分类）
+   * 优先级：物证 > 证人证言 > 鉴定意见 > 书证（默认）
    */
   determineEvidenceType(content: string): EvidenceType {
-    // 检查每种证据类型的模式
-    for (const [type, patterns] of this.evidenceTypePatterns.entries()) {
-      for (const pattern of patterns) {
-        if (pattern.test(content)) {
-          return type;
-        }
-      }
+    if (/物证|实物|照片|录像|录音|监控/.test(content)) {
+      return 'PHYSICAL_EVIDENCE';
     }
-
-    // 默认为书证
+    if (/证人|证言|陈述|作证|表示/.test(content)) {
+      return 'WITNESS_TESTIMONY';
+    }
+    if (/鉴定|鉴定人|鉴定意见|评估|检测意见/.test(content)) {
+      return 'EXPERT_OPINION';
+    }
     return 'DOCUMENTARY_EVIDENCE';
-  }
-
-  /**
-   * 初始化证据类型模式
-   */
-  private initializeEvidencePatterns(): Map<EvidenceType, RegExp[]> {
-    const patterns = new Map<EvidenceType, RegExp[]>();
-
-    patterns.set('PHYSICAL_EVIDENCE', [
-      /物证|实物|原物|样品/gi,
-      /照片|录像|录音|录音/gi,
-    ]);
-
-    patterns.set('DOCUMENTARY_EVIDENCE', [
-      /书证|合同|协议|票据|单据|证明|文件|档案|记录/gi,
-      /判决|裁定|决定|裁决|意见书/gi,
-    ]);
-
-    patterns.set('WITNESS_TESTIMONY', [
-      /证人|证言|陈述|证词/gi,
-      /当事人.*说|当事人.*陈述|原告.*表示|被告.*表示/gi,
-    ]);
-
-    patterns.set('EXPERT_OPINION', [
-      /鉴定|评估|检测|测试|化验|意见/gi,
-      /鉴定人|评估人|检测机构/gi,
-    ]);
-
-    patterns.set('AUDIO_VIDEO_EVIDENCE', [
-      /录像|视频|录音|音频/gi,
-      /监控|拍照|摄影/gi,
-    ]);
-
-    patterns.set('ELECTRONIC_EVIDENCE', [
-      /电子数据|聊天记录|邮件|短信|微信|支付宝/gi,
-      /截图|打印件|复制件/gi,
-    ]);
-
-    return patterns;
   }
 }

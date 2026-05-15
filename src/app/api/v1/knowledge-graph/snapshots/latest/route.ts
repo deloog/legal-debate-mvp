@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { snapshotService } from '@/lib/knowledge-graph/version-control';
 import { logger } from '@/lib/logger';
+import {
+  checkKnowledgeGraphPermission,
+  KnowledgeGraphAction,
+  KnowledgeGraphResource,
+} from '@/lib/middleware/knowledge-graph-permission';
 
 /**
  * GET /api/v1/knowledge-graph/snapshots/latest
@@ -18,6 +23,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: '未授权' },
       { status: 401 }
+    );
+  }
+
+  const permissionResult = await checkKnowledgeGraphPermission(
+    authUser.userId,
+    KnowledgeGraphAction.VIEW_STATS,
+    KnowledgeGraphResource.GRAPH
+  );
+
+  if (!permissionResult.hasPermission) {
+    return NextResponse.json(
+      { success: false, error: '权限不足' },
+      { status: 403 }
     );
   }
 

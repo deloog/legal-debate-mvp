@@ -28,6 +28,17 @@ const updateTemplateSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+function hasMissingApprover(
+  steps: Array<{
+    stepNumber: number;
+    approverRole: string;
+    approverId?: string;
+    approverName?: string;
+  }>
+): boolean {
+  return steps.some(step => !step.approverId?.trim());
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -118,6 +129,19 @@ export async function PUT(
 
     // 验证请求数据
     const validatedData = updateTemplateSchema.parse(body);
+
+    if (validatedData.steps && hasMissingApprover(validatedData.steps)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_APPROVER',
+            message: '审批模板中的每个步骤都必须指定具体审批人',
+          },
+        },
+        { status: 400 }
+      );
+    }
 
     // 更新审批模板
     const template = await prisma.approvalTemplate.update({

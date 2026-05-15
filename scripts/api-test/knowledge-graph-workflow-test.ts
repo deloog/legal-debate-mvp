@@ -101,6 +101,47 @@ interface GraphExpert {
   verified: boolean;
 }
 
+type HeadersWithSetCookie = Headers & {
+  getSetCookie?: () => string[];
+};
+
+interface BrowseGraphPayload {
+  nodes: Array<{
+    id: string;
+    lawName: string;
+    articleNumber: string;
+    category: string;
+    level?: number;
+  }>;
+  links: Array<{
+    source: string;
+    target: string;
+    relationType: string;
+    strength: number;
+  }>;
+}
+
+type BrowseGraphResponse = ApiResponse<BrowseGraphPayload> &
+  Partial<BrowseGraphPayload> & {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+
+function getSetCookieHeaders(headers: Headers): string[] {
+  const cookieHeaders = headers as HeadersWithSetCookie;
+  return typeof cookieHeaders.getSetCookie === 'function'
+    ? cookieHeaders.getSetCookie()
+    : [];
+}
+
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 // =============================================================================
 // 测试框架
 // =============================================================================
@@ -181,7 +222,7 @@ class ApiClient {
   }
 
   private parseCookies(response: Response) {
-    const setCookie = (response.headers as any).getSetCookie?.();
+    const setCookie = getSetCookieHeaders(response.headers);
     if (Array.isArray(setCookie)) {
       for (const cookie of setCookie) {
         const [nameValue] = cookie.split(';');
@@ -398,33 +439,7 @@ class ApiClient {
   }
 
   // Browse graph
-  async browseGraph(
-    cursor?: string,
-    limit = 20
-  ): Promise<
-    ApiResponse<{
-      nodes: Array<{
-        id: string;
-        lawName: string;
-        articleNumber: string;
-        category: string;
-        level?: number;
-      }>;
-      links: Array<{
-        source: string;
-        target: string;
-        relationType: string;
-        strength: number;
-      }>;
-    }> & {
-      pagination?: {
-        page: number;
-        pageSize: number;
-        total: number;
-        totalPages: number;
-      };
-    }
-  > {
+  async browseGraph(cursor?: string, limit = 20): Promise<BrowseGraphResponse> {
     const query = cursor
       ? `?page=${cursor}&pageSize=${limit}`
       : `?pageSize=${limit}`;
@@ -588,8 +603,8 @@ async function runTests() {
           );
           return;
         }
-      } catch (err: any) {
-        console.log(`   ⚠️  Login failed: ${err.message}`);
+      } catch (err: unknown) {
+        console.log(`   ⚠️  Login failed: ${toError(err).message}`);
         console.log(`   📝 Trying to register...`);
       }
     }
@@ -632,14 +647,14 @@ async function runTests() {
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
-      } catch (err: any) {
-        lastError = err;
+      } catch (err: unknown) {
+        lastError = toError(err);
 
         if (
-          !err.message?.includes('USER_EXISTS') &&
-          !err.message?.includes('邮箱已被注册')
+          !lastError.message?.includes('USER_EXISTS') &&
+          !lastError.message?.includes('邮箱已被注册')
         ) {
-          throw err;
+          throw lastError;
         }
 
         if (attempt === maxRetries - 1) {
@@ -731,7 +746,7 @@ async function runTests() {
     const response = await client.browseGraph(undefined, 10);
     // browse API 返回格式: { nodes, links, pagination }，没有 success 包装
     // 或者标准格式: { success, data: { nodes, links }, pagination }
-    const nodes = response.data?.nodes || (response as any).nodes || [];
+    const nodes = response.data?.nodes || response.nodes || [];
     const success =
       response.success !== undefined ? response.success : nodes.length > 0;
     assert(success, 'Browse should succeed');

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Crown, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Crown, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UpgradeComparison } from '@/components/membership/UpgradeComparison';
 import { PriceBreakdown } from '@/components/membership/PriceBreakdown';
@@ -36,8 +36,6 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-
   const [membershipData, setMembershipData] =
     useState<MembershipInfoResponse | null>(null);
   const [selectedTier, setSelectedTier] = useState<MembershipTierDef | null>(
@@ -46,6 +44,7 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     BillingCycle.MONTHLY
   );
+  const paymentMethodParam = searchParams.get('paymentMethod');
 
   const loadMembershipData = useCallback(async (): Promise<void> => {
     if (!tierId) {
@@ -108,32 +107,14 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
     try {
       setSubmitting(true);
       setError(null);
-
-      // 调用升级API
-      const response = await fetch('/api/memberships/upgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tierId: selectedTier.id,
-          billingCycle,
-          autoRenew: true,
-        }),
+      const params = new URLSearchParams({
+        tierId: selectedTier.id,
+        billingCycle,
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '升级失败，请稍后重试');
+      if (paymentMethodParam) {
+        params.set('paymentMethod', paymentMethodParam);
       }
-
-      // 跳转到支付页面
-      if (data.data?.order?.paymentUrl) {
-        window.location.href = data.data.order.paymentUrl;
-      } else {
-        setSuccess(true);
-      }
+      router.push(`/payment?${params.toString()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : '升级失败，请稍后重试');
     } finally {
@@ -146,10 +127,6 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
   };
 
   const handleBack = (): void => {
-    router.push('/membership');
-  };
-
-  const handleGoToMembership = (): void => {
     router.push('/membership');
   };
 
@@ -183,24 +160,6 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
               重试
             </Button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 成功状态
-  if (success) {
-    return (
-      <div className='container mx-auto flex min-h-screen items-center justify-center px-4 py-8'>
-        <div className='max-w-md text-center'>
-          <CheckCircle className='mx-auto mb-4 h-16 w-16 text-green-500' />
-          <h2 className='mb-2 text-2xl font-bold text-gray-900'>升级成功</h2>
-          <p className='mb-6 text-gray-600'>
-            恭喜！您的会员等级已升级成功，现在可以享受更多功能了。
-          </p>
-          <Button onClick={handleGoToMembership} className='w-full'>
-            前往会员中心
-          </Button>
         </div>
       </div>
     );

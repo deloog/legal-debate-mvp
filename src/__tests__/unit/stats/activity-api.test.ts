@@ -11,6 +11,7 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     user: {
       count: jest.fn(),
+      findMany: jest.fn(),
     },
     actionLog: {
       findMany: jest.fn(),
@@ -27,6 +28,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange } from '@/types/stats';
@@ -35,11 +42,13 @@ describe('用户活跃度API', () => {
   const mockGetAuthUser = getAuthUser as jest.Mock;
   const mockValidatePermissions = validatePermissions as jest.Mock;
   const mockUserCount = prisma.user.count as jest.Mock;
+  const mockUserFindMany = prisma.user.findMany as jest.Mock;
   const mockActionLogFindMany = prisma.actionLog.findMany as jest.Mock;
   const mockQueryRaw = prisma.$queryRaw as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUserFindMany.mockResolvedValue([{ id: 'user-1' }, { id: 'user-2' }]);
   });
 
   describe('GET /api/stats/users/activity', () => {
@@ -245,6 +254,50 @@ describe('用户活跃度API', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+    });
+
+    it('应该拒绝非法查询参数', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/users/activity?role=INVALID'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(400);
+      const json = await response.json();
+      expect(json.success).toBe(false);
+    });
+
+    it('应该统一排除软删除用户', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockUserCount.mockResolvedValue(0);
+      mockQueryRaw.mockResolvedValue([]).mockResolvedValue([]);
+      mockActionLogFindMany.mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/users/activity'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(mockUserCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            deletedAt: null,
+          }),
+        })
+      );
+      expect(mockActionLogFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: { in: ['user-1', 'user-2'] },
+          }),
+        })
+      );
     });
 
     it('应该处理查询错误', async () => {

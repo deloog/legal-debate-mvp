@@ -9,7 +9,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
-import { Prisma } from '@prisma/client';
+import { CaseStatus, CaseType, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -165,6 +165,68 @@ function parseQueryParams(
   };
 }
 
+type CaseAnalyticsFilters = Pick<
+  CaseAnalyticsQueryParams,
+  'caseType' | 'status'
+>;
+
+function toCaseType(value?: string): CaseType | undefined {
+  return Object.values(CaseType).includes(value as CaseType)
+    ? (value as CaseType)
+    : undefined;
+}
+
+function toCaseStatus(value?: string): CaseStatus | undefined {
+  return Object.values(CaseStatus).includes(value as CaseStatus)
+    ? (value as CaseStatus)
+    : undefined;
+}
+
+function buildCaseSqlConditions(
+  startDate: Date,
+  endDate: Date,
+  filters: CaseAnalyticsFilters = {}
+): Prisma.Sql[] {
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
+    Prisma.sql`"deletedAt" IS NULL`,
+  ];
+
+  const status = toCaseStatus(filters.status);
+  const caseType = toCaseType(filters.caseType);
+
+  if (status) {
+    conditions.push(Prisma.sql`"status" = ${status}`);
+  }
+
+  if (caseType) {
+    conditions.push(Prisma.sql`"type" = ${caseType}`);
+  }
+
+  return conditions;
+}
+
+function buildCaseWhere(
+  startDate: Date,
+  endDate: Date,
+  filters: CaseAnalyticsFilters = {},
+  statusOverride?: string
+): Prisma.CaseWhereInput {
+  const status = toCaseStatus(statusOverride ?? filters.status);
+  const caseType = toCaseType(filters.caseType);
+
+  return {
+    createdAt: {
+      gte: startDate,
+      lte: endDate,
+    },
+    deletedAt: null,
+    ...(status ? { status } : {}),
+    ...(caseType ? { type: caseType } : {}),
+  };
+}
+
 // =============================================================================
 // 核心函数：获取案件成功率分析
 // =============================================================================
@@ -175,16 +237,9 @@ function parseQueryParams(
 async function getCaseSuccessRate(
   startDate: Date,
   endDate: Date,
-  whereClause: Record<string, unknown>
+  filters: CaseAnalyticsFilters
 ): Promise<CaseSuccessRateData> {
-  const conditions: Prisma.Sql[] = [
-    Prisma.sql`"createdAt" >= ${startDate}`,
-    Prisma.sql`"createdAt" <= ${endDate}`,
-    Prisma.sql`"deletedAt" IS NULL`,
-  ];
-  if (whereClause.status) {
-    conditions.push(Prisma.sql`"status" = ${whereClause.status as string}`);
-  }
+  const conditions = buildCaseSqlConditions(startDate, endDate, filters);
 
   const totalCasesResult = await prisma.$queryRaw<Array<{ count: bigint }>>(
     Prisma.sql`SELECT COUNT(*) as count FROM "cases" WHERE ${Prisma.join(conditions, ' AND ')}`
@@ -300,16 +355,9 @@ async function getCaseSuccessRate(
 async function getCaseRevenueAnalysis(
   startDate: Date,
   endDate: Date,
-  whereClause: Record<string, unknown>
+  filters: CaseAnalyticsFilters
 ): Promise<CaseRevenueAnalysisData> {
-  const conditions: Prisma.Sql[] = [
-    Prisma.sql`"createdAt" >= ${startDate}`,
-    Prisma.sql`"createdAt" <= ${endDate}`,
-    Prisma.sql`"deletedAt" IS NULL`,
-  ];
-  if (whereClause.status) {
-    conditions.push(Prisma.sql`"status" = ${whereClause.status as string}`);
-  }
+  const conditions = buildCaseSqlConditions(startDate, endDate, filters);
 
   // 查询总体收益
   const revenueResults = await prisma.$queryRaw<
@@ -401,8 +449,10 @@ async function getCaseRevenueAnalysis(
  */
 async function getCaseTypeDistribution(
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  filters: CaseAnalyticsFilters
 ): Promise<CaseTypeDistributionData> {
+  const conditions = buildCaseSqlConditions(startDate, endDate, filters);
   const rawResults = await prisma.$queryRaw<
     Array<{ type: string; count: bigint }>
   >(
@@ -410,9 +460,7 @@ async function getCaseTypeDistribution(
       type,
       COUNT(*) as count
     FROM "cases"
-    WHERE "createdAt" >= ${startDate}
-      AND "createdAt" <= ${endDate}
-      AND "deletedAt" IS NULL
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY type
     ORDER BY count DESC`
   );
@@ -433,25 +481,11 @@ async function getCaseTypeDistribution(
   }));
 
   const completedCases = await prisma.case.count({
-    where: {
-      status: 'COMPLETED',
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-      deletedAt: null,
-    },
+    where: buildCaseWhere(startDate, endDate, filters, 'COMPLETED'),
   });
 
   const activeCases = await prisma.case.count({
-    where: {
-      status: 'ACTIVE',
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-      deletedAt: null,
-    },
+    where: buildCaseWhere(startDate, endDate, filters, 'ACTIVE'),
   });
 
   return {
@@ -476,16 +510,20 @@ async function getCaseTypeDistribution(
 /**
  * 获取活跃案件概览数据
  */
-async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
+async function getActiveCasesOverview(
+  filters: CaseAnalyticsFilters
+): Promise<ActiveCasesOverview> {
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const caseType = toCaseType(filters.caseType);
 
   // 查询活跃案件数
   const totalActiveCases = await prisma.case.count({
     where: {
       status: 'ACTIVE',
       deletedAt: null,
+      ...(caseType ? { type: caseType } : {}),
     },
   });
 
@@ -494,7 +532,9 @@ async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
     Prisma.sql`SELECT
       ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / (24 * 3600)), 2) as "avgDuration"
     FROM "cases"
-    WHERE "status" = 'COMPLETED' AND "deletedAt" IS NULL`
+    WHERE "status" = 'COMPLETED'
+      AND "deletedAt" IS NULL
+      ${caseType ? Prisma.sql`AND "type" = ${caseType}` : Prisma.empty}`
   );
 
   const averageDuration =
@@ -507,6 +547,7 @@ async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
     where: {
       status: 'ACTIVE',
       deletedAt: null,
+      ...(caseType ? { type: caseType } : {}),
       createdAt: {
         lte: thirtyDaysFromNow,
       },
@@ -520,6 +561,7 @@ async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
         gte: monthStart,
       },
       deletedAt: null,
+      ...(caseType ? { type: caseType } : {}),
     },
   });
 
@@ -540,16 +582,21 @@ async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
  */
 async function getCaseEfficiency(
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  filters: CaseAnalyticsFilters
 ): Promise<CaseEfficiencyData> {
+  const filtersWithoutStatus = { caseType: filters.caseType };
+  const conditions = buildCaseSqlConditions(
+    startDate,
+    endDate,
+    filtersWithoutStatus
+  );
   const cases = await prisma.$queryRaw<
     Array<{ id: string; createdAt: Date; updatedAt: Date }>
   >(
     Prisma.sql`SELECT id, "createdAt", "updatedAt" FROM "cases"
     WHERE "status" = 'COMPLETED'
-      AND "createdAt" >= ${startDate}
-      AND "createdAt" <= ${endDate}
-      AND "deletedAt" IS NULL`
+      AND ${Prisma.join(conditions, ' AND ')}`
   );
 
   const casesArray = Array.isArray(cases) ? cases : [];
@@ -593,9 +640,7 @@ async function getCaseEfficiency(
       ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 3600), 2) as "avgTime"
     FROM "cases"
     WHERE "status" = 'COMPLETED'
-      AND "createdAt" >= ${startDate}
-      AND "createdAt" <= ${endDate}
-      AND "deletedAt" IS NULL
+      AND ${Prisma.join(conditions, ' AND ')}
     GROUP BY DATE_TRUNC('day', "updatedAt")
     ORDER BY date ASC`
   );
@@ -673,15 +718,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       revenueAnalysis,
       activeCasesOverview,
     ] = await Promise.all([
-      getCaseTypeDistribution(startDate, endDate),
-      getCaseEfficiency(startDate, endDate),
-      getCaseSuccessRate(startDate, endDate, {
-        status: params.status,
-      }),
-      getCaseRevenueAnalysis(startDate, endDate, {
-        status: params.status,
-      }),
-      getActiveCasesOverview(),
+      getCaseTypeDistribution(startDate, endDate, params),
+      getCaseEfficiency(startDate, endDate, params),
+      getCaseSuccessRate(startDate, endDate, params),
+      getCaseRevenueAnalysis(startDate, endDate, params),
+      getActiveCasesOverview(params),
     ]);
 
     // 构建元数据

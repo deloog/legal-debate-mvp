@@ -8,6 +8,11 @@ import { prisma } from '@/lib/db';
 import { VerificationStatus, Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkKnowledgeGraphPermission,
+  KnowledgeGraphAction,
+  KnowledgeGraphResource,
+} from '@/lib/middleware/knowledge-graph-permission';
 
 export async function GET(request: NextRequest) {
   const authUser = await getAuthUser(request);
@@ -15,6 +20,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { success: false, error: '未授权，请先登录' },
       { status: 401 }
+    );
+  }
+
+  const permissionResult = await checkKnowledgeGraphPermission(
+    authUser.userId,
+    KnowledgeGraphAction.VIEW_STATS,
+    KnowledgeGraphResource.STATS
+  );
+  if (!permissionResult.hasPermission) {
+    return NextResponse.json(
+      { success: false, error: permissionResult.reason || '权限不足' },
+      { status: 403 }
     );
   }
 
@@ -100,6 +117,7 @@ export async function GET(request: NextRequest) {
           where,
           select: {
             sourceId: true,
+            targetId: true,
           },
         }),
         // 关系总数
@@ -114,7 +132,9 @@ export async function GET(request: NextRequest) {
       ]);
 
     // 计算有关系的法条数量（去重）
-    const uniqueArticleIds = new Set(relations.map(r => r.sourceId));
+    const uniqueArticleIds = new Set(
+      relations.flatMap(r => [r.sourceId, r.targetId])
+    );
     const articlesWithRelations = uniqueArticleIds.size;
 
     // 计算覆盖率
@@ -129,6 +149,7 @@ export async function GET(request: NextRequest) {
     const relationCounts = new Map<string, number>();
     relations.forEach(r => {
       relationCounts.set(r.sourceId, (relationCounts.get(r.sourceId) || 0) + 1);
+      relationCounts.set(r.targetId, (relationCounts.get(r.targetId) || 0) + 1);
     });
 
     // 获取热门法条（关系数最多的法条）

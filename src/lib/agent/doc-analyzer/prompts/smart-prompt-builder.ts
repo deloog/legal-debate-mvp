@@ -4,7 +4,7 @@
  * 核心功能：
  * - 根据文档特征动态选择提示词层级
  * - 大幅压缩提示词长度（节省40-75%上下文占用）
- * - 支持MINIMAL/STANDARD/COMPREHENSIVE三层架构
+ * - 支持MINIMAL/STANDARD/COMPREHENSIVE三个提示词复杂度级别
  */
 
 import { FewShotLibrary } from './few-shot-library';

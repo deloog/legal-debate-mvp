@@ -105,6 +105,7 @@ export class AlipayPayment {
       const bizContent = JSON.stringify(params);
 
       // 构建完整的API请求参数
+      // 注：notify_url 必须作为顶层参数，不能放在 biz_content 中（支付宝规范要求）
       const requestParams: Record<string, string> = {
         app_id: this.config!.appId,
         method: 'alipay.trade.precreate',
@@ -112,6 +113,7 @@ export class AlipayPayment {
         sign_type: 'RSA2',
         timestamp: generateTimestamp().toString(),
         version: '1.0',
+        notify_url: this.config!.notifyUrl,
         biz_content: bizContent,
       };
 

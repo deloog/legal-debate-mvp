@@ -18,9 +18,11 @@ import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { getContractAccess } from '@/app/api/lib/middleware/contract-auth';
 
 interface RiskAnalysisResult {
   contractId: string;
@@ -91,7 +93,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const permissionResult = await checkKnowledgeGraphPermission(
       authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
+      KnowledgeGraphResource.RELATION
     );
 
     if (!permissionResult.hasPermission) {
@@ -101,14 +103,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
 
-    // 验证合同是否存在
-    const contract = await prisma.contract.findUnique({
-      where: { id: contractId },
-      select: { id: true },
-    });
-
-    if (!contract) {
+    const access = await getContractAccess(contractId, authUser.userId);
+    if (!access.exists) {
       return NextResponse.json({ error: '合同不存在' }, { status: 404 });
+    }
+    if (!access.canRead) {
+      return NextResponse.json({ error: '无权访问此合同' }, { status: 403 });
     }
 
     // 获取合同关联的法条
@@ -288,7 +288,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     await logKnowledgeGraphAction({
       userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.RELATION,
       description: `企业风险分析: 合同${contractId}`,
       metadata: {
         contractId,

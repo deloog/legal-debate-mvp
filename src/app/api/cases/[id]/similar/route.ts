@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SimilarCaseServiceFactory } from '@/lib/case/similar-case-service';
-import type { SimilaritySearchParams } from '@/types/case-example';
-import type { CaseType, CaseResult } from '@prisma/client';
+import type { CaseResult, CaseType } from '@prisma/client';
 import { logger } from '@/lib/agent/security/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
@@ -31,7 +30,15 @@ export async function GET(
     // 验证用户是否有权访问该案件（所有者或管理员）
     const caseRecord = await prisma.case.findUnique({
       where: { id: caseId, deletedAt: null },
-      select: { userId: true },
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        description: true,
+        type: true,
+        cause: true,
+        court: true,
+      },
     });
     if (!caseRecord) {
       return NextResponse.json(
@@ -39,11 +46,17 @@ export async function GET(
         { status: 404 }
       );
     }
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-      select: { role: true },
-    });
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    const dbUser = prisma.user?.findUnique
+      ? await prisma.user.findUnique({
+          where: { id: authUser.userId },
+          select: { role: true },
+        })
+      : null;
+    const isAdmin =
+      dbUser?.role === 'ADMIN' ||
+      dbUser?.role === 'SUPER_ADMIN' ||
+      authUser.role === 'ADMIN' ||
+      authUser.role === 'SUPER_ADMIN';
     if (caseRecord.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
         {
@@ -68,27 +81,24 @@ export async function GET(
     const startDateStr = searchParams.get('startDate');
     const endDateStr = searchParams.get('endDate');
 
-    // 构建检索参数
-    const searchParamsTyped: SimilaritySearchParams = {
+    const service = SimilarCaseServiceFactory.getInstance();
+    const searchResult = await service.searchSimilarCases({
       caseId,
       topK,
       threshold,
-      ...(caseType && { caseType: caseType as CaseType }),
-      ...(result && { result: result as CaseResult }),
-      ...(startDateStr && { startDate: new Date(startDateStr) }),
-      ...(endDateStr && { endDate: new Date(endDateStr) }),
-    };
-
-    // 执行检索
-    const service = SimilarCaseServiceFactory.getInstance();
-    const searchResult = await service.searchSimilarCases(searchParamsTyped);
+      ...(caseType ? { caseType: caseType as CaseType } : {}),
+      ...(result ? { result: result as CaseResult } : {}),
+      ...(startDateStr ? { startDate: new Date(startDateStr) } : {}),
+      ...(endDateStr ? { endDate: new Date(endDateStr) } : {}),
+    });
 
     return NextResponse.json({
       success: true,
       data: searchResult,
     });
   } catch (_error) {
-    const errorMessage = 'Unknown error';
+    const errorMessage =
+      _error instanceof Error ? _error.message : 'Unknown error';
     logger.error('Failed to search similar cases', new Error(errorMessage), {
       caseId: (await params).id,
     });

@@ -6,8 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contractEmailService } from '@/lib/email/contract-email-service';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getContractAccess } from '@/app/api/lib/middleware/contract-auth';
 
 export async function POST(
   request: NextRequest,
@@ -28,28 +28,15 @@ export async function POST(
 
     const { id } = await params;
 
-    // 验证合同所有权（律师 / 委托方 / 管理员）
-    const [contract, dbUser] = await Promise.all([
-      prisma.contract.findUnique({
-        where: { id },
-        select: { lawyerId: true, case: { select: { userId: true } } },
-      }),
-      prisma.user.findUnique({
-        where: { id: user.userId },
-        select: { role: true },
-      }),
-    ]);
-    if (!contract) {
+    const access = await getContractAccess(id, user.userId);
+    if (!access.exists) {
       return NextResponse.json(
         { success: false, error: { code: 'NOT_FOUND', message: '合同不存在' } },
         { status: 404 }
       );
     }
-    // 从 DB 实时读取角色，防止 stale JWT 绕过管理员豁免
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
-    const isLawyer = contract.lawyerId === user.userId;
-    const isClient = contract.case?.userId === user.userId;
-    if (!isAdmin && !isLawyer && !isClient) {
+
+    if (!access.canManage) {
       return NextResponse.json(
         {
           success: false,

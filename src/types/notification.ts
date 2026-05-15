@@ -59,6 +59,7 @@ export const NotificationChannel = NotificationChannelValues;
  * 提醒类型
  */
 export type ReminderType =
+  | 'DEADLINE'
   | 'CASE_DEADLINE'
   | 'TASK_DUE'
   | 'HEARING_DATE'
@@ -72,6 +73,7 @@ export type ReminderType =
  * 提醒类型常量（运行时可用）
  */
 export const ReminderTypeValues = {
+  DEADLINE: 'DEADLINE',
   CASE_DEADLINE: 'CASE_DEADLINE',
   TASK_DUE: 'TASK_DUE',
   HEARING_DATE: 'HEARING_DATE',
@@ -159,8 +161,11 @@ export interface CreateReminderInput {
 export interface UpdateReminderInput {
   title?: string;
   content?: string;
+  message?: string;
   scheduledAt?: Date;
+  reminderTime?: Date;
   channel?: NotificationChannel;
+  channels?: NotificationChannel[];
   status?: ReminderStatus;
   metadata?: Record<string, unknown>;
 }
@@ -178,8 +183,8 @@ export interface ReminderQueryParams {
   channel?: NotificationChannel;
   startDate?: string;
   endDate?: string;
-  startTime?: string; // 兼容旧代码
-  endTime?: string; // 兼容旧代码
+  startTime?: string | Date; // 兼容旧代码
+  endTime?: string | Date; // 兼容旧代码
   sortBy?: string;
   sortOrder?: string;
 }

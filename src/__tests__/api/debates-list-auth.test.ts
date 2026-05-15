@@ -3,6 +3,20 @@ jest.mock('@/lib/ai/quota', () => ({
   recordAIUsage: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('@/lib/middleware/resource-permission', () => ({
+  checkResourceOwnership: jest.fn().mockResolvedValue({ hasPermission: true }),
+  isAdminRole: jest.fn(
+    (role: string) => role === 'ADMIN' || role === 'SUPER_ADMIN'
+  ),
+  ResourceType: {
+    CASE: 'CASE',
+  },
+}));
+
+jest.mock('@/lib/case/share-permission-validator', () => ({
+  canAccessSharedCase: jest.fn().mockResolvedValue({ hasAccess: true }),
+}));
+
 /**
  * 辩论列表API认证测试
  *
@@ -36,6 +50,7 @@ jest.mock('@/lib/db/prisma', () => ({
       findUnique: jest.fn(),
     },
     user: {
+      findUnique: jest.fn(),
       findFirst: jest.fn(),
     },
     actionLog: {
@@ -45,6 +60,11 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 import { prisma } from '@/lib/db/prisma';
+import {
+  checkResourceOwnership,
+  isAdminRole,
+} from '@/lib/middleware/resource-permission';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 
 // =============================================================================
 // 测试数据
@@ -131,6 +151,18 @@ describe('辩论列表API - 认证测试', () => {
     jest.clearAllMocks();
     const { checkAIQuota } = require('@/lib/ai/quota');
     (checkAIQuota as jest.Mock).mockResolvedValue({ allowed: true });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      role: mockAuthUser.role,
+    });
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
+    (canAccessSharedCase as jest.Mock).mockResolvedValue({
+      hasAccess: true,
+    });
+    (isAdminRole as jest.Mock).mockImplementation(
+      (role: string) => role === 'ADMIN' || role === 'SUPER_ADMIN'
+    );
   });
 
   afterEach(() => {
@@ -150,10 +182,10 @@ describe('辩论列表API - 认证测试', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data).toEqual({
-        error: '未认证',
-        message: '请先登录',
-      });
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('未认证');
+      expect(data.message).toBe('请先登录');
 
       expect(getAuthUser).toHaveBeenCalledWith(request);
       expect(prisma.debate.findMany).not.toHaveBeenCalled();
@@ -168,7 +200,9 @@ describe('辩论列表API - 认证测试', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('未认证');
     });
 
     it('无效token应返回401状态码', async () => {
@@ -184,7 +218,9 @@ describe('辩论列表API - 认证测试', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('未认证');
     });
 
     it('已认证请求应通过验证并继续处理', async () => {
@@ -249,7 +285,9 @@ describe('辩论列表API - 认证测试', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('未认证');
       expect(data.message).toBe('请先登录');
     });
 
@@ -376,7 +414,9 @@ describe('辩论列表API - 认证测试', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('未认证');
     });
   });
 
@@ -393,6 +433,9 @@ describe('辩论列表API - 认证测试', () => {
       };
 
       (getAuthUser as jest.Mock).mockResolvedValue(userPayload);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        role: userPayload.role,
+      });
       (prisma.debate.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.debate.count as jest.Mock).mockResolvedValue(0);
 
@@ -410,6 +453,9 @@ describe('辩论列表API - 认证测试', () => {
       };
 
       (getAuthUser as jest.Mock).mockResolvedValue(adminPayload);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        role: adminPayload.role,
+      });
       (prisma.debate.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.debate.count as jest.Mock).mockResolvedValue(0);
 
@@ -427,6 +473,9 @@ describe('辩论列表API - 认证测试', () => {
       };
 
       (getAuthUser as jest.Mock).mockResolvedValue(superAdminPayload);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        role: superAdminPayload.role,
+      });
       (prisma.debate.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.debate.count as jest.Mock).mockResolvedValue(0);
 
@@ -444,6 +493,9 @@ describe('辩论列表API - 认证测试', () => {
       };
 
       (getAuthUser as jest.Mock).mockResolvedValue(lawyerPayload);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        role: lawyerPayload.role,
+      });
       (prisma.debate.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.debate.count as jest.Mock).mockResolvedValue(0);
 

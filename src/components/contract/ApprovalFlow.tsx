@@ -106,17 +106,11 @@ export function ApprovalFlow({
   };
 
   const canApprove = (step: ApprovalStep) => {
-    // 如果步骤指定了审批人，只有该审批人可操作；否则任何登录用户均可操作
-    if (step.approverId) {
-      return (
-        currentUserId &&
-        step.status === StepStatus.PENDING &&
-        step.approverId === currentUserId &&
-        approval.status === ApprovalStatus.IN_PROGRESS
-      );
-    }
+    // 审批步骤必须指定审批人，未指定时视为配置错误，前端不提供可点击操作。
+    if (!step.approverId) return false;
+
     return (
-      !!currentUserId &&
+      step.approverId === currentUserId &&
       step.status === StepStatus.PENDING &&
       approval.status === ApprovalStatus.IN_PROGRESS
     );
@@ -246,6 +240,13 @@ export function ApprovalFlow({
                             </button>
                           </div>
                         )}
+
+                        {!step.approverId &&
+                          step.status === StepStatus.PENDING && (
+                            <p className='mt-3 text-xs text-red-500'>
+                              该审批步骤未指定审批人，当前流程配置有误，需由发起人撤回后重新发起。
+                            </p>
+                          )}
                       </div>
 
                       {/* 完成时间 */}

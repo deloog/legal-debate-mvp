@@ -427,7 +427,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
       const data = await response.json();
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(503);
       expect(data.success).toBe(false);
       expect(data.error).toBeDefined();
     });

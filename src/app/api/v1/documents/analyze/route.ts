@@ -1,27 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocAnalyzerAgentAdapter } from '../../../../../lib/agent/doc-analyzer/adapter';
-import { AgentContext, TaskPriority } from '../../../../../types/agent';
-import { resolve, sep } from 'path';
+import type { Prisma } from '@prisma/client';
+import { DocAnalyzerAgentAdapter } from '@/lib/agent/doc-analyzer/adapter';
+import { AgentContext, TaskPriority } from '@/types/agent';
+import { join } from 'path';
 import { existsSync } from 'fs';
-import { retryDocAnalysis } from '../../../../../lib/ai/retry-handler';
+import { retryDocAnalysis } from '@/lib/ai/retry-handler';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
 import { prisma } from '@/lib/db';
 import { logAIAction } from '@/lib/audit/logger';
 import { logger } from '@/lib/logger';
 import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
+import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
 
-// =============================================================================
-// API处理函数
-// =============================================================================
+function toUserFriendlyError(raw: string): string {
+  if (/fetch failed|ECONNREFUSED|ETIMEDOUT|timeout|network|socket/i.test(raw)) {
+    return 'AI 服务暂时不可用，请稍候重试';
+  }
+  if (/rate.?limit|quota|429|too many/i.test(raw)) {
+    return 'AI 服务请求过于频繁，请稍候重试';
+  }
+  if (/unauthorized|401|api.?key|invalid.*key/i.test(raw)) {
+    return 'AI 服务配置异常，请联系管理员';
+  }
+  return 'AI 分析失败，请稍候重试';
+}
+
+async function resolveDocumentContext(
+  authUserId: string,
+  documentId: string
+): Promise<
+  | {
+      ok: true;
+      document: {
+        id: string;
+        caseId: string;
+        filePath: string;
+        fileType: string;
+      };
+    }
+  | { ok: false; response: NextResponse }
+> {
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: {
+      id: true,
+      caseId: true,
+      filePath: true,
+      fileType: true,
+      deletedAt: true,
+    },
+  });
+
+  if (!document || document.deletedAt) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: '文档不存在' },
+        { status: 404 }
+      ),
+    };
+  }
+
+  const access = await canAccessSharedCase(
+    authUserId,
+    document.caseId,
+    CasePermission.VIEW_DOCUMENTS
+  );
+  if (!access.hasAccess) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: access.reason || '无权限分析该文档' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return {
+    ok: true,
+    document: {
+      id: document.id,
+      caseId: document.caseId,
+      filePath: document.filePath,
+      fileType: document.fileType,
+    },
+  };
+}
 
 export async function POST(request: NextRequest) {
-  // 速率限制（AI 分析为高成本操作）
   const rateLimitResponse = await moderateRateLimiter(request);
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    // 获取认证用户
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -30,42 +103,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 从 DB 重新获取 role，避免 stale JWT 导致配额绕过
     const dbUser = await prisma.user.findUnique({
       where: { id: authUser.userId },
       select: { role: true },
     });
     const userRole = dbUser?.role ?? 'FREE';
 
-    // 检查AI配额
     const quotaCheck = await checkAIQuota(authUser.userId, userRole);
     if (!quotaCheck.allowed) {
       return NextResponse.json(
-        {
-          success: false,
-          error: quotaCheck.reason,
-        },
+        { success: false, error: quotaCheck.reason },
         { status: 429 }
       );
     }
 
-    // 解析请求体
     const body = await request.json();
+    const documentId = body?.documentId as string | undefined;
+    const options = body?.options as Record<string, unknown> | undefined;
 
-    const { documentId, filePath, fileType, options } = body;
-
-    // 验证必需参数
-    if (!documentId || !filePath || !fileType) {
+    if (!documentId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: '缺少必需参数: documentId, filePath, fileType',
-        },
+        { success: false, error: '缺少必需参数: documentId' },
         { status: 400 }
       );
     }
 
-    // 验证文件类型
+    const contextResult = await resolveDocumentContext(
+      authUser.userId,
+      documentId
+    );
+    if (!contextResult.ok) {
+      return contextResult.response;
+    }
+
+    const { document } = contextResult;
+    const fileType = document.fileType.toUpperCase();
     const supportedTypes = ['PDF', 'DOCX', 'DOC', 'TXT', 'IMAGE'];
     if (!supportedTypes.includes(fileType)) {
       return NextResponse.json(
@@ -77,40 +149,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 验证文档所有权（防止越权分析他人文档）
-    const doc = await prisma.document.findUnique({
-      where: { id: documentId },
-      select: { userId: true },
-    });
-    if (!doc) {
-      return NextResponse.json(
-        { success: false, error: '文档不存在' },
-        { status: 404 }
-      );
-    }
-    if (doc.userId !== authUser.userId) {
-      return NextResponse.json(
-        { success: false, error: '无权限分析该文档' },
-        { status: 403 }
-      );
-    }
-
-    // 构建完整文件路径，并防止路径穿越攻击
-    const uploadsDir = resolve(process.cwd(), 'uploads');
-    const normalizedPath = filePath.startsWith('/')
-      ? filePath.substring(1)
-      : filePath;
-    const fullFilePath = resolve(uploadsDir, normalizedPath);
-
-    // 边界校验：确保解析后路径仍在 uploads 目录内
-    if (!fullFilePath.startsWith(uploadsDir + sep)) {
-      return NextResponse.json(
-        { success: false, error: '非法文件路径' },
-        { status: 400 }
-      );
-    }
-
-    // 检查文件是否存在
+    const fullFilePath = join(
+      process.cwd(),
+      'private_uploads',
+      document.filePath
+    );
     if (!existsSync(fullFilePath)) {
       return NextResponse.json(
         {
@@ -121,13 +164,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建DocAnalyzer Agent实例（测试环境使用Mock）
+    await prisma.document.update({
+      where: { id: documentId },
+      data: { analysisStatus: 'PROCESSING', analysisError: null },
+    });
+
     const useMock =
       process.env.NODE_ENV === 'test' || process.env.USE_MOCK_AI === 'true';
     const agent = new DocAnalyzerAgentAdapter(useMock);
     await agent.initialize();
 
-    // 构建Agent执行上下文
     const context: AgentContext = {
       task: 'document_analysis',
       taskType: 'document_parse',
@@ -149,38 +195,32 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
       },
       options: {
-        timeout: 60000, // 60秒超时
+        timeout: 60000,
         retryAttempts: 2,
       },
     };
 
-    // 执行文档分析（带重试机制）
     const startTime = Date.now();
-
-    // 使用重试机制执行文档分析
     const retryResult = await retryDocAnalysis(async () => {
       return await agent.execute(context);
     });
-
     const processingTime = Date.now() - startTime;
-
-    // 清理Agent资源
     await agent.cleanup();
 
-    // 记录重试和降级信息（如果适用）
-    if (retryResult.isFallback) {
-      logger.warn(
-        `[文档分析API] 使用Mock降级，重试次数: ${retryResult.attempts}`
-      );
-    } else if (retryResult.attempts > 1) {
-      logger.info(`[文档分析API] 重试成功，总次数: ${retryResult.attempts}`);
-    }
-
-    // 返回分析结果
     if (retryResult.success) {
       const result = retryResult.result;
+      const analysisResult = (result.data ??
+        null) as unknown as Prisma.InputJsonValue;
+      await prisma.document.update({
+        where: { id: documentId },
+        data: {
+          analysisStatus: 'COMPLETED',
+          analysisResult,
+          analysisError: null,
+          updatedAt: new Date(),
+        },
+      });
 
-      // 记录AI使用
       await recordAIUsage({
         userId: authUser.userId,
         type: 'document_analysis',
@@ -190,7 +230,6 @@ export async function POST(request: NextRequest) {
         success: true,
       });
 
-      // 记录审计日志
       await logAIAction({
         userId: authUser.userId,
         actionType: 'ANALYZE_DOCUMENT',
@@ -199,6 +238,13 @@ export async function POST(request: NextRequest) {
         request,
         responseStatus: 200,
         executionTime: processingTime,
+      });
+
+      runAfterAnalysisHooks(document.caseId).catch(err => {
+        logger.warn(
+          `[documents/analyze] 后置钩子 fire-and-forget 失败 [caseId=${document.caseId}]:`,
+          err
+        );
       });
 
       return NextResponse.json({
@@ -215,35 +261,41 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-    } else {
-      const errorMessage = retryResult.error?.message || '文档分析失败';
-
-      // 记录AI使用（失败）
-      await recordAIUsage({
-        userId: authUser.userId,
-        type: 'document_analysis',
-        provider: 'system',
-        tokensUsed: 0,
-        duration: processingTime,
-        success: false,
-        error: errorMessage,
-      });
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: errorMessage,
-          details: {
-            documentId,
-            processingTime,
-            error: retryResult.error,
-            isFallback: retryResult.isFallback,
-            attempts: retryResult.attempts,
-          },
-        },
-        { status: 500 }
-      );
     }
+
+    const errorMessage = retryResult.error?.message || '文档分析失败';
+    await prisma.document.update({
+      where: { id: documentId },
+      data: {
+        analysisStatus: 'FAILED',
+        analysisError: toUserFriendlyError(errorMessage),
+        updatedAt: new Date(),
+      },
+    });
+
+    await recordAIUsage({
+      userId: authUser.userId,
+      type: 'document_analysis',
+      provider: 'system',
+      tokensUsed: 0,
+      duration: processingTime,
+      success: false,
+      error: errorMessage,
+    });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: toUserFriendlyError(errorMessage),
+        details: {
+          documentId,
+          processingTime,
+          isFallback: retryResult.isFallback,
+          attempts: retryResult.attempts,
+        },
+      },
+      { status: 500 }
+    );
   } catch (error) {
     logger.error('文档分析API错误:', error);
     return NextResponse.json(
@@ -259,10 +311,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// =============================================================================
-// GET方法 - 获取分析状态（可选功能）
-// =============================================================================
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const documentId = searchParams.get('documentId');
@@ -277,8 +325,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 这里可以实现查询分析状态的逻辑
-  // 目前返回基本信息
   return NextResponse.json({
     success: true,
     data: {
@@ -286,14 +332,10 @@ export async function GET(request: NextRequest) {
       status: 'ready',
       message: '文档分析服务已就绪，请使用POST方法提交分析请求',
       supportedFormats: ['PDF', 'DOCX', 'DOC', 'TXT'],
-      ocrSupported: false, // 暂时不支持图片OCR
+      ocrSupported: false,
     },
   });
 }
-
-// =============================================================================
-// OPTIONS方法 - 处理CORS预检请求
-// =============================================================================
 
 export async function OPTIONS() {
   return new NextResponse(null, {

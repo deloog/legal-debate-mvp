@@ -41,7 +41,7 @@ export default function PaymentProcessingPage() {
           count++;
           setPollingCount(count);
 
-          const url = new URL('/api/payment/query', window.location.origin);
+          const url = new URL('/api/payments/query', window.location.origin);
           if (orderIdParam) {
             url.searchParams.append('orderId', orderIdParam);
           } else if (orderNoParam) {

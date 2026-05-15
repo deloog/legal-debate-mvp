@@ -15,6 +15,7 @@ jest.mock('@/lib/db/prisma', () => ({
       count: jest.fn(),
       groupBy: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
     },
     case: {
@@ -34,6 +35,12 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 
 const mockUserId = 'user-123';
@@ -42,6 +49,10 @@ describe('GET /api/analytics/clients', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getAuthUser as jest.Mock).mockResolvedValue({ userId: mockUserId });
+    (prisma.client.findFirst as jest.Mock).mockResolvedValue({
+      id: 'client-1',
+      createdAt: new Date(),
+    });
   });
 
   describe('身份验证', () => {
@@ -327,6 +338,58 @@ describe('GET /api/analytics/clients', () => {
       expect(data.valueAnalysis).toBeDefined();
       expect(data.valueAnalysis.totalValue).toBe(250000);
       expect(data.valueAnalysis.averageValueScore).toBeGreaterThan(0);
+    });
+
+    it('计算客户价值时应限制为当前用户的未删除案件', async () => {
+      (prisma.client.count as jest.Mock).mockResolvedValue(1);
+      (prisma.client.groupBy as jest.Mock).mockResolvedValue([
+        { status: ClientStatus.ACTIVE, _count: 1 },
+      ]);
+      (prisma.client.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'client-1',
+          name: 'Client 1',
+          userId: mockUserId,
+          createdAt: new Date(),
+          _count: { cases: 1 },
+          cases: [{ amount: 100000 }],
+        },
+      ]);
+      (prisma.case.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'case-1',
+          amount: 100000,
+          createdAt: new Date(),
+          status: 'COMPLETED',
+        },
+      ]);
+      (prisma.communicationRecord.count as jest.Mock).mockResolvedValue(0);
+      (prisma.followUpTask.findMany as jest.Mock).mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/analytics/clients'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(prisma.case.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            clientId: 'client-1',
+            userId: mockUserId,
+            deletedAt: null,
+          },
+        })
+      );
+      expect(prisma.client.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            id: 'client-1',
+            userId: mockUserId,
+            deletedAt: null,
+          },
+        })
+      );
     });
   });
 

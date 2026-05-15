@@ -10,6 +10,8 @@ import { prisma } from '@/lib/db';
 import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 获取辩论推荐法条
@@ -113,8 +115,12 @@ export async function GET(
       );
     }
 
-    // 校验案件归属（防止 IDOR）
-    if (caseInfo.userId !== authUser.userId) {
+    const access = await canAccessDebateByCasePermission(
+      authUser.userId,
+      debateId,
+      CasePermission.VIEW_DEBATES
+    );
+    if (!access.allowed) {
       return NextResponse.json(
         { success: false, error: '无权访问此辩论' },
         { status: 403 }

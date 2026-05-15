@@ -31,6 +31,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { DateGranularity, TimeRange } from '@/types/stats';
@@ -173,6 +179,34 @@ describe('辩论生成次数统计API', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+    });
+
+    it('统计总论点数时应复用辩论状态和软删除过滤', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockDebateCount.mockResolvedValue(2);
+      mockArgumentCount.mockResolvedValue(6);
+      mockDebateFindMany.mockResolvedValue([]);
+      mockDebateRoundFindMany.mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/debates/generation-count?status=COMPLETED'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(mockArgumentCount).toHaveBeenCalledWith({
+        where: {
+          createdAt: expect.any(Object),
+          round: {
+            debate: {
+              deletedAt: null,
+              status: 'COMPLETED',
+            },
+          },
+        },
+      });
     });
 
     it('应该正确计算增长率', async () => {

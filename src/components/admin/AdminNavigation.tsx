@@ -16,6 +16,7 @@ import {
   Settings,
   Activity,
   Brain,
+  HardDrive,
 } from 'lucide-react';
 
 interface NavItem {
@@ -71,6 +72,16 @@ const navigation: NavSection[] = [
       {
         label: '告警监控',
         href: '/admin/alerts',
+        icon: <ShieldAlert className='h-5 w-5' />,
+      },
+      {
+        label: '系统支撑与监控',
+        href: '/admin/system-monitoring',
+        icon: <HardDrive className='h-5 w-5' />,
+      },
+      {
+        label: '系统防护控制台',
+        href: '/admin/system-monitoring/control',
         icon: <ShieldAlert className='h-5 w-5' />,
       },
       {

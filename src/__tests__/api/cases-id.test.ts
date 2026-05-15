@@ -44,6 +44,7 @@ mockCreatePermissionErrorResponse.mockImplementation((reason: string) => {
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     case: {
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -103,6 +104,7 @@ describe('Cases ID API', () => {
       };
 
       mockedPrisma.case.findUnique.mockResolvedValue(mockCase);
+      mockedPrisma.case.findFirst.mockResolvedValue(mockCase);
 
       const request = createMockRequest(
         `http://localhost:3000/api/v1/cases/${mockCaseId}`
@@ -130,7 +132,7 @@ describe('Cases ID API', () => {
     });
 
     it('should return 404 for non-existent case', async () => {
-      mockedPrisma.case.findUnique.mockResolvedValue(null);
+      mockedPrisma.case.findFirst.mockResolvedValue(null);
 
       const request = createMockRequest(
         `http://localhost:3000/api/v1/cases/${mockCaseId}`

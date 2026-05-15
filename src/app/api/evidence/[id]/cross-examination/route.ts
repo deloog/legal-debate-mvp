@@ -173,16 +173,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     logger.error('质证预判API错误:', error);
 
+    const message = error instanceof Error ? error.message : '服务器内部错误';
+    const isAIUnavailable =
+      /api.?key|401|unauthorized|fetch failed|timeout|network|deepseek|zhipu|ai/i.test(
+        message
+      );
+
     // 返回错误响应
     return NextResponse.json(
       {
         success: false,
         error: {
-          code: 'INTERNAL_ERROR',
-          message: '服务器内部错误',
+          code: isAIUnavailable ? 'AI_UNAVAILABLE' : 'INTERNAL_ERROR',
+          message: isAIUnavailable
+            ? 'AI 服务暂时不可用，请稍后重试'
+            : '服务器内部错误',
         },
       },
-      { status: 500 }
+      { status: isAIUnavailable ? 503 : 500 }
     );
   }
 }

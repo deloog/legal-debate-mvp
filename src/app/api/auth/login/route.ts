@@ -12,6 +12,7 @@ import type { AuthResponse, LoginRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'crypto';
 
 /**
  * POST /api/auth/login
@@ -98,21 +99,31 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       },
     });
 
+    // 先创建 session，使用 session.id 绑定 access/refresh token
+    const sessionExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天后过期
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        sessionToken: `pending:${randomUUID()}`,
+        expires: sessionExpires,
+      },
+    });
+
     // 生成 JWT Token
     const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
+      jti: session.id,
     };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    // 创建session记录
-    await prisma.session.create({
+    // 用真实 refreshToken 更新 placeholder sessionToken
+    await prisma.session.update({
+      where: { id: session.id },
       data: {
-        userId: user.id,
         sessionToken: refreshToken,
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7天后过期
       },
     });
 

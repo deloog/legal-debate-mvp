@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ComplianceService } from '@/lib/compliance/compliance-service';
+import {
+  ComplianceAccessError,
+  ComplianceService,
+} from '@/lib/compliance/compliance-service';
 import type { GetComplianceDashboardResponse } from '@/types/compliance';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -38,6 +41,19 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof ComplianceAccessError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        },
+        { status: error.status }
+      );
+    }
+
     logger.error('获取合规仪表盘错误:', error);
 
     return NextResponse.json(

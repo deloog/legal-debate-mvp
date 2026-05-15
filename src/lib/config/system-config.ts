@@ -64,7 +64,21 @@ export async function getConfig<T>(key: string, defaultValue: T): Promise<T> {
   if (cached !== null) return cached as T;
 
   try {
-    const record = await prisma.systemConfig.findUnique({ where: { key } });
+    const systemConfigModel = (
+      prisma as typeof prisma & {
+        systemConfig?: {
+          findUnique: (args: { where: { key: string } }) => Promise<{
+            value: unknown;
+          } | null>;
+        };
+      }
+    ).systemConfig;
+
+    if (!systemConfigModel?.findUnique) {
+      return defaultValue;
+    }
+
+    const record = await systemConfigModel.findUnique({ where: { key } });
     if (!record) return defaultValue;
 
     const value = record.value as T;
@@ -152,6 +166,16 @@ export async function getFreeDebateMonthlyLimit(): Promise<number> {
 /** 免费用户AI配额（默认100） */
 export async function getFreeAiQuota(): Promise<number> {
   return getNumberConfig('business.ai_quota_free_monthly', 100);
+}
+
+/** 企业用户AI配额（默认10000） */
+export async function getEnterpriseAiQuota(): Promise<number> {
+  return getNumberConfig('business.ai_quota_enterprise_monthly', 10000);
+}
+
+/** 律师用户AI配额（默认2000） */
+export async function getLawyerAiQuota(): Promise<number> {
+  return getNumberConfig('business.ai_quota_lawyer_monthly', 2000);
 }
 
 /** 律师认证宽限期（天，默认7） */

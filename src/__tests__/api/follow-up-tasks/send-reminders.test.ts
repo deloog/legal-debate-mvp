@@ -4,6 +4,8 @@
 
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/follow-up-tasks/send-reminders/route';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import {
   sendFollowUpReminders,
   getFollowUpRemindersStats,
@@ -12,6 +14,18 @@ import {
 } from '@/lib/cron/send-follow-up-reminders';
 
 // Mock dependencies
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    user: {
+      findUnique: jest.fn(),
+    },
+  },
+}));
+
 jest.mock('@/lib/cron/send-follow-up-reminders', () => ({
   sendFollowUpReminders: jest.fn(),
   getFollowUpRemindersStats: jest.fn(),
@@ -30,6 +44,8 @@ jest.mock('@/lib/agent/security/logger', () => ({
 describe('GET /api/follow-up-tasks/send-reminders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({ userId: 'admin-1' });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: 'ADMIN' });
   });
 
   it('应该返回统计信息', async () => {
@@ -127,13 +143,18 @@ describe('GET /api/follow-up-tasks/send-reminders', () => {
 
     expect(response.status).toBe(500);
     expect(data.success).toBe(false);
-    expect(data.error).toBe('数据库错误');
+    expect(data.error).toEqual({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: '数据库错误',
+    });
   });
 });
 
 describe('POST /api/follow-up-tasks/send-reminders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({ userId: 'admin-1' });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: 'ADMIN' });
   });
 
   it('应该发送跟进提醒', async () => {
@@ -208,7 +229,10 @@ describe('POST /api/follow-up-tasks/send-reminders', () => {
 
     expect(response.status).toBe(500);
     expect(data.success).toBe(false);
-    expect(data.error).toBe('发送失败');
+    expect(data.error).toEqual({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: '发送失败',
+    });
   });
 
   it('应该处理标记过期任务的错误', async () => {
@@ -227,6 +251,9 @@ describe('POST /api/follow-up-tasks/send-reminders', () => {
 
     expect(response.status).toBe(500);
     expect(data.success).toBe(false);
-    expect(data.error).toBe('标记失败');
+    expect(data.error).toEqual({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: '标记失败',
+    });
   });
 });

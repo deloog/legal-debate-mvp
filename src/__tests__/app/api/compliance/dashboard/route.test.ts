@@ -5,22 +5,43 @@
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/compliance/dashboard/route';
-import {
-  ComplianceCategory,
-  ComplianceCheckStatus,
-  CompliancePriority,
-} from '@/types/compliance';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { ComplianceCategory, CompliancePriority } from '@/types/compliance';
 
 // Mock合规服务
 jest.mock('@/lib/compliance/compliance-service', () => ({
+  ComplianceAccessError: class ComplianceAccessError extends Error {
+    code: string;
+    status: number;
+
+    constructor(code: string, message: string, status: number) {
+      super(message);
+      this.name = 'ComplianceAccessError';
+      this.code = code;
+      this.status = status;
+    }
+  },
   ComplianceService: {
     getDashboard: jest.fn(),
+  },
+}));
+
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
   },
 }));
 
 describe('合规管理仪表盘API测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'enterprise-user-1',
+    });
   });
 
   describe('GET /api/compliance/dashboard', () => {
@@ -104,7 +125,48 @@ describe('合规管理仪表盘API测试', () => {
       expect(data.data).toBeDefined();
       expect(data.data.overallScore).toBe(85);
       expect(data.data.trend).toBe('up');
-      expect(ComplianceService.getDashboard).toHaveBeenCalled();
+      expect(ComplianceService.getDashboard).toHaveBeenCalledWith(
+        'enterprise-user-1'
+      );
+    });
+
+    it('未登录时应返回401', async () => {
+      (getAuthUser as jest.Mock).mockResolvedValueOnce(null);
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/compliance/dashboard'
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('企业认证未通过时应返回403', async () => {
+      const { ComplianceAccessError, ComplianceService } =
+        await import('@/lib/compliance/compliance-service');
+
+      (ComplianceService.getDashboard as jest.Mock).mockRejectedValue(
+        new ComplianceAccessError(
+          'ENTERPRISE_NOT_APPROVED',
+          '企业认证尚未通过，暂不可使用合规管理功能',
+          403
+        )
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/compliance/dashboard'
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('ENTERPRISE_NOT_APPROVED');
     });
 
     it('应该处理服务错误', async () => {

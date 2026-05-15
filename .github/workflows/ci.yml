@@ -55,7 +55,7 @@ jobs:
         run: npm ci
 
       - name: Copy test environment
-        run: cp .env.test .env.local
+        run: cp .env.test.example .env.local
 
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -162,7 +162,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Copy test environment
-        run: cp .env.test .env.local
+        run: cp .env.test.example .env.local
 
       - name: Generate Prisma Client
         run: npx prisma generate

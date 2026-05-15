@@ -179,6 +179,7 @@ export function ReminderList({ userId }: ReminderListProps) {
   const getReminderTypeLabel = (type: ReminderType): string => {
     const typeLabels: Record<ReminderType, string> = {
       COURT_SCHEDULE: '法庭日程',
+      DEADLINE: '截止日期',
       CASE_DEADLINE: '截止日期',
       TASK_DUE: '任务提醒',
       HEARING_DATE: '开庭日期',
@@ -217,6 +218,7 @@ export function ReminderList({ userId }: ReminderListProps) {
   const getTypeColor = (type: ReminderType): string => {
     const typeColors: Record<ReminderType, string> = {
       COURT_SCHEDULE: 'bg-red-100 text-red-800',
+      DEADLINE: 'bg-orange-100 text-orange-800',
       CASE_DEADLINE: 'bg-orange-100 text-orange-800',
       TASK_DUE: 'bg-green-100 text-green-800',
       HEARING_DATE: 'bg-red-100 text-red-800',

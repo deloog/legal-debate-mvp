@@ -1,190 +1,47 @@
+/** @legacy 优先使用 /api/payments/query，此路由保留以向后兼容 */
 /**
- * 支付宝订单查询API
+ * 支付宝订单查询API（兼容旧入口）
  * POST /api/payments/alipay/query
+ *
+ * 说明：
+ * - 旧入口使用 POST + body(orderId/orderNo)
+ * - 统一入口使用 GET /api/payments/query?orderId=...&orderNo=...&syncFromPayment=true
+ * - 此处做参数转换并转发到统一实现，避免支付查询语义分叉
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/middleware/auth';
-import { getAlipay } from '@/lib/payment/alipay';
-import { isPaymentSuccess, isPaymentFailed } from '@/lib/payment/alipay-utils';
-import {
-  handlePaymentSuccess,
-  handlePaymentFailure,
-} from '@/lib/order/order-service';
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { NextRequest } from 'next/server';
+import { GET as queryPayment } from '@/app/api/payments/query/route';
 
-/**
- * POST /api/payments/alipay/query
- * 查询支付宝订单
- */
 export async function POST(request: NextRequest) {
+  let orderId: string | undefined;
+  let orderNo: string | undefined;
+
   try {
-    const authUser = await getAuthUser(request);
-    if (!authUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: '未授权',
-          error: 'UNAUTHORIZED',
-        },
-        { status: 401 }
-      );
-    }
-
-    // 解析请求体
-    const body = await request.json();
-    const { orderNo, orderId } = body;
-
-    // 验证必填字段
-    if (!orderNo && !orderId) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: '订单号或订单ID不能为空',
-          error: 'MISSING_ORDER_ID',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 获取订单号（IDOR 防护：查询时同时校验所有权）
-    let targetOrderNo = orderNo;
-    if (!targetOrderNo) {
-      // 根据orderId查询订单，同时验证所有权防止 IDOR
-      const order = await prisma.order.findFirst({
-        where: { id: orderId, userId: authUser.userId },
-      });
-
-      if (!order) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: '订单不存在',
-            error: 'ORDER_NOT_FOUND',
-          },
-          { status: 404 }
-        );
-      }
-
-      targetOrderNo = order.orderNo;
-    }
-
-    // 调用支付宝API查询订单
-    try {
-      const alipay = getAlipay();
-      const queryResponse = await alipay.queryOrder({
-        outTradeNo: targetOrderNo,
-      });
-
-      // 判断响应是否成功
-      if (queryResponse.code !== '10000') {
-        logger.error('[API] 支付宝查询订单失败:', queryResponse);
-        return NextResponse.json(
-          {
-            success: false,
-            message: queryResponse.msg || '查询订单失败',
-            error: 'ALIPAY_ERROR',
-          },
-          { status: 500 }
-        );
-      }
-
-      // 查询数据库订单
-      const order = await prisma.order.findUnique({
-        where: { orderNo: targetOrderNo },
-        include: {
-          membershipTier: true,
-        },
-      });
-
-      if (!order) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: '订单不存在',
-            error: 'ORDER_NOT_FOUND',
-          },
-          { status: 404 }
-        );
-      }
-
-      // 判断是否需要更新订单状态
-      const tradeStatus = queryResponse.tradeStatus;
-
-      // 如果订单已支付但数据库未更新
-      if (isPaymentSuccess(tradeStatus) && order.status !== 'PAID') {
-        try {
-          await handlePaymentSuccess(
-            order.id,
-            queryResponse.tradeNo,
-            queryResponse.tradeNo
-          );
-          logger.info('[API] 支付宝订单状态更新成功:', targetOrderNo);
-        } catch (error) {
-          logger.error('[API] 更新支付宝订单状态失败:', error);
-        }
-      }
-      // 如果订单已关闭但数据库未更新
-      else if (
-        isPaymentFailed(tradeStatus) &&
-        order.status !== 'FAILED' &&
-        order.status !== 'CANCELLED'
-      ) {
-        try {
-          await handlePaymentFailure(order.id, 'TRADE_CLOSED', '交易已关闭');
-          logger.info('[API] 支付宝订单状态更新成功:', targetOrderNo);
-        } catch (error) {
-          logger.error('[API] 更新支付宝订单状态失败:', error);
-        }
-      }
-
-      // 返回查询结果
-      return NextResponse.json({
-        success: true,
-        message: '查询成功',
-        data: {
-          order: {
-            id: order.id,
-            orderNo: order.orderNo,
-            amount: Number(order.amount),
-            currency: order.currency,
-            status: order.status,
-            expiredAt: order.expiredAt,
-            paidAt: order.paidAt,
-            createdAt: order.createdAt,
-            membershipTier: {
-              id: order.membershipTier.id,
-              name: order.membershipTier.name,
-              displayName: order.membershipTier.displayName,
-            },
-          },
-          alipayStatus: tradeStatus,
-          alipayTradeNo: queryResponse.tradeNo,
-          alipayBuyerId: queryResponse.buyerId,
-          alipayBuyerLogonId: queryResponse.buyerLogonId,
-        },
-      });
-    } catch (error) {
-      logger.error('[API] 调用支付宝查询失败:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          message: '查询订单失败',
-          error: 'ALIPAY_ERROR',
-        },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    logger.error('[API] 查询支付宝订单失败:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: '查询订单失败',
-        error: 'INTERNAL_ERROR',
-      },
-      { status: 500 }
-    );
+    const body = (await request.json()) as {
+      orderId?: string;
+      orderNo?: string;
+    };
+    orderId = body.orderId;
+    orderNo = body.orderNo;
+  } catch {
+    // 让统一入口负责参数校验并返回标准错误
   }
+
+  const url = new URL(request.url);
+  const forwarded = new URL('/api/payments/query', url.origin);
+
+  if (orderId) {
+    forwarded.searchParams.set('orderId', orderId);
+  }
+  if (orderNo) {
+    forwarded.searchParams.set('orderNo', orderNo);
+  }
+  forwarded.searchParams.set('syncFromPayment', 'true');
+
+  const forwardedRequest = new NextRequest(forwarded, {
+    method: 'GET',
+    headers: request.headers,
+  });
+
+  return queryPayment(forwardedRequest);
 }

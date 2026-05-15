@@ -13,6 +13,10 @@ import {
   UserReputationLevel,
 } from '@/lib/middleware/adaptive-rate-limit';
 import { logger } from '@/lib/logger';
+import {
+  validateAdminStepUpToken,
+  validateSensitiveOperationReason,
+} from '@/lib/admin/step-up';
 
 /**
  * GET /api/admin/reputation
@@ -87,9 +91,31 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
-    const { identifier, level } = body;
+    const { identifier, level, changeReason } = body;
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!identifier || typeof identifier !== 'string') {
       return NextResponse.json(
@@ -146,9 +172,32 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const identifier = searchParams.get('identifier');
+    const changeReason = searchParams.get('changeReason') ?? '';
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!identifier) {
       return NextResponse.json(

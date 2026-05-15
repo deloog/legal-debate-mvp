@@ -1,5 +1,5 @@
 /**
- * 时间线提取器 - 三层架构：AI识别+算法兜底+AI审查
+ * 时间线提取器 — AI识别 + 日期模式辅助 + AI审查
  * 主入口文件，整合所有子模块
  */
 
@@ -34,13 +34,13 @@ export type {
 } from './timeline-types';
 
 /**
- * 时间线提取器类 - 三层架构
+ * 时间线提取器类
  */
 export class TimelineExtractor {
   /**
-   * 从文本中提取时间线 - 三层架构
+   * 从文本中提取时间线
    * 第一层：AI识别
-   * 第二层：规则匹配兜底
+   * 第二层：日期模式辅助（正则补充 AI 遗漏的日期格式）
    * 第三层：AI审查修正
    */
   async extractFromText(
@@ -57,7 +57,7 @@ export class TimelineExtractor {
       aiExtracted = await aiExtractLayer(text, extractedData);
     }
 
-    // 第二层：规则匹配兜底
+    // 第二层：日期模式辅助（正则补充 AI 遗漏的日期格式）
     ruleExtracted = ruleMatchLayer(text, extractedData, aiExtracted);
 
     // 合并第一层和第二层的结果，去重

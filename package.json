@@ -1,6 +1,6 @@
 {
-  "name": "legal_debate_mvp",
-  "version": "0.1.0",
+  "name": "luban-ai",
+  "version": "1.0.0-beta",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -52,6 +52,11 @@
     "test:api:coverage": "jest --config=jest.config.api.js src/__tests__/api/ --coverage",
     "test:integration": "jest --config=jest.config.integration.js",
     "test:integration:coverage": "jest --config=jest.config.integration.js --coverage",
+    "test:legacy-auth:api": "jest --runInBand --config=jest.config.legacy-auth.js src/__tests__/api/debates-list-auth-smoke.test.ts src/__tests__/api/debates-id-auth-permission-smoke.test.ts src/__tests__/api/admin/export/cases.test.ts src/__tests__/api/document-templates.api.test.ts --passWithNoTests",
+    "test:legacy-auth:payment": "jest --runInBand --config=jest.config.legacy-auth.js src/__tests__/payment/payment-api.test.ts --passWithNoTests",
+    "test:legacy-auth:debates": "jest --runInBand --config=jest.config.legacy-auth.js src/__tests__/api/debates-list-auth-smoke.test.ts src/__tests__/api/debates-id-auth-permission-smoke.test.ts --passWithNoTests",
+    "test:legacy-auth:docs": "jest --runInBand --config=jest.config.legacy-auth.js src/__tests__/api/document-templates.api.test.ts src/__tests__/api/admin/export/cases.test.ts --passWithNoTests",
+    "test:legacy-auth": "npm run test:legacy-auth:api && npm run test:legacy-auth:payment",
     "coverage:check": "tsx scripts/check-coverage-gate.ts",
     "coverage:monitor": "tsx scripts/monitor-test-coverage.ts",
     "coverage:report": "npm run test:coverage && npm run coverage:check",

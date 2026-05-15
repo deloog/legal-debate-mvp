@@ -8,11 +8,16 @@ jest.mock('@/lib/case/similar-case-service');
 jest.mock('@/lib/agent/security/logger');
 jest.mock('@/lib/middleware/auth');
 jest.mock('@/lib/db/prisma', () => ({
-  prisma: { case: { findUnique: jest.fn() } },
+  prisma: {
+    case: { findUnique: jest.fn(), findFirst: jest.fn() },
+    user: { findUnique: jest.fn() },
+  },
 }));
 
 const mockGetAuthUser = getAuthUser as jest.Mock;
 const mockCaseFindUnique = prisma.case.findUnique as jest.Mock;
+const mockCaseFindFirst = prisma.case.findFirst as jest.Mock;
+const mockUserFindUnique = prisma.user.findUnique as jest.Mock;
 
 const AUTHED_USER = {
   userId: 'user-123',
@@ -33,6 +38,16 @@ describe('GET /api/cases/[id]/success-rate', () => {
     // 默认：已认证用户 + 拥有该案件
     mockGetAuthUser.mockResolvedValue(AUTHED_USER);
     mockCaseFindUnique.mockResolvedValue(OWNED_CASE);
+    mockCaseFindFirst.mockResolvedValue({
+      id: 'case-123',
+      userId: 'user-123',
+      title: '测试案件',
+      description: '描述',
+      type: 'CIVIL',
+      cause: '合同纠纷',
+      court: '测试法院',
+    });
+    mockUserFindUnique.mockResolvedValue({ role: 'USER' });
   });
 
   describe('认证与权限', () => {
@@ -54,6 +69,7 @@ describe('GET /api/cases/[id]/success-rate', () => {
 
     it('案件不存在时应该返回404', async () => {
       mockCaseFindUnique.mockResolvedValue(null);
+      mockCaseFindFirst.mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
@@ -69,7 +85,18 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('无权访问他人案件时应该返回403', async () => {
-      mockCaseFindUnique.mockResolvedValue({ userId: 'other-user' });
+      mockCaseFindUnique.mockResolvedValue({
+        userId: 'other-user',
+      });
+      mockCaseFindFirst.mockResolvedValue({
+        id: 'case-123',
+        userId: 'other-user',
+        title: '测试案件',
+        description: '描述',
+        type: 'CIVIL',
+        cause: '合同纠纷',
+        court: '测试法院',
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
@@ -91,6 +118,16 @@ describe('GET /api/cases/[id]/success-rate', () => {
         email: 'admin@test.com',
       });
       mockCaseFindUnique.mockResolvedValue({ userId: 'other-user' });
+      mockCaseFindFirst.mockResolvedValue({
+        id: 'case-123',
+        userId: 'other-user',
+        title: '测试案件',
+        description: '描述',
+        type: 'CIVIL',
+        cause: '合同纠纷',
+        court: '测试法院',
+      });
+      mockUserFindUnique.mockResolvedValue({ role: 'ADMIN' });
       mockAnalyzeSuccessRate.mockResolvedValue({
         caseId: 'case-123',
         winRate: 0.5,

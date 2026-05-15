@@ -13,6 +13,7 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { ExpertService } from '@/lib/knowledge-graph/expert/expert-service';
 
 /**
  * POST /api/v1/law-article-relations/[id]
@@ -57,11 +58,14 @@ export async function POST(
     }
 
     const relationId = (await params).id;
+    const expert = await new ExpertService().getOrCreateExpertProfile(
+      authUser.userId
+    );
 
     // 验证关系
     const relation = await LawArticleRelationService.verifyRelation(
       relationId,
-      authUser.userId,
+      expert.id,
       body.isApproved
     );
 

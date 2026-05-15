@@ -25,7 +25,6 @@ import {
   TrendingUp,
   XCircle,
 } from 'lucide-react';
-import { useAuth } from '@/app/providers/AuthProvider';
 import { useEffect, useState } from 'react';
 
 interface RelationStats {
@@ -132,9 +131,6 @@ export default function KnowledgeGraphAdminPage() {
     loadStats();
   }, []);
 
-  const { user } = useAuth();
-  const userId = user?.id ?? 'anonymous';
-
   // 审核关系
   const handleVerify = async (relationId: string, approved: boolean) => {
     try {
@@ -145,13 +141,16 @@ export default function KnowledgeGraphAdminPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             approved,
-            verifiedBy: userId,
           }),
         }
       );
 
       if (!res.ok) {
-        throw new Error('审核失败');
+        const data = (await res.json().catch(() => null)) as {
+          error?: { message?: string };
+          message?: string;
+        } | null;
+        throw new Error(data?.error?.message ?? data?.message ?? '审核失败');
       }
 
       // 重新加载数据

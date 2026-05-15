@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useCallback,
   useState,
   type ReactNode,
 } from 'react';
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   // 尝试用 refreshToken 续期 accessToken
-  const tryRefresh = async (): Promise<boolean> => {
+  const tryRefresh = useCallback(async (): Promise<boolean> => {
     try {
       const res = await fetch('/api/auth/refresh', {
         method: 'POST',
@@ -45,9 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       setLoading(true);
       const controller = new AbortController();
@@ -101,9 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tryRefresh]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
@@ -116,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionStorage.removeItem('user');
       router.push('/');
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     // 全局 fetch 拦截：401 → 先尝试刷新，失败则清理状态跳转登录
@@ -158,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       window.fetch = originalFetch;
     };
-  }, [router]);
+  }, [router, tryRefresh]);
 
   useEffect(() => {
     // 初始化时检查认证状态
@@ -194,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('login-success', handleLoginSuccess);
     };
-  }, []);
+  }, [checkAuth]);
 
   return (
     <AuthContext.Provider value={{ user, loading, checkAuth, logout }}>

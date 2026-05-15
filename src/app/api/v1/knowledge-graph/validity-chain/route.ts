@@ -15,6 +15,7 @@ import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { getAuthUser } from '@/lib/middleware/auth';
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: '未授权，请先登录' }, { status: 401 });
   }
 
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = new URL(request.url).searchParams;
 
   // 在try外声明，以便在catch块中使用
   let lawArticleId: string | null = null;
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const permissionResult = await checkKnowledgeGraphPermission(
       authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
+      KnowledgeGraphResource.RELATION
     );
 
     if (!permissionResult.hasPermission) {
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     await logKnowledgeGraphAction({
       userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.RELATION,
       resourceId: lawArticleId,
       description: `查询法条效力链，链长度: ${chain.length}`,
     });

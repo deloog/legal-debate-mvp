@@ -10,23 +10,18 @@ import {
 import { GET as GETLowQuality } from '@/app/api/v1/knowledge-graph/quality-score/low-quality/route';
 import { GET as GETWarning } from '@/app/api/v1/knowledge-graph/quality-score/warning/route';
 
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
-}));
-
 jest.mock('@/lib/logger');
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
 jest.mock('@/lib/middleware/knowledge-graph-permission');
 jest.mock('@/lib/knowledge-graph/quality-score/quality-score-service');
 
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
-import { getServerSession } from 'next-auth';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { checkKnowledgeGraphPermission } from '@/lib/middleware/knowledge-graph-permission';
 import { QualityScoreService } from '@/lib/knowledge-graph/quality-score/quality-score-service';
 
-const mockGetServerSession = getServerSession as jest.Mock;
+const mockGetAuthUser = getAuthUser as jest.Mock;
 const mockCheckPermission = checkKnowledgeGraphPermission as jest.Mock;
 const mockQualityScoreService = QualityScoreService as jest.Mock;
 
@@ -36,6 +31,11 @@ describe('Quality Score API Routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue({
+      userId: 'user1',
+      email: 'user1@example.com',
+      role: 'ADMIN',
+    });
     mockService = {
       getQualityStats: jest.fn(),
       batchCalculateQuality: jest.fn(),
@@ -49,7 +49,6 @@ describe('Quality Score API Routes', () => {
 
   describe('GET /api/v1/knowledge-graph/quality-score', () => {
     it('成功获取质量统计', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.getQualityStats.mockResolvedValue({
         totalRelations: 100,
@@ -76,7 +75,7 @@ describe('Quality Score API Routes', () => {
     });
 
     it('未授权时返回401', async () => {
-      mockGetServerSession.mockResolvedValue(null);
+      mockGetAuthUser.mockResolvedValueOnce(null);
 
       mockRequest = {
         url: 'http://localhost:3000/api/v1/knowledge-graph/quality-score',
@@ -97,7 +96,6 @@ describe('Quality Score API Routes', () => {
     });
 
     it('权限不足时返回403', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({
         hasPermission: false,
         reason: '需要管理员权限',
@@ -124,7 +122,6 @@ describe('Quality Score API Routes', () => {
 
   describe('POST /api/v1/knowledge-graph/quality-score', () => {
     it('成功批量计算质量分数', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.batchCalculateQuality.mockResolvedValue([
         { relationId: 'rel1', qualityScore: 85 },
@@ -155,7 +152,7 @@ describe('Quality Score API Routes', () => {
     });
 
     it('未授权时返回401', async () => {
-      mockGetServerSession.mockResolvedValue(null);
+      mockGetAuthUser.mockResolvedValueOnce(null);
 
       mockRequest = {
         url: 'http://localhost:3000/api/v1/knowledge-graph/quality-score',
@@ -180,7 +177,6 @@ describe('Quality Score API Routes', () => {
 
   describe('GET /api/v1/knowledge-graph/quality-score/[id]', () => {
     it('成功获取单个关系质量分数', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.getRelationQualityScore.mockResolvedValue({
         relationId: 'rel1',
@@ -210,7 +206,6 @@ describe('Quality Score API Routes', () => {
     });
 
     it('质量分数不存在时返回404', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.getRelationQualityScore.mockRejectedValue(
         new Error('Quality score not found')
@@ -239,7 +234,6 @@ describe('Quality Score API Routes', () => {
 
   describe('POST /api/v1/knowledge-graph/quality-score/[id]', () => {
     it('成功更新关系质量分数', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.updateRelationScore.mockResolvedValue({
         relationId: 'rel1',
@@ -275,7 +269,6 @@ describe('Quality Score API Routes', () => {
 
   describe('GET /api/v1/knowledge-graph/quality-score/low-quality', () => {
     it('成功获取低质量关系列表', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.getLowQualityRelations.mockResolvedValue([
         {
@@ -305,7 +298,6 @@ describe('Quality Score API Routes', () => {
     });
 
     it('支持查询参数', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.getLowQualityRelations.mockResolvedValue([]);
 
@@ -334,7 +326,6 @@ describe('Quality Score API Routes', () => {
 
   describe('GET /api/v1/knowledge-graph/quality-score/warning', () => {
     it('成功触发质量预警', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.triggerQualityWarning.mockResolvedValue([
         {
@@ -365,7 +356,6 @@ describe('Quality Score API Routes', () => {
     });
 
     it('无预警时返回空数组', async () => {
-      mockGetServerSession.mockResolvedValue({ user: { id: 'user1' } });
       mockCheckPermission.mockResolvedValue({ hasPermission: true });
       mockService.triggerQualityWarning.mockResolvedValue([]);
 

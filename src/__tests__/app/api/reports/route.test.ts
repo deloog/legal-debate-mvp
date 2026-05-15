@@ -8,12 +8,23 @@ import { POST } from '@/app/api/reports/route';
 import { POST as ExportPOST } from '@/app/api/reports/export/route';
 import type { ReportFilter } from '@/types/report';
 import { ReportType, ReportPeriod } from '@/types/report';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock报表服务
 jest.mock('@/lib/reports/report-service', () => ({
   ReportService: {
     generateReport: jest.fn(),
     exportReport: jest.fn(),
+  },
+}));
+
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
   },
 }));
 
@@ -25,6 +36,11 @@ describe('法务报表API测试', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'user-1',
+      email: 'lawyer@example.com',
+      role: 'LAWYER',
+    });
   });
 
   describe('POST /api/reports', () => {
@@ -326,8 +342,8 @@ describe('法务报表API测试', () => {
       const { ReportService } = await import('@/lib/reports/report-service');
 
       const mockExportResult = {
-        downloadUrl: '/downloads/report-001.pdf',
-        fileName: 'report-001.pdf',
+        downloadUrl: '/downloads/report_001.pdf',
+        fileName: 'report_001.pdf',
       };
 
       (ReportService.exportReport as jest.Mock).mockResolvedValue(
@@ -339,7 +355,7 @@ describe('法务报表API测试', () => {
         {
           method: 'POST',
           body: JSON.stringify({
-            reportId: 'report-001',
+            reportId: 'report_001',
             format: 'pdf',
           }),
         }
@@ -350,16 +366,16 @@ describe('法务报表API测试', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.downloadUrl).toBe('/downloads/report-001.pdf');
-      expect(data.data.fileName).toBe('report-001.pdf');
+      expect(data.data.downloadUrl).toBe('/downloads/report_001.pdf');
+      expect(data.data.fileName).toBe('report_001.pdf');
     });
 
     it('应该成功导出Excel格式', async () => {
       const { ReportService } = await import('@/lib/reports/report-service');
 
       const mockExportResult = {
-        downloadUrl: '/downloads/report-001.xlsx',
-        fileName: 'report-001.xlsx',
+        downloadUrl: '/downloads/report_001.xlsx',
+        fileName: 'report_001.xlsx',
       };
 
       (ReportService.exportReport as jest.Mock).mockResolvedValue(
@@ -371,7 +387,7 @@ describe('法务报表API测试', () => {
         {
           method: 'POST',
           body: JSON.stringify({
-            reportId: 'report-001',
+            reportId: 'report_001',
             format: 'excel',
           }),
         }
@@ -389,8 +405,8 @@ describe('法务报表API测试', () => {
       const { ReportService } = await import('@/lib/reports/report-service');
 
       const mockExportResult = {
-        downloadUrl: '/downloads/report-001.csv',
-        fileName: 'report-001.csv',
+        downloadUrl: '/downloads/report_001.csv',
+        fileName: 'report_001.csv',
       };
 
       (ReportService.exportReport as jest.Mock).mockResolvedValue(
@@ -402,7 +418,7 @@ describe('法务报表API测试', () => {
         {
           method: 'POST',
           body: JSON.stringify({
-            reportId: 'report-001',
+            reportId: 'report_001',
             format: 'csv',
           }),
         }
@@ -447,7 +463,7 @@ describe('法务报表API测试', () => {
         {
           method: 'POST',
           body: JSON.stringify({
-            reportId: 'report-001',
+            reportId: 'report_001',
             format: 'pdf',
           }),
         }

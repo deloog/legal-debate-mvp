@@ -13,6 +13,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -896,9 +897,12 @@ export default function CreateCasePage() {
                       className='relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 py-10 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors dark:border-zinc-600 dark:bg-zinc-900 dark:hover:border-blue-500 dark:hover:bg-blue-950'
                     >
                       {imagePreview ? (
-                        <img
+                        <Image
                           src={imagePreview}
                           alt='预览'
+                          width={640}
+                          height={320}
+                          unoptimized
                           className='max-h-48 max-w-full rounded-lg object-contain'
                         />
                       ) : (

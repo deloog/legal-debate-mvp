@@ -1,6 +1,10 @@
 /** @legacy 优先使用 /api/v1/follow-up-tasks，此路由保留以向后兼容 */
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import {
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
 import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import {
@@ -47,10 +51,7 @@ const createTaskSchema = z.object({
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return createUnauthorizedResponse();
   }
 
   const { searchParams } = new URL(request.url);
@@ -89,10 +90,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 export const POST = withErrorHandler(async (request: NextRequest) => {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return NextResponse.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return createUnauthorizedResponse();
   }
 
   const body = await request.json();
@@ -104,14 +102,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     where: {
       id: validatedData.clientId,
       userId: authUser.userId,
+      deletedAt: null,
     },
   });
 
   if (!client) {
-    return NextResponse.json(
-      { error: '客户不存在或无权限访问' },
-      { status: 404 }
-    );
+    return createNotFoundResponse('客户不存在或无权限访问');
   }
 
   const task = await FollowUpTaskProcessor.createTask({

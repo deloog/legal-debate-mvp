@@ -1,5 +1,9 @@
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
+import {
   createNoContentResponse,
   createSuccessResponse,
 } from '@/app/api/lib/responses/success';
@@ -60,10 +64,7 @@ export const GET = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -76,10 +77,7 @@ export const GET = withErrorHandler(
     });
 
     if (!communication) {
-      return NextResponse.json(
-        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定沟通记录');
     }
 
     const communicationDetail = await mapCommunicationRecord(communication);
@@ -99,10 +97,7 @@ export const PATCH = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -117,10 +112,7 @@ export const PATCH = withErrorHandler(
     });
 
     if (!communication) {
-      return NextResponse.json(
-        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定沟通记录');
     }
 
     const updatedCommunication = await prisma.communicationRecord.update({
@@ -157,10 +149,7 @@ export const DELETE = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id } = await params;
@@ -173,10 +162,7 @@ export const DELETE = withErrorHandler(
     });
 
     if (!communication) {
-      return NextResponse.json(
-        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('未找到指定沟通记录');
     }
 
     await prisma.communicationRecord.delete({

@@ -7,8 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
 import { logger } from '@/lib/logger';
 import {
+  getContractAccess,
   resolveContractUserId,
   unauthorizedResponse,
+  forbiddenResponse,
 } from '@/app/api/lib/middleware/contract-auth';
 
 export async function GET(
@@ -21,6 +23,24 @@ export async function GET(
 
   try {
     const contractId = (await params).id;
+    const access = await getContractAccess(contractId, userId);
+
+    if (!access.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '合同不存在',
+          },
+        },
+        { status: 404 }
+      );
+    }
+
+    if (!access.canManage) {
+      return forbiddenResponse('无权访问此合同审批');
+    }
 
     // 获取合同的最新审批记录
     const approvals =

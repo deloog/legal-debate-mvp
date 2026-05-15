@@ -214,6 +214,9 @@ async function getDebateGenerationCount(
       createdAt: {
         lte: endDate,
       },
+      round: {
+        debate: whereClause,
+      },
     },
   });
 

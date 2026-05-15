@@ -1501,6 +1501,9 @@ ${contextSection}
       previousRoundsContext?: string;
       evidenceContext?: string; // 案件已采纳证据
       userRoundContext?: string; // 用户本轮补充的理由/新证据
+      disputeFocuses?: string[]; // 来自 extractionSnapshot
+      establishedFacts?: string[]; // 来自 extractionSnapshot
+      uncertainFacts?: string[]; // 来自 extractionSnapshot（存疑事实，被告重点攻击）
     },
     side: 'plaintiff' | 'defendant',
     opponentArgs?: string
@@ -1515,6 +1518,26 @@ ${contextSection}
     const contextSection = params.previousRoundsContext
       ? `\n## 前轮辩论摘要\n${params.previousRoundsContext}\n\n**本轮要求**：必须针对以上前轮论点进行正面回应或深化论证，不得简单重复已有论点。\n`
       : '';
+
+    // 案件争议焦点（来自 AI 提炼结果，比案件描述更精准）
+    const disputeSection =
+      params.disputeFocuses && params.disputeFocuses.length > 0
+        ? `\n## 本案争议焦点（AI 提炼）\n${params.disputeFocuses.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n**要求**：论点必须紧扣以上争议焦点展开，避免空泛陈述。\n`
+        : '';
+
+    // 已确认事实（双方均认可，作为立论基础）
+    const establishedSection =
+      params.establishedFacts && params.establishedFacts.length > 0
+        ? `\n## 已确认事实\n${params.establishedFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n`
+        : '';
+
+    // 存疑事实（被告可重点质疑，原告需补强证明）
+    const uncertainSection =
+      params.uncertainFacts && params.uncertainFacts.length > 0
+        ? isPlaintiff
+          ? `\n## 需补强证明的事实\n${params.uncertainFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n\n**要求**：原告方需就以上存疑事实提供充分论证。\n`
+          : `\n## 可重点质疑的存疑事实（被告攻击重点）\n${params.uncertainFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n\n**要求**：被告方应重点针对以上存疑事实进行质疑，指出原告举证不足或事实不成立。\n`
+        : '';
 
     const opponentSection =
       !isPlaintiff && opponentArgs
@@ -1534,7 +1557,7 @@ ${contextSection}
 **案件**：${params.title}
 **描述**：${params.description}
 ${params.legalReferences?.length ? `**参考法条**：${params.legalReferences.join('、')}` : ''}
-${evidenceSection}${userRoundSection}${contextSection}${opponentSection}
+${establishedSection}${disputeSection}${uncertainSection}${evidenceSection}${userRoundSection}${contextSection}${opponentSection}
 请为${sideLabel}生成3-4个核心论点，直接以JSON格式输出（不要包含其他任何文字）：
 
 {

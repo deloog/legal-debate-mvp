@@ -3,25 +3,10 @@
  * POST /api/refunds/apply
  */
 
-// Mock JWT 工具
-jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn(),
-  verifyToken: jest.fn(),
-}));
-
-// Mock NextAuth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
 import { POST } from '@/app/api/refunds/apply/route';
 import { NextRequest } from 'next/server';
 import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
-
-// Mock auth options
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
-}));
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock prisma
 jest.mock('@/lib/db/prisma', () => ({
@@ -35,7 +20,12 @@ jest.mock('@/lib/db/prisma', () => ({
       create: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
     },
+    $transaction: jest.fn(),
   },
+}));
+
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
 }));
 
 // Mock payment modules
@@ -63,24 +53,29 @@ jest.mock('@/lib/payment/payment-config', () => ({
   },
 }));
 
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db/prisma';
 import { alipayRefund } from '@/lib/payment/alipay-refund';
 import { wechatRefund } from '@/lib/payment/wechat-refund';
 import { paymentConfig } from '@/lib/payment/payment-config';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 describe('POST /api/refunds/apply', () => {
   let mockRequest: NextRequest;
+  let mockGetAuthUser: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
-      header?.replace('Bearer ', '')
-    );
-    (verifyToken as jest.Mock).mockReturnValue({
-      valid: true,
-      payload: { userId: 'test-user-id' },
+    mockGetAuthUser = getAuthUser as jest.Mock;
+    mockGetAuthUser.mockResolvedValue({ userId: 'user-123' });
+    (prisma.$transaction as jest.Mock).mockImplementation(async callback => {
+      const tx = {
+        refundRecord: {
+          update: prisma.refundRecord.update,
+        },
+        order: {
+          update: prisma.order.update,
+        },
+      };
+      return callback(tx);
     });
     mockRequest = {
       json: async () => ({}),
@@ -90,7 +85,7 @@ describe('POST /api/refunds/apply', () => {
   describe('授权和验证', () => {
     it('应该拒绝未授权的请求', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue(null);
+      mockGetAuthUser.mockResolvedValue(null);
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -111,9 +106,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该拒绝缺少订单ID的请求', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({ reason: RefundReason.USER_REQUEST }),
       } as unknown as NextRequest;
@@ -130,9 +122,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该拒绝无效的退款原因', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({ orderId: 'order-123', reason: 'INVALID_REASON' }),
       } as unknown as NextRequest;
@@ -151,9 +140,6 @@ describe('POST /api/refunds/apply', () => {
   describe('订单验证', () => {
     it('应该拒绝不存在的订单', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -174,9 +160,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该拒绝不属于用户的订单', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -206,9 +189,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该拒绝未支付的订单', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -240,9 +220,6 @@ describe('POST /api/refunds/apply', () => {
   describe('重复退款检查', () => {
     it('应该拒绝已存在退款记录的订单', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -279,9 +256,6 @@ describe('POST /api/refunds/apply', () => {
   describe('微信退款', () => {
     it('应该成功处理微信退款', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -315,6 +289,11 @@ describe('POST /api/refunds/apply', () => {
         refundAmount: 99.0,
         status: RefundStatus.SUCCESS,
       });
+      (prisma.refundRecord.update as jest.Mock).mockResolvedValue({
+        id: 'refund-123',
+        refundAmount: 99.0,
+        status: RefundStatus.SUCCESS,
+      });
 
       // Act
       const response = await POST(mockRequest);
@@ -330,9 +309,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该在微信配置无效时返回错误', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -366,9 +342,6 @@ describe('POST /api/refunds/apply', () => {
   describe('支付宝退款', () => {
     it('应该成功处理支付宝退款', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -401,6 +374,11 @@ describe('POST /api/refunds/apply', () => {
         refundAmount: 99.0,
         status: RefundStatus.SUCCESS,
       });
+      (prisma.refundRecord.update as jest.Mock).mockResolvedValue({
+        id: 'refund-123',
+        refundAmount: 99.0,
+        status: RefundStatus.SUCCESS,
+      });
 
       // Act
       const response = await POST(mockRequest);
@@ -416,9 +394,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该在支付宝退款失败时返回错误', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -459,9 +434,6 @@ describe('POST /api/refunds/apply', () => {
   describe('错误处理', () => {
     it('应该处理退款失败的情况', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',
@@ -503,7 +475,7 @@ describe('POST /api/refunds/apply', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             status: RefundStatus.FAILED,
-            rejectedReason: '微信退款失败',
+            rejectedReason: '退款处理失败',
           }),
         })
       );
@@ -511,9 +483,6 @@ describe('POST /api/refunds/apply', () => {
 
     it('应该拒绝不支持的支付方式', async () => {
       // Arrange
-      (getServerSession as jest.Mock).mockResolvedValue({
-        user: { id: 'user-123' },
-      });
       mockRequest = {
         json: async () => ({
           orderId: 'order-123',

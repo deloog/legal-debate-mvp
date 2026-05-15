@@ -33,9 +33,9 @@ class ReminderService {
           userId: input.userId!,
           type: input.type as never,
           title: input.title,
-          message: input.message ?? null,
-          reminderTime: input.reminderTime ?? new Date(),
-          channels: input.channels ?? [],
+          message: input.message ?? input.content ?? null,
+          reminderTime: input.reminderTime ?? input.scheduledAt ?? new Date(),
+          channels: input.channels ?? (input.channel ? [input.channel] : []),
           relatedType: input.relatedType ?? null,
           relatedId: input.relatedId ?? null,
           metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
@@ -86,6 +86,16 @@ class ReminderService {
     try {
       const updateData: Prisma.ReminderUpdateInput = {
         ...(input.title !== undefined && { title: input.title }),
+        ...((input.message !== undefined || input.content !== undefined) && {
+          message: input.message ?? input.content ?? null,
+        }),
+        ...((input.reminderTime !== undefined ||
+          input.scheduledAt !== undefined) && {
+          reminderTime: input.reminderTime ?? input.scheduledAt,
+        }),
+        ...((input.channels !== undefined || input.channel !== undefined) && {
+          channels: input.channels ?? (input.channel ? [input.channel] : []),
+        }),
         ...(input.status !== undefined && { status: input.status as never }),
         ...(input.metadata !== undefined && {
           metadata: input.metadata as Prisma.InputJsonValue,
@@ -171,13 +181,19 @@ class ReminderService {
         typeof limitStr === 'string' ? parseInt(limitStr, 10) : limitStr;
 
       const skip = (page - 1) * limit;
+      const reminderTime: Prisma.DateTimeFilter | undefined =
+        startTime || endTime
+          ? {
+              ...(startTime && { gte: new Date(startTime) }),
+              ...(endTime && { lte: new Date(endTime) }),
+            }
+          : undefined;
 
       const where: Prisma.ReminderWhereInput = {
         userId,
         ...(type && { type: type as never }),
         ...(status && { status: status as never }),
-        ...(startTime && { reminderTime: { gte: startTime } }),
-        ...(endTime && { reminderTime: { lte: endTime } }),
+        ...(reminderTime && { reminderTime }),
       };
 
       const [reminders, total] = await Promise.all([

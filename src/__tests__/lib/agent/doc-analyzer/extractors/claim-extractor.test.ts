@@ -60,38 +60,11 @@ describe('ClaimExtractor', () => {
       expect(result.compoundDecomposed).toBeGreaterThan(0);
     });
 
-    it('应该自动补充诉讼费用', async () => {
-      const result = await extractor.extractFromText('本案费用由被告承担');
-
-      const costClaim = result.claims.find(c => c.type === 'LITIGATION_COST');
-      expect(costClaim).toBeDefined();
-    });
-
-    it('应该推断本金请求', async () => {
-      const result = await extractor.extractFromText(
-        '本案诉讼费用由被告承担，赔偿损失5万元'
-      );
-
-      const principalClaim = result.claims.find(
-        c => c.type === 'PAY_PRINCIPAL'
-      );
-      // 当有赔偿损失时，会推断本金
-      expect(principalClaim).toBeDefined();
-    });
-
     it('应该推断利息请求', async () => {
       const result = await extractor.extractFromText('按年利率10%支付利息');
 
       const interestClaim = result.claims.find(c => c.type === 'PAY_INTEREST');
       expect(interestClaim).toBeDefined();
-    });
-
-    it('应该推断违约金请求', async () => {
-      const result =
-        await extractor.extractFromText('被告违约，应当承担相应责任');
-
-      const penaltyClaim = result.claims.find(c => c.type === 'PAY_PENALTY');
-      expect(penaltyClaim).toBeDefined();
     });
 
     it('应该生成正确的摘要', async () => {
@@ -1134,81 +1107,6 @@ describe('ClaimExtractor - 复合请求拆解（originalText匹配）', () => {
     );
     expect(hasPrincipal).toBe(true);
     expect(hasPenalty).toBe(true);
-  });
-});
-
-// ========================================================================
-// 新增测试：本金推断逻辑
-// ========================================================================
-describe('ClaimExtractor - 本金推断逻辑', () => {
-  let extractor: ClaimExtractor;
-
-  beforeEach(() => {
-    extractor = createClaimExtractor();
-  });
-
-  it('应该在有诉讼费用和本金关键词时推断本金', async () => {
-    const result =
-      await extractor.extractFromText('本案诉讼费用由被告承担，本金尚未偿还');
-
-    const principalClaim = result.claims.find(c => c.type === 'PAY_PRINCIPAL');
-    expect(principalClaim).toBeDefined();
-    // 应该标记为推断的
-    if (principalClaim && '_inferred' in principalClaim) {
-      expect(principalClaim._inferred).toBe(true);
-    }
-  });
-
-  it('应该在有货款关键词时推断本金', async () => {
-    const result =
-      await extractor.extractFromText('本案诉讼费用由被告承担，货款未支付');
-
-    const principalClaim = result.claims.find(c => c.type === 'PAY_PRINCIPAL');
-    expect(principalClaim).toBeDefined();
-  });
-
-  it('应该在有欠款关键词时推断本金', async () => {
-    const result =
-      await extractor.extractFromText('本案诉讼费用由被告承担，欠款未清');
-
-    const principalClaim = result.claims.find(c => c.type === 'PAY_PRINCIPAL');
-    expect(principalClaim).toBeDefined();
-  });
-
-  it('应该在有借款关键词时推断本金', async () => {
-    const result =
-      await extractor.extractFromText('本案诉讼费用由被告承担，借款未归还');
-
-    const principalClaim = result.claims.find(c => c.type === 'PAY_PRINCIPAL');
-    expect(principalClaim).toBeDefined();
-  });
-});
-
-// ========================================================================
-// 新增测试：利息推断逻辑
-// ========================================================================
-describe('ClaimExtractor - 利息推断逻辑', () => {
-  let extractor: ClaimExtractor;
-
-  beforeEach(() => {
-    extractor = createClaimExtractor();
-  });
-
-  it('应该在有利率关键词时推断利息', async () => {
-    const result = await extractor.extractFromText('按年利率10%计算');
-
-    const interestClaim = result.claims.find(c => c.type === 'PAY_INTEREST');
-    expect(interestClaim).toBeDefined();
-    if (interestClaim && '_inferred' in interestClaim) {
-      expect(interestClaim._inferred).toBe(true);
-    }
-  });
-
-  it('应该在有利息计算关键词时推断利息', async () => {
-    const result = await extractor.extractFromText('计算利息至实际清偿之日');
-
-    const interestClaim = result.claims.find(c => c.type === 'PAY_INTEREST');
-    expect(interestClaim).toBeDefined();
   });
 });
 

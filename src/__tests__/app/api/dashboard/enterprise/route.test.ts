@@ -14,10 +14,14 @@
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/dashboard/enterprise/route';
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
+    enterpriseAccount: {
+      findUnique: jest.fn(),
+    },
     contract: {
       count: jest.fn(),
       findMany: jest.fn(),
@@ -32,12 +36,68 @@ jest.mock('@/lib/db/prisma', () => ({
   },
 }));
 
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 describe('企业法务工作台API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'enterprise-user-1',
+    });
+    (prisma.enterpriseAccount.findUnique as jest.Mock).mockResolvedValue({
+      status: 'APPROVED',
+    });
   });
 
   describe('GET /api/dashboard/enterprise', () => {
+    it('未登录时应返回401', async () => {
+      (getAuthUser as jest.Mock).mockResolvedValueOnce(null);
+      const request = new NextRequest(
+        'http://localhost:3000/api/dashboard/enterprise'
+      );
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+    });
+
+    it('未找到企业账号时应返回404', async () => {
+      (prisma.enterpriseAccount.findUnique as jest.Mock).mockResolvedValueOnce(
+        null
+      );
+      const request = new NextRequest(
+        'http://localhost:3000/api/dashboard/enterprise'
+      );
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error.code).toBe('ENTERPRISE_ACCOUNT_NOT_FOUND');
+    });
+
+    it('企业未审核通过时应返回403', async () => {
+      (prisma.enterpriseAccount.findUnique as jest.Mock).mockResolvedValueOnce({
+        status: 'PENDING',
+      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/dashboard/enterprise'
+      );
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error.code).toBe('ENTERPRISE_NOT_APPROVED');
+    });
+
     it('应该成功返回工作台数据', async () => {
       // Mock数据
       (prisma.contract.count as jest.Mock)

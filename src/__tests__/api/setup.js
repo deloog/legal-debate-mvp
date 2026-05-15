@@ -1,6 +1,9 @@
 /**
  * API测试环境设置
  * 确保Web API在Node环境中可用
+ *
+ * 审计日志 mock 规范见：
+ * docs/development/testing/API_TEST_AUDIT_MOCK_GUIDELINES.md
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -256,6 +259,16 @@ jest.mock('next/server', () => {
     NextResponse: MockResponse,
   };
 });
+
+// 统一静音审计日志，避免长尾 API 测试因未完整 mock Prisma actionLog 而输出噪音。
+jest.mock('@/lib/audit/logger', () => ({
+  createAuditLog: jest.fn().mockResolvedValue(undefined),
+  logCreateAction: jest.fn().mockResolvedValue(undefined),
+  logUpdateAction: jest.fn().mockResolvedValue(undefined),
+  logDeleteAction: jest.fn().mockResolvedValue(undefined),
+  logViewAction: jest.fn().mockResolvedValue(undefined),
+  logAIAction: jest.fn().mockResolvedValue(undefined),
+}));
 
 // 设置基本的Web API polyfills
 

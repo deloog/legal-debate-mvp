@@ -21,6 +21,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { DateGranularity, TimeRange } from '@/types/stats';
@@ -340,6 +346,102 @@ describe('错误率统计API', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+    });
+
+    it('默认应只统计未恢复错误日志', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockQueryRaw
+        .mockResolvedValueOnce([
+          {
+            total_requests: BigInt(200),
+            success_count: BigInt(190),
+            error_count: BigInt(10),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            total_errors: BigInt(5),
+            recovered_errors: BigInt(0),
+          },
+        ])
+        .mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/performance/error-rate'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const queryText = mockQueryRaw.mock.calls
+        .map(([query]) => query?.strings?.join('?') ?? String(query))
+        .join('\n');
+      expect(queryText).toContain('"recovered" = false');
+    });
+
+    it('includeRecovered=true 时不应排除已恢复错误日志', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockQueryRaw
+        .mockResolvedValueOnce([
+          {
+            total_requests: BigInt(200),
+            success_count: BigInt(190),
+            error_count: BigInt(10),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            total_errors: BigInt(10),
+            recovered_errors: BigInt(5),
+          },
+        ])
+        .mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/performance/error-rate?includeRecovered=true'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const queryText = mockQueryRaw.mock.calls
+        .map(([query]) => query?.strings?.join('?') ?? String(query))
+        .join('\n');
+      expect(queryText).not.toContain('"recovered" = false');
+    });
+
+    it('应该支持 minSeverity 严重程度下限筛选', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockQueryRaw
+        .mockResolvedValueOnce([
+          {
+            total_requests: BigInt(200),
+            success_count: BigInt(190),
+            error_count: BigInt(10),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            total_errors: BigInt(5),
+            recovered_errors: BigInt(0),
+          },
+        ])
+        .mockResolvedValue([]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/performance/error-rate?minSeverity=HIGH'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const queryText = mockQueryRaw.mock.calls
+        .map(([query]) => query?.strings?.join('?') ?? String(query))
+        .join('\n');
+      expect(queryText).toContain('"severity" IN');
     });
 
     it('应该正确计算错误率', async () => {

@@ -7,6 +7,8 @@ import { prisma } from '@/lib/db/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -73,12 +75,12 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: '辩论不存在' }, { status: 404 });
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authUser.userId },
-      select: { role: true },
-    });
-    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
-    if (debate.userId !== authUser.userId && !isAdmin) {
+    const access = await canAccessDebateByCasePermission(
+      authUser.userId,
+      id,
+      CasePermission.EXPORT_DATA
+    );
+    if (!access.allowed) {
       return NextResponse.json({ error: '无权访问' }, { status: 403 });
     }
 

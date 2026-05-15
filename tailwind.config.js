@@ -9,6 +9,8 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
+          'var(--font-noto-sans-sc)',
+          'Noto Sans SC',
           '-apple-system',
           'BlinkMacSystemFont',
           'Segoe UI',
@@ -19,6 +21,14 @@ module.exports = {
           'Helvetica Neue',
           'Arial',
           'sans-serif',
+        ],
+        serif: [
+          'var(--font-noto-serif-sc)',
+          'Noto Serif SC',
+          'STSong',
+          'SimSun',
+          '宋体',
+          'serif',
         ],
         mono: [
           'ui-monospace',

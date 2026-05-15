@@ -8,6 +8,7 @@ jest.mock('@/lib/middleware/auth', () => ({
 }));
 
 import { getAuthUser } from '@/lib/middleware/auth';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 // Mock checkAIQuota
 jest.mock('@/lib/ai/quota', () => ({
   checkAIQuota: jest.fn().mockResolvedValue({ allowed: true }),
@@ -26,19 +27,32 @@ jest.mock('@/lib/db/prisma', () => ({
     case: {
       findUnique: jest.fn(),
     },
+    user: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
 import { prisma } from '@/lib/db/prisma';
+import {
+  checkResourceOwnership,
+  isAdminRole,
+} from '@/lib/middleware/resource-permission';
 
 // Mock checkResourceOwnership
-jest.mock('@/lib/middleware/resource-permission', () => {
-  const actual = jest.requireActual('@/lib/middleware/resource-permission');
-  return {
-    ...actual,
-    checkResourceOwnership: jest.fn(),
-  };
-});
+jest.mock('@/lib/middleware/resource-permission', () => ({
+  checkResourceOwnership: jest.fn(),
+  isAdminRole: jest.fn(
+    (role: string) => role === 'ADMIN' || role === 'SUPER_ADMIN'
+  ),
+  ResourceType: {
+    CASE: 'CASE',
+  },
+}));
+
+jest.mock('@/lib/case/share-permission-validator', () => ({
+  canAccessSharedCase: jest.fn(),
+}));
 
 const mockAuthUser: JwtPayload = {
   userId: 'test-user-1',
@@ -52,6 +66,15 @@ describe('Debates API', () => {
   beforeEach(() => {
     // Mock getAuthUser返回已认证用户
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
+    (canAccessSharedCase as jest.Mock).mockResolvedValue({
+      hasAccess: true,
+    });
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
+    (isAdminRole as jest.Mock).mockImplementation(
+      (role: string) => role === 'ADMIN' || role === 'SUPER_ADMIN'
+    );
     (prisma.debate.findMany as jest.Mock).mockResolvedValue([
       {
         id: 'debate-1',
@@ -66,12 +89,16 @@ describe('Debates API', () => {
       },
     ]);
     (prisma.debate.count as jest.Mock).mockResolvedValue(1);
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      role: mockAuthUser.role,
+    });
     (prisma.case.findUnique as jest.Mock).mockResolvedValue({
       id: 'case-1',
       title: '案件1',
       description: '案件描述',
       type: 'CIVIL',
       status: 'ACTIVE',
+      userId: mockAuthUser.userId,
     });
     (prisma.debate.create as jest.Mock).mockResolvedValue({
       id: 'new-debate-1',

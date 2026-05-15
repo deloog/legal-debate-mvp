@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
+  createNotFoundResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
+import {
   createSuccessResponse,
   createNoContentResponse,
 } from '@/app/api/lib/responses/success';
@@ -35,10 +39,7 @@ export const GET = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const task = await FollowUpTaskProcessor.getTask(
@@ -47,10 +48,7 @@ export const GET = withErrorHandler(
     );
 
     if (!task) {
-      return NextResponse.json(
-        { error: '任务不存在或无权限访问' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('任务不存在或无权限访问');
     }
 
     return createSuccessResponse(task);
@@ -68,10 +66,7 @@ export const PUT = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const body = await request.json();
@@ -79,13 +74,26 @@ export const PUT = withErrorHandler(
 
     // 构建更新输入
     const updateInput: {
+      type?: import('@/types/client').CommunicationType;
+      summary?: string;
       priority?: import('@/types/client').FollowUpTaskPriority;
+      dueDate?: Date;
       notes?: string;
     } = {};
 
+    if (validatedData.type) {
+      updateInput.type =
+        validatedData.type as import('@/types/client').CommunicationType;
+    }
+    if (validatedData.summary !== undefined) {
+      updateInput.summary = validatedData.summary;
+    }
     if (validatedData.priority) {
       updateInput.priority =
         validatedData.priority as import('@/types/client').FollowUpTaskPriority;
+    }
+    if (validatedData.dueDate) {
+      updateInput.dueDate = new Date(validatedData.dueDate);
     }
     if (validatedData.notes !== undefined) {
       updateInput.notes = validatedData.notes;
@@ -98,10 +106,7 @@ export const PUT = withErrorHandler(
     );
 
     if (!task) {
-      return NextResponse.json(
-        { error: '任务不存在或无权限访问' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('任务不存在或无权限访问');
     }
 
     return createSuccessResponse(task);
@@ -119,10 +124,7 @@ export const PATCH = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const body = await request.json();
@@ -135,10 +137,7 @@ export const PATCH = withErrorHandler(
     );
 
     if (!task) {
-      return NextResponse.json(
-        { error: '任务不存在或无权限访问' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('任务不存在或无权限访问');
     }
 
     return createSuccessResponse(task);
@@ -156,10 +155,7 @@ export const DELETE = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const success = await FollowUpTaskProcessor.cancelTask(
@@ -168,10 +164,7 @@ export const DELETE = withErrorHandler(
     );
 
     if (!success) {
-      return NextResponse.json(
-        { error: '任务不存在或无权限访问' },
-        { status: 404 }
-      );
+      return createNotFoundResponse('任务不存在或无权限访问');
     }
 
     return createNoContentResponse();

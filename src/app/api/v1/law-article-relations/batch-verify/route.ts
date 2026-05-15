@@ -14,11 +14,11 @@ import {
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { ExpertService } from '@/lib/knowledge-graph/expert/expert-service';
 
 interface BatchVerifyRequestBody {
   relationIds: string[];
   approved: boolean;
-  verifiedBy: string;
   note?: string;
 }
 
@@ -126,6 +126,10 @@ export async function POST(
       );
     }
 
+    const expert = await new ExpertService().getOrCreateExpertProfile(
+      authUser.userId
+    );
+
     // 批量审核关系
     const results: BatchVerifyResult[] = [];
     let successCount = 0;
@@ -166,7 +170,7 @@ export async function POST(
             verificationStatus: body.approved
               ? VerificationStatus.VERIFIED
               : VerificationStatus.REJECTED,
-            verifiedBy: authUser.userId,
+            verifiedBy: expert.id,
             verifiedAt: new Date(),
           },
         });

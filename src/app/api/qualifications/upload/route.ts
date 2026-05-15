@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
 
     // 获取请求数据
     const body = (await request.json()) as QualificationUploadRequest;
-    const { licenseNumber, fullName, idCardNumber, lawFirm } = body;
+    const { licenseNumber, fullName, idCardNumber, lawFirm, licensePhoto } =
+      body;
 
     // 验证基础信息
     const validation = validateBasicInfo({
@@ -84,9 +85,15 @@ export async function POST(request: NextRequest) {
     // 检查用户是否已有资格认证记录
     const userQualifications = await prisma.lawyerQualification.findMany({
       where: { userId },
+      orderBy: { submittedAt: 'desc' },
     });
 
-    if (userQualifications.length > 0) {
+    const latestQualification = userQualifications[0];
+    const canResubmit =
+      latestQualification?.status === QualificationStatus.REJECTED ||
+      latestQualification?.status === QualificationStatus.EXPIRED;
+
+    if (userQualifications.length > 0 && !canResubmit) {
       return NextResponse.json(
         {
           success: false,
@@ -113,18 +120,36 @@ export async function POST(request: NextRequest) {
       initialStatus = QualificationStatus.UNDER_REVIEW;
     }
 
-    // 创建资格认证记录
-    const qualification = await prisma.lawyerQualification.create({
-      data: {
-        userId,
-        licenseNumber: formattedLicenseNumber,
-        fullName,
-        idCardNumber,
-        lawFirm,
-        status: initialStatus,
-        verificationData: verificationData as Prisma.InputJsonValue,
-      },
-    });
+    const qualificationData = {
+      userId,
+      licenseNumber: formattedLicenseNumber,
+      fullName,
+      idCardNumber,
+      lawFirm,
+      licensePhoto:
+        typeof licensePhoto === 'string' && licensePhoto.trim() !== ''
+          ? licensePhoto.trim()
+          : null,
+      status: initialStatus,
+      verificationData: verificationData as Prisma.InputJsonValue,
+    };
+
+    // 被拒绝/过期的申请允许重新提交：复用原记录并重置审核状态
+    const qualification =
+      canResubmit && latestQualification
+        ? await prisma.lawyerQualification.update({
+            where: { id: latestQualification.id },
+            data: {
+              ...qualificationData,
+              reviewedAt: null,
+              reviewerId: null,
+              reviewNotes: null,
+              submittedAt: new Date(),
+            },
+          })
+        : await prisma.lawyerQualification.create({
+            data: qualificationData,
+          });
 
     // 如果自动通过，更新用户角色
     if (initialStatus === QualificationStatus.APPROVED) {

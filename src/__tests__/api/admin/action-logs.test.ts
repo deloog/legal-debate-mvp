@@ -18,6 +18,11 @@ jest.mock('@/lib/db/prisma', () => ({
 
 jest.mock('@/lib/middleware/auth');
 jest.mock('@/lib/middleware/permission-check');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
 
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -66,19 +71,31 @@ describe('操作日志API - GET /api/admin/action-logs', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('UNAUTHORIZED');
+      expect(data.success).toBe(false);
+      const errorCode =
+        typeof data.error === 'string' ? data.error : data.error?.code;
+      expect(errorCode).toBe('UNAUTHORIZED');
     });
 
     it('无权限用户应返回403', async () => {
       mockedGetAuthUser.mockResolvedValue(mockUser);
       mockedValidatePermissions.mockResolvedValue(
-        Response.json({ error: '权限不足' }, { status: 403 })
+        Response.json(
+          {
+            success: false,
+            error: { code: 'FORBIDDEN', message: '权限不足' },
+          },
+          { status: 403 }
+        )
       );
 
       const request = new NextRequest('http://localhost/api/admin/action-logs');
       const response = await GET(request);
 
       expect(response.status).toBe(403);
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error?.code).toBe('FORBIDDEN');
     });
 
     it('有权限用户可以访问', async () => {

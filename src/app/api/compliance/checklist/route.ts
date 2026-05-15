@@ -5,7 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ComplianceService } from '@/lib/compliance/compliance-service';
+import {
+  ComplianceAccessError,
+  ComplianceRequestError,
+  ComplianceService,
+} from '@/lib/compliance/compliance-service';
 import type {
   GetChecklistResponse,
   UpdateCheckItemResponse,
@@ -67,6 +71,19 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof ComplianceAccessError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        },
+        { status: error.status }
+      );
+    }
+
     logger.error('获取检查清单错误:', error);
 
     return NextResponse.json(
@@ -199,6 +216,32 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof ComplianceAccessError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        },
+        { status: error.status }
+      );
+    }
+
+    if (error instanceof ComplianceRequestError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        },
+        { status: error.status }
+      );
+    }
+
     logger.error('更新检查项错误:', error);
 
     return NextResponse.json(

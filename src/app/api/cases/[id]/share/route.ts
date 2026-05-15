@@ -14,6 +14,10 @@ import {
   canAccessSharedCase,
 } from '@/lib/case/share-permission-validator';
 import { Prisma } from '@prisma/client';
+import {
+  checkResourceOwnership,
+  ResourceType,
+} from '@/lib/middleware/resource-permission';
 
 /**
  * 共享案件的Zod schema
@@ -140,8 +144,15 @@ export const GET = withErrorHandler(
 
     const caseId = (await params).id;
 
-    // 检查是否有权限访问案件
-    const accessPermission = await canAccessSharedCase(caseId, authUser.userId);
+    // 所有者/管理员直接通过；其余用户走共享案件访问校验
+    const ownershipResult = await checkResourceOwnership(
+      authUser.userId,
+      caseId,
+      ResourceType.CASE
+    );
+    const accessPermission = ownershipResult.hasPermission
+      ? { hasAccess: true }
+      : await canAccessSharedCase(authUser.userId, caseId);
     if (!accessPermission.hasAccess) {
       return NextResponse.json(
         {

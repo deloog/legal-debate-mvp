@@ -9,6 +9,7 @@ import {
   ApprovalStateMachineError,
 } from '@/lib/contract/contract-approval-service';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 
@@ -18,7 +19,7 @@ const cancelApprovalSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  _context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // 通过 JWT Bearer 或 cookie 获取当前用户
@@ -37,6 +38,38 @@ export async function POST(
 
     // 验证请求数据
     const validatedData = cancelApprovalSchema.parse(body);
+    const { id: contractId } = await context.params;
+
+    const approval = await prisma.contractApproval.findUnique({
+      where: { id: validatedData.approvalId },
+      select: { id: true, contractId: true, createdBy: true },
+    });
+
+    if (!approval || approval.contractId !== contractId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '审批记录不存在或不属于该合同',
+          },
+        },
+        { status: 404 }
+      );
+    }
+
+    if (approval.createdBy !== user.userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: '只有发起人可以撤回审批',
+          },
+        },
+        { status: 403 }
+      );
+    }
 
     // 撤回审批
     await contractApprovalService.cancelApproval(

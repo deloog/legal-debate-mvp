@@ -11,6 +11,29 @@ import {
   createPermissionErrorResponse,
   ResourceType,
 } from '@/lib/middleware/resource-permission';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
+
+async function checkCaseAccess(
+  userId: string,
+  caseId: string,
+  permission: CasePermission
+): Promise<{ allowed: boolean; reason?: string }> {
+  const ownership = await checkResourceOwnership(
+    userId,
+    caseId,
+    ResourceType.CASE
+  );
+  if (ownership.hasPermission) {
+    return { allowed: true };
+  }
+
+  const result = await canAccessSharedCase(userId, caseId, permission);
+  return {
+    allowed: result.hasAccess,
+    reason: result.reason,
+  };
+}
 
 /**
  * GET /api/v1/cases/[id]
@@ -36,22 +59,9 @@ export const GET = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
-      authUser.userId,
-      validatedId,
-      ResourceType.CASE
-    );
-
-    if (!permissionResult.hasPermission) {
-      return createPermissionErrorResponse(
-        permissionResult.reason ?? '您无权访问此案件'
-      );
-    }
-
     // 调用实际的数据库查询
-    const caseItem = await prisma.case.findUnique({
-      where: { id: validatedId },
+    const caseItem = await prisma.case.findFirst({
+      where: { id: validatedId, deletedAt: null },
       include: {
         documents: {
           orderBy: { createdAt: 'desc' },
@@ -79,6 +89,19 @@ export const GET = withErrorHandler(
     if (!caseItem) {
       const { NotFoundError } = await import('@/app/api/lib/errors/api-error');
       throw new NotFoundError('Case');
+    }
+
+    // 检查案件访问权限（所有者 / 案件成员 / 共享团队成员）
+    const permissionResult = await checkCaseAccess(
+      authUser.userId,
+      validatedId,
+      CasePermission.VIEW_CASE
+    );
+
+    if (!permissionResult.allowed) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权访问此案件'
+      );
     }
 
     return createSuccessResponse(caseItem);
@@ -109,14 +132,14 @@ export const PUT = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    // 检查案件编辑权限
+    const permissionResult = await checkCaseAccess(
       authUser.userId,
       validatedId,
-      ResourceType.CASE
+      CasePermission.EDIT_CASE
     );
 
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权修改此案件'
       );
@@ -273,14 +296,14 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    // 检查案件删除权限
+    const permissionResult = await checkCaseAccess(
       authUser.userId,
       validatedId,
-      ResourceType.CASE
+      CasePermission.DELETE_CASE
     );
 
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权删除此案件'
       );

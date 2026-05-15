@@ -133,6 +133,7 @@ export interface QualificationUploadRequest {
   fullName: string;
   idCardNumber: string;
   lawFirm: string;
+  licensePhoto?: string;
 }
 
 /**

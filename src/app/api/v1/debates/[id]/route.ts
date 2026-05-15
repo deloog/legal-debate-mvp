@@ -11,11 +11,9 @@ import {
 } from '@/app/api/lib/validation/schemas';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import {
-  checkResourceOwnership,
-  createPermissionErrorResponse,
-  ResourceType,
-} from '@/lib/middleware/resource-permission';
+import { createPermissionErrorResponse } from '@/lib/middleware/resource-permission';
+import { canAccessDebateByCasePermission } from '@/lib/debate/access';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 创建404响应的辅助函数
@@ -59,14 +57,12 @@ export const GET = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    const permissionResult = await canAccessDebateByCasePermission(
       authUser.userId,
       id,
-      ResourceType.DEBATE
+      CasePermission.VIEW_DEBATES
     );
-
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权访问此辩论'
       );
@@ -137,14 +133,12 @@ export const PUT = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    const permissionResult = await canAccessDebateByCasePermission(
       authUser.userId,
       id,
-      ResourceType.DEBATE
+      CasePermission.EDIT_DEBATES
     );
-
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权修改此辩论'
       );
@@ -220,14 +214,12 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    // 检查资源权限
-    const permissionResult = await checkResourceOwnership(
+    const permissionResult = await canAccessDebateByCasePermission(
       authUser.userId,
       id,
-      ResourceType.DEBATE
+      CasePermission.DELETE_DEBATES
     );
-
-    if (!permissionResult.hasPermission) {
+    if (!permissionResult.allowed) {
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权删除此辩论'
       );

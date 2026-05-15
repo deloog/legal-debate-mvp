@@ -5,6 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  loadRuntimePolicy,
+  saveRuntimePolicy,
+} from '@/lib/admin/runtime-policy-storage';
 
 /**
  * IP过滤规则类型
@@ -34,18 +38,144 @@ class IPFilter {
     mode: 'blacklist', // 默认黑名单模式
     blockMessage: '访问被拒绝',
   };
+  private hydratePromise: Promise<void> | null = null;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastHydratedAt = 0;
+
+  constructor() {
+    void this.hydrateFromStorage();
+  }
+
+  private shouldUsePersistence(): boolean {
+    return process.env.NODE_ENV !== 'test';
+  }
+
+  private refreshIfStale(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (Date.now() - this.lastHydratedAt > 15000) {
+      void this.hydrateFromStorage();
+    }
+  }
+
+  private async hydrateFromStorage(force = false): Promise<void> {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.hydratePromise && !force) {
+      await this.hydratePromise;
+      return;
+    }
+
+    this.hydratePromise = (async () => {
+      const [config, blacklist, whitelist] = await Promise.all([
+        loadRuntimePolicy<IPFilterConfig>('admin.ip_filter.config'),
+        loadRuntimePolicy<
+          Array<IPFilterRule & { addedAt: string; expiresAt?: string }>
+        >('admin.ip_filter.blacklist'),
+        loadRuntimePolicy<
+          Array<IPFilterRule & { addedAt: string; expiresAt?: string }>
+        >('admin.ip_filter.whitelist'),
+      ]);
+
+      if (config) {
+        this.config = config;
+      }
+
+      if (blacklist) {
+        this.blacklist = new Map(
+          blacklist.map(rule => [
+            rule.ip,
+            {
+              ...rule,
+              addedAt: new Date(rule.addedAt),
+              expiresAt: rule.expiresAt ? new Date(rule.expiresAt) : undefined,
+            },
+          ])
+        );
+      }
+
+      if (whitelist) {
+        this.whitelist = new Map(
+          whitelist.map(rule => [
+            rule.ip,
+            {
+              ...rule,
+              addedAt: new Date(rule.addedAt),
+              expiresAt: rule.expiresAt ? new Date(rule.expiresAt) : undefined,
+            },
+          ])
+        );
+      }
+
+      this.lastHydratedAt = Date.now();
+    })();
+
+    try {
+      await this.hydratePromise;
+    } finally {
+      this.hydratePromise = null;
+    }
+  }
+
+  private schedulePersist(): void {
+    if (!this.shouldUsePersistence()) {
+      return;
+    }
+
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+    }
+
+    this.persistTimer = setTimeout(() => {
+      void this.persistToStorage();
+    }, 100);
+  }
+
+  private async persistToStorage(): Promise<void> {
+    await Promise.all([
+      saveRuntimePolicy(
+        'admin.ip_filter.config',
+        this.config,
+        '运行时 IP 过滤配置'
+      ),
+      saveRuntimePolicy(
+        'admin.ip_filter.blacklist',
+        Array.from(this.blacklist.values()).map(rule => ({
+          ...rule,
+          addedAt: rule.addedAt.toISOString(),
+          expiresAt: rule.expiresAt?.toISOString(),
+        })),
+        '运行时 IP 黑名单'
+      ),
+      saveRuntimePolicy(
+        'admin.ip_filter.whitelist',
+        Array.from(this.whitelist.values()).map(rule => ({
+          ...rule,
+          addedAt: rule.addedAt.toISOString(),
+          expiresAt: rule.expiresAt?.toISOString(),
+        })),
+        '运行时 IP 白名单'
+      ),
+    ]);
+  }
 
   /**
    * 设置过滤模式
    */
   setMode(mode: IPFilterConfig['mode']): void {
     this.config.mode = mode;
+    this.schedulePersist();
   }
 
   /**
    * 获取当前模式
    */
   getMode(): IPFilterConfig['mode'] {
+    this.refreshIfStale();
     return this.config.mode;
   }
 
@@ -63,6 +193,7 @@ class IPFilter {
     };
 
     this.blacklist.set(ip, rule);
+    this.schedulePersist();
 
     if (process.env.NODE_ENV !== 'test') {
       logger.warn('[IPFilter] IP added to blacklist:', {
@@ -78,6 +209,9 @@ class IPFilter {
    */
   removeFromBlacklist(ip: string): boolean {
     const removed = this.blacklist.delete(ip);
+    if (removed) {
+      this.schedulePersist();
+    }
     if (removed && process.env.NODE_ENV !== 'test') {
       logger.info('[IPFilter] IP removed from blacklist:', { ip });
     }
@@ -95,6 +229,7 @@ class IPFilter {
     };
 
     this.whitelist.set(ip, rule);
+    this.schedulePersist();
 
     if (process.env.NODE_ENV !== 'test') {
       logger.info('[IPFilter] IP added to whitelist:', { ip, reason });
@@ -105,13 +240,18 @@ class IPFilter {
    * 从白名单移除IP
    */
   removeFromWhitelist(ip: string): boolean {
-    return this.whitelist.delete(ip);
+    const removed = this.whitelist.delete(ip);
+    if (removed) {
+      this.schedulePersist();
+    }
+    return removed;
   }
 
   /**
    * 检查IP是否在黑名单中
    */
   isBlacklisted(ip: string): boolean {
+    this.refreshIfStale();
     const rule = this.blacklist.get(ip);
 
     if (!rule) {
@@ -131,6 +271,7 @@ class IPFilter {
    * 检查IP是否在白名单中
    */
   isWhitelisted(ip: string): boolean {
+    this.refreshIfStale();
     return this.whitelist.has(ip);
   }
 
@@ -173,6 +314,7 @@ class IPFilter {
    * 获取黑名单列表
    */
   getBlacklist(): IPFilterRule[] {
+    this.refreshIfStale();
     return Array.from(this.blacklist.values()).filter(rule => {
       // 过滤掉已过期的规则
       if (rule.expiresAt && new Date() > rule.expiresAt) {
@@ -187,6 +329,7 @@ class IPFilter {
    * 获取白名单列表
    */
   getWhitelist(): IPFilterRule[] {
+    this.refreshIfStale();
     return Array.from(this.whitelist.values());
   }
 
@@ -209,6 +352,7 @@ class IPFilter {
    */
   clearBlacklist(): void {
     this.blacklist.clear();
+    this.schedulePersist();
     if (process.env.NODE_ENV !== 'test') {
       logger.info('[IPFilter] Blacklist cleared');
     }
@@ -219,6 +363,7 @@ class IPFilter {
    */
   clearWhitelist(): void {
     this.whitelist.clear();
+    this.schedulePersist();
     if (process.env.NODE_ENV !== 'test') {
       logger.info('[IPFilter] Whitelist cleared');
     }
@@ -249,6 +394,7 @@ class IPFilter {
    * 获取统计信息
    */
   getStats() {
+    this.refreshIfStale();
     return {
       mode: this.config.mode,
       blacklistSize: this.blacklist.size,
@@ -261,7 +407,7 @@ class IPFilter {
 export const ipFilter = new IPFilter();
 
 // 定期清理过期条目（每小时）
-if (typeof setInterval !== 'undefined') {
+if (typeof setInterval !== 'undefined' && process.env.NODE_ENV !== 'test') {
   setInterval(
     () => {
       ipFilter.cleanupExpired();

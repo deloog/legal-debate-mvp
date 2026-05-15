@@ -4,6 +4,10 @@
  */
 
 import { type NextRequest } from 'next/server';
+import {
+  createErrorResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
@@ -24,10 +28,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // 验证用户身份
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return Response.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const userId = authUser.userId;
@@ -94,9 +95,11 @@ export async function GET(request: NextRequest): Promise<Response> {
     return Response.json(statistics);
   } catch (error) {
     logger.error('[GET /api/clients/statistics] Error:', error);
-    return Response.json(
-      { error: '获取统计数据失败', details: String(error) },
-      { status: 500 }
+    return createErrorResponse(
+      'INTERNAL_SERVER_ERROR',
+      '获取统计数据失败',
+      500,
+      String(error)
     );
   }
 }

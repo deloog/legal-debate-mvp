@@ -14,6 +14,7 @@ import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import {
+  getContractAccess,
   resolveContractUserId,
   unauthorizedResponse,
   forbiddenResponse,
@@ -48,6 +49,24 @@ export async function GET(
       );
     }
 
+    const access = await getContractAccess(id, userId);
+    if (!access.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '合同记录不存在',
+          },
+        },
+        { status: 404 }
+      );
+    }
+
+    if (!access.canRead) {
+      return forbiddenResponse('无权访问此合同');
+    }
+
     // 查询合同记录
     const contract = await prisma.contract.findUnique({
       where: { id },
@@ -67,7 +86,6 @@ export async function GET(
       },
     });
 
-    // 检查是否存在
     if (!contract) {
       return NextResponse.json(
         {
@@ -180,6 +198,24 @@ export async function PUT(
     }
 
     // 检查记录是否存在，并验证所有权（lawyerId === userId）
+    const access = await getContractAccess(id, userId);
+    if (!access.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: '合同记录不存在',
+          },
+        },
+        { status: 404 }
+      );
+    }
+
+    if (!access.canManage) {
+      return forbiddenResponse();
+    }
+
     const existing = await prisma.contract.findUnique({
       where: { id },
     });
@@ -195,11 +231,6 @@ export async function PUT(
         },
         { status: 404 }
       );
-    }
-
-    // ─── 所有权检查（只有合同归属律师可以修改） ─────────────────────────────
-    if (existing.lawyerId !== userId) {
-      return forbiddenResponse();
     }
 
     // 解析请求体

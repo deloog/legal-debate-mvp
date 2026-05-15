@@ -158,7 +158,7 @@ class CaseStatusMonitor {
 
       const input: CreateReminderInput = {
         userId: caseData.userId,
-        type: ReminderType.CASE_DEADLINE, // 使用正确的枚举值
+        type: ReminderType.DEADLINE,
         title: `案件截止提醒: ${caseData.title}`,
         content: `${config.description}\n\n案件：${caseData.title}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
         message: `${config.description}\n\n案件：${caseData.title}\n截止时间：${deadline.toLocaleString('zh-CN')}`, // 兼容旧代码

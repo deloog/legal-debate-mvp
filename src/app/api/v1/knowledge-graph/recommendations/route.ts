@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { RelationType, VerificationStatus } from '@prisma/client';
+import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
 import { validateID } from '@/lib/validation/id-validator';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -72,15 +72,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 验证必需参数
     if (!articleId) {
-      logger.warn('推荐查询缺少 articleId 参数，返回空结果');
-      return sendSuccess(
-        {
-          sourceArticle: null,
-          recommendations: [],
-          mode: mode || 'relations',
-        },
-        { message: '请提供 articleId 参数以获取推荐' }
-      );
+      return sendError('BAD_REQUEST', '缺少必需参数: articleId');
     }
 
     // 验证 ID 格式
@@ -342,7 +334,7 @@ async function getSimilarityRecommendations(
     id: string;
     lawName: string;
     articleNumber: string;
-    category: string | null;
+    category: LawCategory | null;
   },
   limit: number
 ): Promise<RecommendationResult[]> {
@@ -352,7 +344,7 @@ async function getSimilarityRecommendations(
 
   const similarArticles = await prisma.lawArticle.findMany({
     where: {
-      category: sourceArticle.category as any,
+      category: sourceArticle.category,
       id: { not: sourceArticle.id },
     },
     select: {

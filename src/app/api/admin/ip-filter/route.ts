@@ -10,6 +10,10 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { ipFilter } from '@/lib/middleware/ip-filter';
 import { logger } from '@/lib/logger';
+import {
+  validateAdminStepUpToken,
+  validateSensitiveOperationReason,
+} from '@/lib/admin/step-up';
 
 /**
  * GET /api/admin/ip-filter
@@ -73,9 +77,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
-    const { ip, listType, reason, expiresInMinutes } = body;
+    const { ip, listType, reason, expiresInMinutes, changeReason } = body;
+
+    const reasonCheck = validateSensitiveOperationReason(
+      changeReason ?? reason
+    );
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     // 验证参数
     if (!ip || typeof ip !== 'string') {
@@ -132,10 +160,33 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const ip = searchParams.get('ip');
     const listType = searchParams.get('listType');
+    const changeReason = searchParams.get('changeReason') ?? '';
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!ip) {
       return NextResponse.json(
@@ -199,9 +250,31 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
-    const { mode } = body;
+    const { mode, changeReason } = body;
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!mode || !['blacklist', 'whitelist', 'off'].includes(mode)) {
       return NextResponse.json(

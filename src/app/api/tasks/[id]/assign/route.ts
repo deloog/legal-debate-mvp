@@ -6,6 +6,8 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { TaskStatus, TaskPriority } from '@/types/task';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 分配任务Schema
@@ -81,6 +83,34 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       { error: '用户不存在', message: '指定的用户不存在或已被禁用' },
       { status: 404 }
     );
+  }
+
+  if (validatedData.assignedTo !== authUser.userId) {
+    if (!existingTask.caseId) {
+      return NextResponse.json(
+        {
+          error: '无权操作',
+          message: '无关联案件的任务只能分配给自己',
+        },
+        { status: 403 }
+      );
+    }
+
+    const assigneeAccess = await canAccessSharedCase(
+      validatedData.assignedTo,
+      existingTask.caseId,
+      CasePermission.VIEW_CASE
+    );
+
+    if (!assigneeAccess.hasAccess) {
+      return NextResponse.json(
+        {
+          error: '无权操作',
+          message: '只能将任务分配给有权访问该案件的成员',
+        },
+        { status: 403 }
+      );
+    }
   }
 
   const updateData: Record<string, unknown> = {

@@ -10,23 +10,27 @@ interface PaymentConfirmProps {
   amount: number;
   currency?: string;
   membershipTierId?: string;
+  existingOrderId?: string;
   billingCycle?: 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'LIFETIME';
   description?: string;
   paymentMethod: PaymentMethod | null;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  onOrderCreated?: (data: NonNullable<CreateOrderResponse['data']>) => void;
 }
 
 export function PaymentConfirm({
   amount,
   membershipTierId,
+  existingOrderId,
   billingCycle = 'MONTHLY',
   description = '会员升级',
   paymentMethod,
   onConfirm,
   onCancel,
   isLoading = false,
+  onOrderCreated,
 }: PaymentConfirmProps) {
   const [orderData, setOrderData] = useState<
     CreateOrderResponse['data'] | null
@@ -39,11 +43,11 @@ export function PaymentConfirm({
 
   // 创建订单
   useEffect(() => {
-    if (membershipTierId && paymentMethod) {
+    if (!existingOrderId && membershipTierId && paymentMethod) {
       void createOrder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [membershipTierId, paymentMethod]);
+  }, [membershipTierId, paymentMethod, existingOrderId]);
 
   // 倒计时
   useEffect(() => {
@@ -74,7 +78,7 @@ export function PaymentConfirm({
         throw new Error('缺少必要参数');
       }
 
-      const response = await fetch('/api/orders/create', {
+      const response = await fetch('/api/payments/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,6 +99,9 @@ export function PaymentConfirm({
       }
 
       setOrderData(data.data);
+      if (data.data) {
+        onOrderCreated?.(data.data);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '创建订单失败');
     } finally {
@@ -200,6 +207,35 @@ export function PaymentConfirm({
           </div>
         </div>
       )}
+
+      {/* 支付宝二维码（统一映射为 codeUrl 之前的兼容展示） */}
+      {(orderData as CreateOrderResponse['data'] & { qrCode?: string })
+        ?.qrCode &&
+        !orderData?.codeUrl && (
+          <div className='rounded-lg border border-gray-200 bg-white p-4'>
+            <div className='mb-4 text-center'>
+              <p className='mb-2 text-sm text-gray-600'>
+                请使用手机扫描下方二维码完成支付
+              </p>
+              <div className='mx-auto flex h-48 w-48 items-center justify-center rounded-lg border-2 border-gray-300 bg-white'>
+                <Image
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180&data=${encodeURIComponent(
+                    (
+                      orderData as CreateOrderResponse['data'] & {
+                        qrCode?: string;
+                      }
+                    ).qrCode || ''
+                  )}`}
+                  alt='支付二维码'
+                  width={176}
+                  height={176}
+                  className='h-44 w-44'
+                  unoptimized
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* 支付链接 */}
       {orderData?.paymentUrl && (

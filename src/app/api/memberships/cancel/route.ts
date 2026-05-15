@@ -6,8 +6,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import type { CancelRequestBody } from '@/types/admin-membership';
-import { MembershipStatus } from '@prisma/client';
-import { MembershipChangeType } from '@/types/membership';
+import { cancelMembership } from '@/lib/membership/membership-service';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
@@ -108,69 +107,48 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 计算取消后的到期时间
-    const cancelledMembership = await prisma.$transaction(async tx => {
-      // 更新会员状态为已取消
-      const updatedMembership = await tx.userMembership.update({
-        where: { id: currentMembership.id },
-        data: {
-          status: MembershipStatus.CANCELLED,
-          cancelledAt: new Date(),
-          cancelledReason: reason || '用户主动取消',
-          notes: `会员取消：${reason || '用户主动取消'}`,
-          autoRenew: false, // 取消后关闭自动续费
-        },
-        include: {
-          tier: true,
-        },
-      });
-
-      // 记录会员变更历史
-      await tx.membershipHistory.create({
-        data: {
-          userId: authUser.userId,
-          membershipId: currentMembership.id,
-          changeType: 'CANCEL' as MembershipChangeType,
-          fromTier: currentMembership.tier.tier,
-          toTier: undefined,
-          fromStatus: currentMembership.status,
-          toStatus: MembershipStatus.CANCELLED,
-          reason: `会员取消：${reason || '用户主动取消'}`,
-          performedBy: authUser.userId,
-          metadata: {
-            cancelReason: reason,
-            wasAutoRenew: currentMembership.autoRenew,
-            remainingDays: Math.ceil(
-              (new Date(updatedMembership.endDate).getTime() - Date.now()) /
-                (24 * 60 * 60 * 1000)
-            ),
-          },
-        },
-      });
-
-      return updatedMembership;
+    // 产品契约：取消会员 = 仅取消续费，到期前仍可继续使用
+    await cancelMembership({
+      userId: authUser.userId,
+      immediate: false,
+      reason: reason || '用户主动取消续费',
+      performedBy: authUser.userId,
     });
+
+    // 重新查询最新会员信息，返回当前仍为 ACTIVE 的会员，但 autoRenew = false
+    const updatedMembership = await prisma.userMembership.findFirst({
+      where: {
+        id: currentMembership.id,
+      },
+      include: {
+        tier: true,
+      },
+    });
+
+    if (!updatedMembership) {
+      throw new Error('会员取消后重新查询失败');
+    }
 
     // 返回成功响应
     return NextResponse.json(
       {
         success: true,
-        message: '会员取消成功',
+        message: '已取消自动续费，当前会员权益将在到期前继续有效',
         data: {
           membership: {
-            id: cancelledMembership.id,
-            tier: cancelledMembership.tier.tier,
-            tierName: cancelledMembership.tier.displayName,
-            status: cancelledMembership.status,
-            startDate: cancelledMembership.startDate,
-            endDate: cancelledMembership.endDate,
-            cancelledAt: cancelledMembership.cancelledAt,
-            cancelledReason: cancelledMembership.cancelledReason,
-            autoRenew: cancelledMembership.autoRenew,
-            price: Number(cancelledMembership.tier.price),
-            billingCycle: cancelledMembership.tier.billingCycle,
-            features: cancelledMembership.tier.features,
-            permissions: cancelledMembership.tier.permissions,
+            id: updatedMembership.id,
+            tier: updatedMembership.tier.tier,
+            tierName: updatedMembership.tier.displayName,
+            status: updatedMembership.status,
+            startDate: updatedMembership.startDate,
+            endDate: updatedMembership.endDate,
+            cancelledAt: updatedMembership.cancelledAt,
+            cancelledReason: updatedMembership.cancelledReason,
+            autoRenew: updatedMembership.autoRenew,
+            price: Number(updatedMembership.tier.price),
+            billingCycle: updatedMembership.tier.billingCycle,
+            features: updatedMembership.tier.features,
+            permissions: updatedMembership.tier.permissions,
           },
         },
       },

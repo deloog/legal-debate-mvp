@@ -23,6 +23,12 @@ jest.mock('@/lib/middleware/permission-check', () => ({
   validatePermissions: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange } from '@/types/stats';
@@ -250,6 +256,34 @@ describe('辩论质量评分统计API', () => {
       const response = await GET(request);
 
       expect(response.status).toBe(200);
+    });
+
+    it('应该把 debateStatus 筛选应用到论点查询', async () => {
+      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1' });
+      mockValidatePermissions.mockResolvedValue(null);
+
+      mockArgumentFindMany.mockResolvedValue([
+        { confidence: 0.8, createdAt: new Date('2024-01-01') },
+      ]);
+
+      const request = new NextRequest(
+        'http://localhost/api/stats/debates/quality-score?debateStatus=COMPLETED'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      expect(mockArgumentFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            round: {
+              debate: {
+                status: 'COMPLETED',
+                deletedAt: null,
+              },
+            },
+          }),
+        })
+      );
     });
 
     it('应该返回400当查询参数无效', async () => {

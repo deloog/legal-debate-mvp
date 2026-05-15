@@ -6,15 +6,6 @@ import { POST } from '@/app/api/payments/create/route';
 import { GET } from '@/app/api/payments/query/route';
 import { PaymentMethod, CreateOrderResponse } from '@/types/payment';
 
-// Mock dependencies
-jest.mock('next-auth/next', () => ({
-  getServerSession: jest.fn(),
-}));
-
-jest.mock('@/lib/auth/auth-options', () => ({
-  authOptions: {},
-}));
-
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     membershipTier: {
@@ -42,10 +33,27 @@ jest.mock('@/lib/payment/payment-service', () => ({
   },
 }));
 
-import { getServerSession } from 'next-auth';
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/audit/logger', () => ({
+  createAuditLog: jest.fn().mockResolvedValue(undefined),
+  logCreateAction: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+  },
+}));
+
 import { prisma } from '@/lib/db/prisma';
 import { createOrder } from '@/lib/order/order-service';
 import { paymentService } from '@/lib/payment/payment-service';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // Mock NextRequest and NextResponse
 const mockRequest = (body: Record<string, unknown>) =>
@@ -67,7 +75,9 @@ describe('统一支付创建接口', () => {
     mockSession = {
       user: { id: 'mock-user-id' },
     };
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: mockSession.user.id,
+    });
   });
 
   describe('POST /api/payments/create', () => {
@@ -172,7 +182,7 @@ describe('统一支付创建接口', () => {
     });
 
     it('应该拒绝未授权的请求', async () => {
-      (getServerSession as jest.Mock).mockResolvedValue(null);
+      (getAuthUser as jest.Mock).mockResolvedValue(null);
 
       const requestBody = {
         membershipTierId: 'mock-tier-id',
@@ -185,7 +195,11 @@ describe('统一支付创建接口', () => {
 
       expect(response.status).toBe(401);
       expect(responseData.success).toBe(false);
-      expect(responseData.error).toBe('UNAUTHORIZED');
+      const errorCode =
+        typeof responseData.error === 'string'
+          ? responseData.error
+          : responseData.error?.code;
+      expect(errorCode).toBe('UNAUTHORIZED');
     });
 
     it('应该拒绝缺少会员等级ID的请求', async () => {
@@ -323,7 +337,9 @@ describe('统一支付查询接口', () => {
     mockSession = {
       user: { id: 'mock-user-id' },
     };
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: mockSession.user.id,
+    });
   });
 
   describe('GET /api/payments/query', () => {
@@ -386,7 +402,7 @@ describe('统一支付查询接口', () => {
     });
 
     it('应该拒绝未授权的请求', async () => {
-      (getServerSession as jest.Mock).mockResolvedValue(null);
+      (getAuthUser as jest.Mock).mockResolvedValue(null);
 
       const request = mockQueryRequest(
         'http://localhost:3000/api/payments/query?orderId=mock-order-id'
@@ -396,7 +412,11 @@ describe('统一支付查询接口', () => {
 
       expect(response.status).toBe(401);
       expect(responseData.success).toBe(false);
-      expect(responseData.error).toBe('UNAUTHORIZED');
+      const errorCode =
+        typeof responseData.error === 'string'
+          ? responseData.error
+          : responseData.error?.code;
+      expect(errorCode).toBe('UNAUTHORIZED');
     });
 
     it('应该拒绝缺少查询参数的请求', async () => {

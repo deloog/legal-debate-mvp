@@ -14,6 +14,8 @@ import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { clearQuotaConfigCache } from '@/lib/ai/quota';
+import { clearConfigCache } from '@/lib/config/system-config';
 import {
   BatchUpdateConfigRequest,
   ConfigQueryParams,
@@ -23,7 +25,22 @@ import {
   isValidConfigType,
 } from '@/types/config';
 import { Prisma } from '@prisma/client';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  recordSystemConfigHistory,
+  snapshotSystemConfig,
+} from '@/lib/admin/system-config-governance';
+import {
+  validateAdminStepUpToken,
+  validateSensitiveOperationReason,
+} from '@/lib/admin/step-up';
+
+function invalidateConfigCaches(key: string): void {
+  clearConfigCache(key);
+  if (key.startsWith('business.ai_quota_')) {
+    clearQuotaConfigCache();
+  }
+}
 
 // =============================================================================
 // 辅助函数
@@ -176,6 +193,24 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   try {
     const body: CreateConfigRequest = await request.json();
+    const stepUp = validateAdminStepUpToken(request, user.userId);
+    if (!stepUp.valid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'STEP_UP_REQUIRED',
+            message: stepUp.reason,
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    const reasonCheck = validateSensitiveOperationReason(body.changeReason);
+    if (!reasonCheck.valid) {
+      return errorResponse(reasonCheck.message ?? '缺少操作原因', 400);
+    }
 
     // 验证必填字段
     if (!body.key || !body.value || !body.type || !body.category) {
@@ -225,6 +260,18 @@ export async function POST(request: NextRequest): Promise<Response> {
       },
     });
 
+    await recordSystemConfigHistory({
+      userId: user.userId,
+      configKey: newConfig.key,
+      operation: 'create',
+      reason: body.changeReason!.trim(),
+      before: null,
+      after: snapshotSystemConfig(newConfig),
+      request,
+    });
+
+    invalidateConfigCaches(newConfig.key);
+
     return createdResponse(newConfig, '配置创建成功');
   } catch (error) {
     logger.error('创建配置失败:', error);
@@ -251,6 +298,30 @@ export async function PUT(request: NextRequest): Promise<Response> {
 
   try {
     const body: BatchUpdateConfigRequest = await request.json();
+    const stepUp = validateAdminStepUpToken(request, user.userId);
+    if (!stepUp.valid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'STEP_UP_REQUIRED',
+            message: stepUp.reason,
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    const batchReason =
+      typeof (body as BatchUpdateConfigRequest & { changeReason?: unknown })
+        .changeReason === 'string'
+        ? (body as BatchUpdateConfigRequest & { changeReason?: string })
+            .changeReason
+        : undefined;
+    const reasonCheck = validateSensitiveOperationReason(batchReason);
+    if (!reasonCheck.valid) {
+      return errorResponse(reasonCheck.message ?? '缺少操作原因', 400);
+    }
 
     // 验证请求体
     if (!body.configs || !Array.isArray(body.configs)) {
@@ -313,6 +384,18 @@ export async function PUT(request: NextRequest): Promise<Response> {
         });
 
         updatedConfigs.push(updatedConfig);
+
+        await recordSystemConfigHistory({
+          userId: user.userId,
+          configKey: item.key,
+          operation: 'update',
+          reason: batchReason!.trim(),
+          before: snapshotSystemConfig(existingConfig),
+          after: snapshotSystemConfig(updatedConfig),
+          request,
+        });
+
+        invalidateConfigCaches(updatedConfig.key);
       } catch (updateError) {
         logger.error(`更新配置${item.key}失败:`, updateError);
         errors.push({

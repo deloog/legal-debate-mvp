@@ -347,7 +347,8 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
 
   // 生成主要论点（确保至少有一条论点）
   const claimContent = (claims as Array<{ content: string }>)[0]?.content;
-  const mainContent = `${sideName}（${partyName}）的核心主张：${claimContent || '根据案件事实，${sideName}的请求具有充分的事实和法律依据'}。${side === 'PLAINTIFF' ? '请求法院依法支持原告的全部诉讼请求。' : '请求法院依法驳回原告的全部诉讼请求。'}`;
+  const mainFallback = `根据案件事实，${sideName}的请求具有充分的事实和法律依据`;
+  const mainContent = `${sideName}（${partyName}）的核心主张：${claimContent || mainFallback}。${side === 'PLAINTIFF' ? '请求法院依法支持原告的全部诉讼请求。' : '请求法院依法驳回原告的全部诉讼请求。'}`;
 
   arguments_.push({
     id: `arg-${side}-${Date.now()}-${arguments_.length}`,
@@ -369,7 +370,8 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
 
   // 生成支持论点（确保至少有两条论点）
   const factContent = (keyFacts as { description?: string }[])[0]?.description;
-  const supportContent = `${sideName}（${partyName}）的事实依据：${factContent || '根据本案查明的事实，能够充分支持${sideName}的主张'}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
+  const supportFallback = `根据本案查明的事实，能够充分支持${sideName}的主张`;
+  const supportContent = `${sideName}（${partyName}）的事实依据：${factContent || supportFallback}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
 
   arguments_.push({
     id: `arg-${side}-${Date.now()}-${arguments_.length}`,

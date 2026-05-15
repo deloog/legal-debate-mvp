@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { DebateStatus, type Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -19,6 +20,12 @@ import {
 } from '@/types/stats';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+
+function toDebateStatus(value?: string): DebateStatus | undefined {
+  return Object.values(DebateStatus).includes(value as DebateStatus)
+    ? (value as DebateStatus)
+    : undefined;
+}
 
 // =============================================================================
 // 辅助函数：时间范围处理
@@ -184,23 +191,40 @@ function buildWhereClause(
   startDate: Date,
   endDate: Date
 ) {
-  const where: Record<string, unknown> = {
+  const where: Prisma.ArgumentWhereInput = {
     createdAt: {
       gte: startDate,
       lte: endDate,
     },
   };
 
+  const debateStatus = toDebateStatus(params.debateStatus);
+
+  if (debateStatus) {
+    where.round = {
+      debate: {
+        status: debateStatus,
+        deletedAt: null,
+      },
+    };
+  } else {
+    where.round = {
+      debate: {
+        deletedAt: null,
+      },
+    };
+  }
+
   if (params.minConfidence !== undefined) {
     where.confidence = {
-      ...((where.confidence as Record<string, unknown>) || {}),
+      ...(typeof where.confidence === 'object' ? where.confidence : {}),
       gte: params.minConfidence,
     };
   }
 
   if (params.maxConfidence !== undefined) {
     where.confidence = {
-      ...((where.confidence as Record<string, unknown>) || {}),
+      ...(typeof where.confidence === 'object' ? where.confidence : {}),
       lte: params.maxConfidence,
     };
   }

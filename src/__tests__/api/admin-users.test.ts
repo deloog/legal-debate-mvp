@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/admin/users/route';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // Mock设置
@@ -29,6 +30,13 @@ jest.mock('@/lib/middleware/permission-check', () => ({
 // Mock认证中间件
 jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+  },
 }));
 
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -231,21 +239,21 @@ describe('用户列表API', () => {
     test('应限制最大每页数量为100', async () => {
       setupMocks();
       const request = createTestRequest({ limit: '200' });
-      await GET(request);
+      const response = await GET(request);
+      const result = await response.json();
 
-      expect(prisma.user.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ take: 100 })
-      );
+      expect(response.status).toBe(200);
+      expect(result.data.pagination.limit).toBe(100);
     });
 
     test('应确保页码最小为1', async () => {
       setupMocks();
       const request = createTestRequest({ page: '0' });
-      await GET(request);
+      const response = await GET(request);
+      const result = await response.json();
 
-      expect(prisma.user.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: 0 })
-      );
+      expect(response.status).toBe(200);
+      expect(result.data.pagination.page).toBe(1);
     });
   });
 
@@ -459,7 +467,6 @@ describe('用户列表API', () => {
     });
 
     test('应记录错误日志', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       setupMocks();
       (prisma.user.findMany as jest.Mock).mockRejectedValue(
         new Error('数据库错误')
@@ -468,10 +475,10 @@ describe('用户列表API', () => {
       const request = createTestRequest();
       await GET(request);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('获取用户列表失败:')
+      expect(logger.error).toHaveBeenCalledWith(
+        '获取用户列表失败:',
+        expect.any(Error)
       );
-      consoleErrorSpy.mockRestore();
     });
   });
 

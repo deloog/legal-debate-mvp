@@ -41,6 +41,12 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 // =============================================================================
 // 导入
 // =============================================================================
@@ -90,14 +96,18 @@ function setupMocks({
   isAuthenticated = true,
   hasPermission = true,
   userExists = true,
+  currentUserRole = 'ADMIN',
+  targetUserRole = 'USER',
 }: {
   isAuthenticated?: boolean;
   hasPermission?: boolean;
   userExists?: boolean;
+  currentUserRole?: string;
+  targetUserRole?: string;
 } = {}) {
   // Mock认证
   (getAuthUser as jest.Mock).mockResolvedValue(
-    isAuthenticated ? mockUser : null
+    isAuthenticated ? { ...mockUser, role: currentUserRole } : null
   );
 
   // Mock权限检查
@@ -106,8 +116,18 @@ function setupMocks({
   );
 
   // Mock用户查询
-  (prisma.user.findUnique as jest.Mock).mockResolvedValue(
-    userExists ? mockUserData : null
+  (prisma.user.findUnique as jest.Mock).mockImplementation(
+    async ({ where }: { where: { id: string } }) => {
+      if (where.id === mockAdminId) {
+        return { id: mockAdminId, role: currentUserRole };
+      }
+
+      if (!userExists) {
+        return null;
+      }
+
+      return { ...mockUserData, role: targetUserRole };
+    }
   );
 
   // Mock统计数据
@@ -330,6 +350,46 @@ describe('Admin Users Detail API', () => {
       expect(data.data.user.role).toBe(updateData.role);
     });
 
+    it('普通管理员不能将用户提升为ADMIN', async () => {
+      setupMocks({ currentUserRole: 'ADMIN', targetUserRole: 'USER' });
+
+      const request = createTestRequest(
+        `http://localhost:3000/api/admin/users/${mockUserId}`,
+        {
+          method: 'PUT',
+          body: { role: 'ADMIN' },
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.message).toBe('只有超级管理员可以管理管理员或超级管理员账号');
+    });
+
+    it('普通管理员不能修改管理员账号', async () => {
+      setupMocks({ currentUserRole: 'ADMIN', targetUserRole: 'ADMIN' });
+
+      const request = createTestRequest(
+        `http://localhost:3000/api/admin/users/${mockUserId}`,
+        {
+          method: 'PUT',
+          body: { name: '尝试修改管理员' },
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.message).toBe('只有超级管理员可以管理管理员或超级管理员账号');
+    });
+
     it('应该更新用户状态', async () => {
       setupMocks();
       const updatedData = { ...mockUserData, status: 'SUSPENDED' };
@@ -433,9 +493,7 @@ describe('Admin Users Detail API', () => {
     });
 
     it('应该返回404用户不存在', async () => {
-      setupMocks();
-      const dbError = new Error('Record to update not found');
-      (prisma.user.update as jest.Mock).mockRejectedValue(dbError);
+      setupMocks({ userExists: false });
 
       const request = createTestRequest(
         'http://localhost:3000/api/admin/users/cmnonexistent',
@@ -537,6 +595,24 @@ describe('Admin Users Detail API', () => {
       expect(data.error).toBe('禁止操作');
     });
 
+    it('普通管理员不能删除管理员账号', async () => {
+      setupMocks({ currentUserRole: 'ADMIN', targetUserRole: 'ADMIN' });
+      const request = createTestRequest(
+        `http://localhost:3000/api/admin/users/${mockUserId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.message).toBe('只有超级管理员可以删除管理员或超级管理员账号');
+    });
+
     it('应该返回400用户ID格式不正确', async () => {
       setupMocks();
       const request = createTestRequest(
@@ -556,9 +632,7 @@ describe('Admin Users Detail API', () => {
     });
 
     it('应该返回404用户不存在', async () => {
-      setupMocks();
-      const dbError = new Error('Record to update not found');
-      (prisma.user.update as jest.Mock).mockRejectedValue(dbError);
+      setupMocks({ userExists: false });
 
       const request = createTestRequest(
         'http://localhost:3000/api/admin/users/cmnonexistent',

@@ -26,13 +26,24 @@ export async function POST(request: NextRequest) {
 
     // 解析请求体
     const body: EnterpriseRegisterRequest = await request.json();
-    const {
-      enterpriseName,
-      creditCode,
-      legalPerson,
-      industryType,
-      businessLicense,
-    } = body;
+    const { enterpriseName, creditCode, legalPerson, industryType } = body;
+    const rawBody = body as EnterpriseRegisterRequest & {
+      businessLicense?: unknown;
+    };
+
+    if (
+      typeof rawBody.businessLicense === 'string' &&
+      rawBody.businessLicense.trim().length > 0
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '营业执照请通过企业资质上传接口提交',
+          error: 'LICENSE_UPLOAD_REQUIRED',
+        },
+        { status: 400 }
+      );
+    }
 
     // 验证输入数据
     const validation = validateEnterpriseRegistration({
@@ -59,7 +70,6 @@ export async function POST(request: NextRequest) {
       creditCode,
       legalPerson,
       industryType,
-      businessLicense,
     });
 
     return NextResponse.json(
@@ -72,6 +82,31 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logger.error('企业注册失败:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ENTERPRISE_CREDIT_CODE_EXISTS') {
+        return NextResponse.json(
+          {
+            success: false,
+            message: error.message,
+            error: 'CREDIT_CODE_EXISTS',
+          },
+          { status: 409 }
+        );
+      }
+
+      if (error.name === 'ENTERPRISE_ACCOUNT_EXISTS') {
+        return NextResponse.json(
+          {
+            success: false,
+            message: error.message,
+            error: 'ENTERPRISE_ACCOUNT_EXISTS',
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         success: false,

@@ -15,6 +15,7 @@ import { WitnessList } from '@/components/witness/WitnessList';
 import { EvidenceTab } from './components/EvidenceTab';
 import { LawGraphTab } from './components/LawGraphTab';
 import { DocumentsTab } from './components/DocumentsTab';
+import { WorkflowPanel } from './components/WorkflowPanel';
 import { SimilarCasesPanel } from '@/components/cases/SimilarCasesPanel';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -246,6 +247,13 @@ export default function CaseDetailPage() {
 
     return (
       <div className='space-y-6'>
+        {/* 办案进度面板 */}
+        <WorkflowPanel
+          caseId={caseId}
+          onSwitchToDocuments={() => setActiveTab('documents')}
+          onStartDebate={handleStartDebate}
+        />
+
         {/* 基本信息 */}
         <Card>
           <CardHeader>
@@ -355,6 +363,13 @@ export default function CaseDetailPage() {
                 onClick={() => setActiveTab('evidence')}
               >
                 添加证据
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => router.push(`/cases/${caseId}/package`)}
+              >
+                整案交付包
               </Button>
             </div>
           </CardContent>

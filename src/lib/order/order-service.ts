@@ -11,6 +11,7 @@ import {
 } from '@/lib/payment/wechat-utils';
 import { Order, OrderStatus, PaymentMethod } from '@/types/payment';
 import type { MembershipTierType } from '@prisma/client';
+import { activateMembershipFromPaidOrderInTransaction } from '@/lib/membership/membership-service';
 
 /**
  * 将 Prisma Decimal 转换为 number
@@ -368,7 +369,6 @@ export async function handlePaymentSuccess(
   transactionId: string,
   _thirdPartyOrderNo: string
 ): Promise<Order> {
-  logger.info('[OrderService] 第三方订单号（未使用）:', _thirdPartyOrderNo);
   try {
     // 查询订单
     const order = await prisma.order.findUnique({
@@ -387,9 +387,7 @@ export async function handlePaymentSuccess(
       return createOrderObject(order); // 已支付，直接返回
     }
 
-    // 更新订单状态为已支付
     const updatedOrder = await prisma.$transaction(async tx => {
-      // 更新订单状态
       const orderResult = await tx.order.update({
         where: { id: orderId },
         data: {
@@ -402,88 +400,20 @@ export async function handlePaymentSuccess(
         },
       });
 
-      // 创建或更新会员记录
-      const now = new Date();
-      let endDate = new Date(now);
-
-      // 计算会员到期时间
-      const metadata = order.metadata as Record<string, unknown>;
-      const billingCycle = (metadata.billingCycle as string) || 'MONTHLY';
-
-      switch (billingCycle) {
-        case 'MONTHLY':
-          endDate.setMonth(endDate.getMonth() + 1);
-          break;
-        case 'QUARTERLY':
-          endDate.setMonth(endDate.getMonth() + 3);
-          break;
-        case 'YEARLY':
-          endDate.setFullYear(endDate.getFullYear() + 1);
-          break;
-        case 'LIFETIME':
-          endDate.setFullYear(endDate.getFullYear() + 100);
-          break;
-      }
-
-      // 查询当前会员
-      const currentMembership = await tx.userMembership.findFirst({
-        where: {
+      await activateMembershipFromPaidOrderInTransaction(tx, {
+        order: {
+          id: order.id,
+          orderNo: order.orderNo,
           userId: order.userId,
-          status: 'ACTIVE',
+          membershipTierId: order.membershipTierId,
+          amount: order.amount,
+          metadata: order.metadata,
         },
-        orderBy: {
-          endDate: 'desc',
+        tier: {
+          tier: (order.membershipTier?.tier as MembershipTierType) || 'BASIC',
+          name: order.membershipTier?.name || '',
         },
-        include: {
-          tier: true,
-        },
-      });
-
-      // 如果当前会员未到期，则延长到期时间
-      if (currentMembership && new Date(currentMembership.endDate) > now) {
-        const currentEndDate = new Date(currentMembership.endDate);
-        endDate = new Date(
-          Math.max(endDate.getTime(), currentEndDate.getTime())
-        );
-      }
-
-      // 创建新的会员记录
-      const membershipResult = await tx.userMembership.create({
-        data: {
-          userId: order.userId,
-          tierId: order.membershipTierId,
-          status: 'ACTIVE',
-          startDate: now,
-          endDate,
-          autoRenew: (metadata.autoRenew as boolean) || false,
-          notes: `通过订单${order.orderNo}开通会员`,
-        },
-        include: {
-          tier: true,
-        },
-      });
-
-      // 记录变更历史
-      await tx.membershipHistory.create({
-        data: {
-          userId: order.userId,
-          membershipId: membershipResult.id,
-          changeType: 'UPGRADE',
-          fromTier:
-            (currentMembership?.tier?.tier as MembershipTierType) || 'FREE',
-          toTier:
-            (membershipResult.tier?.tier as MembershipTierType) || 'BASIC',
-          fromStatus: currentMembership?.status || 'EXPIRED',
-          toStatus: 'ACTIVE',
-          reason: `通过订单${order.orderNo}开通会员`,
-          performedBy: order.userId,
-          metadata: {
-            orderId: order.id,
-            orderNo: order.orderNo,
-            amount: toNumber(order.amount),
-            transactionId,
-          },
-        },
+        performedBy: order.userId,
       });
 
       return orderResult;

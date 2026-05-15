@@ -19,6 +19,29 @@ jest.mock('@/lib/db/prisma', () => ({
 jest.mock('@/lib/middleware/auth');
 jest.mock('@/lib/middleware/permission-check');
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
+function stringifyRawQueries(): string {
+  return (prisma.$queryRaw as jest.Mock).mock.calls
+    .map(([query]) => {
+      if (typeof query === 'string') {
+        return query;
+      }
+      if (Array.isArray(query?.strings)) {
+        return query.strings.join('?');
+      }
+      if (typeof query?.sql === 'string') {
+        return query.sql;
+      }
+      return String(query);
+    })
+    .join('\n');
+}
+
 describe('GET /api/analytics/lawyers', () => {
   let mockRequest: unknown;
 
@@ -164,6 +187,17 @@ describe('GET /api/analytics/lawyers', () => {
     expect(result.data.metadata).toHaveProperty('generatedAt');
     expect(result.data.metadata).toHaveProperty('dataPoints');
     expect(result.data.metadata).toHaveProperty('granularity');
+  });
+
+  it('律师绩效 SQL 应使用 Case.userId 而不是不存在的 createdBy 字段', async () => {
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
+
+    const response = await GET(mockRequest as NextRequest);
+
+    expect(response.status).toBe(200);
+    const sqlText = stringifyRawQueries();
+    expect(sqlText).toContain('"c"."userId"');
+    expect(sqlText).not.toContain('"createdBy"');
   });
 
   it('数据库错误应该返回500', async () => {

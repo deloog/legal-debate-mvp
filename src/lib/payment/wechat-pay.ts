@@ -73,7 +73,23 @@ export class WechatPay {
       const method = 'POST';
       const timestamp = generateTimestamp();
       const nonceStr = generateNonceStr();
-      const body = safeStringifyJSON(request);
+
+      // 构建符合微信支付V3规范的请求体：appid/mchid/notify_url 必须在请求体顶层
+      const wechatBody: Record<string, unknown> = {
+        appid: this.config!.appId,
+        mchid: this.config!.mchId,
+        description: request.description,
+        out_trade_no: request.outTradeNo,
+        notify_url: this.config!.notifyUrl,
+        amount: request.amount,
+      };
+      if (request.attach) wechatBody.attach = request.attach;
+      if (request.time_expire) wechatBody.time_expire = request.time_expire;
+      if (request.payer) wechatBody.payer = request.payer;
+      if (request.detail) wechatBody.detail = request.detail;
+      if (request.scene_info) wechatBody.scene_info = request.scene_info;
+      if (request.settle_info) wechatBody.settle_info = request.settle_info;
+      const body = safeStringifyJSON(wechatBody);
 
       const authorization = this.generateAuthorization(
         method,

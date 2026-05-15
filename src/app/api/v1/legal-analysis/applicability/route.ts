@@ -4,7 +4,7 @@ import type { CaseType } from '@/lib/agent/doc-analyzer/core/types';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { ApplicabilityAnalyzer } from '@/lib/law-article/applicability/applicability-analyzer';
 import type { ApplicabilityInput } from '@/lib/law-article/applicability/types';
 import type {
@@ -16,17 +16,6 @@ import type {
   TimelineEvent,
 } from '@/lib/agent/doc-analyzer/core/types';
 
-/** 从请求头中解析 JWT，返回 userId 或 null */
-function resolveUserId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization');
-  const token = extractTokenFromHeader(authHeader ?? '');
-  const result = verifyToken(token ?? '');
-  if (result.valid && result.payload) {
-    return result.payload.userId;
-  }
-  return null;
-}
-
 /**
  * POST /api/v1/legal-analysis/applicability
  * 法条适用性分析 API
@@ -36,13 +25,14 @@ function resolveUserId(request: NextRequest): string | null {
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
   // ─── 身份验证 ────────────────────────────────────────────────────────────
-  const userId = resolveUserId(request);
-  if (!userId) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
       { status: 401 }
     );
   }
+  const userId = authUser.userId;
 
   // ─── 参数验证 ────────────────────────────────────────────────────────────
   const body = await request.json();
@@ -217,6 +207,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     await prisma.legalReference.upsert({
       where: { caseId_articleId: { caseId, articleId: result.articleId } },
       update: {
+        source: article?.lawName ?? 'LAW_ARTICLE',
+        articleNumber: article?.articleNumber ?? null,
+        content: article?.fullText ?? '',
+        lawType: article?.lawType ?? 'OTHER',
+        category: article?.category ?? null,
         applicabilityScore: result.score,
         applicabilityReason: result.reasons.join('; ') || null,
         analysisResult: result as unknown as Prisma.InputJsonValue,
@@ -226,7 +221,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       create: {
         caseId,
         articleId: result.articleId,
-        source: 'LAW_ARTICLE',
+        source: article?.lawName ?? 'LAW_ARTICLE',
+        articleNumber: article?.articleNumber ?? null,
         content: article?.fullText ?? '',
         lawType: article?.lawType ?? 'OTHER',
         category: article?.category ?? null,

@@ -31,6 +31,12 @@ jest.mock('@/lib/db/prisma', () => ({
   },
 }));
 
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
+  },
+}));
+
 import { prisma } from '@/lib/db/prisma';
 
 // 类型断言 helper
@@ -360,6 +366,25 @@ describe('RBAC权限模型', () => {
       expect(permissions).toContain('case:create');
       expect(permissions).toContain('case:read');
       expect(permissions.length).toBe(2);
+    });
+
+    it('ADMIN 应该通过内置权限兜底访问后台权限', async () => {
+      const mockUser = {
+        id: 'user-123',
+        role: 'ADMIN',
+        permissions: null,
+      };
+
+      mockUserFindUnique.mockResolvedValue(mockUser);
+      mockRoleFindUnique.mockResolvedValue(null);
+
+      const result = await hasPermission('user-123', 'role:read');
+      const permissions = await getUserPermissions('user-123');
+
+      expect(result.hasPermission).toBe(true);
+      expect(permissions).toContain('role:read');
+      expect(permissions).toContain('admin:write');
+      expect(permissions).toContain('log:read');
     });
 
     it('应该正确批量检查权限', async () => {

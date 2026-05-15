@@ -42,6 +42,30 @@ interface ChecklistResult {
   completedDate?: string;
 }
 
+export class ComplianceAccessError extends Error {
+  constructor(
+    public readonly code:
+      | 'ENTERPRISE_ACCOUNT_NOT_FOUND'
+      | 'ENTERPRISE_NOT_APPROVED',
+    message: string,
+    public readonly status: 404 | 403
+  ) {
+    super(message);
+    this.name = 'ComplianceAccessError';
+  }
+}
+
+export class ComplianceRequestError extends Error {
+  constructor(
+    public readonly code: 'CHECKLIST_NOT_FOUND' | 'CHECK_ITEM_NOT_FOUND',
+    message: string,
+    public readonly status: 404
+  ) {
+    super(message);
+    this.name = 'ComplianceRequestError';
+  }
+}
+
 // =============================================================================
 // 辅助映射
 // =============================================================================
@@ -144,13 +168,30 @@ function getTemplates(rule: {
 // =============================================================================
 
 export class ComplianceService {
-  // ── 核心：获取企业账号，若没有则抛出 ─────────────────────────────────────────
+  // ── 核心：企业合规能力只对已审核通过的企业开放 ─────────────────────────────
   private static async requireEnterprise(userId: string) {
     const enterprise = await prisma.enterpriseAccount.findUnique({
       where: { userId },
-      select: { id: true },
+      select: { id: true, status: true },
     });
-    return enterprise; // 可能为 null，调用方自行决定如何处理
+
+    if (!enterprise) {
+      throw new ComplianceAccessError(
+        'ENTERPRISE_ACCOUNT_NOT_FOUND',
+        '未找到企业账号，请先完成企业认证',
+        404
+      );
+    }
+
+    if (enterprise.status !== 'APPROVED') {
+      throw new ComplianceAccessError(
+        'ENTERPRISE_NOT_APPROVED',
+        '企业认证尚未通过，暂不可使用合规管理功能',
+        403
+      );
+    }
+
+    return enterprise;
   }
 
   // ── 自动初始化：为企业创建所有尚未有记录的规则的 PENDING 检查 ──────────────
@@ -202,7 +243,6 @@ export class ComplianceService {
     request: GetChecklistRequest = {}
   ): Promise<ComplianceChecklist[]> {
     const enterprise = await this.requireEnterprise(userId);
-    if (!enterprise) return [];
 
     // 确保所有规则都有对应的检查记录
     await this.initializeChecksIfNeeded(enterprise.id);
@@ -276,7 +316,6 @@ export class ComplianceService {
     request: UpdateCheckItemRequest
   ): Promise<ComplianceCheckItem> {
     const enterprise = await this.requireEnterprise(userId);
-    if (!enterprise) throw new Error('未找到企业账号，请先完成企业认证');
 
     const rule = await prisma.complianceRule.findUnique({
       where: { id: request.checklistId },
@@ -288,7 +327,23 @@ export class ComplianceService {
         ruleName: true,
       },
     });
-    if (!rule) throw new Error('检查清单不存在');
+    if (!rule) {
+      throw new ComplianceRequestError(
+        'CHECKLIST_NOT_FOUND',
+        '检查清单不存在',
+        404
+      );
+    }
+
+    const templates = getTemplates(rule);
+    const template = templates.find(t => t.id === request.itemId);
+    if (!template) {
+      throw new ComplianceRequestError(
+        'CHECK_ITEM_NOT_FOUND',
+        '检查项不存在',
+        404
+      );
+    }
 
     const existing = await prisma.enterpriseComplianceCheck.findFirst({
       where: { enterpriseId: enterprise.id, ruleId: rule.id },
@@ -314,7 +369,6 @@ export class ComplianceService {
     else results.push(newResult);
 
     // 重新计算整体结果
-    const templates = getTemplates(rule);
     const allItems: ComplianceCheckItem[] = templates.map(t => ({
       id: t.id,
       category: inferCategory(rule),
@@ -350,11 +404,10 @@ export class ComplianceService {
     return {
       id: request.itemId,
       category: inferCategory(rule),
-      title:
-        templates.find(t => t.id === request.itemId)?.title ?? request.itemId,
-      description: '',
+      title: template.title,
+      description: template.description ?? '',
       status: request.status,
-      priority: CompliancePriority.MEDIUM,
+      priority: mapPriority(template.priority),
       notes: request.notes,
       completedDate: newResult.completedDate
         ? new Date(newResult.completedDate)
@@ -365,25 +418,6 @@ export class ComplianceService {
   // ── 仪表盘 ────────────────────────────────────────────────────────────────────
   static async getDashboard(userId: string): Promise<ComplianceDashboard> {
     const enterprise = await this.requireEnterprise(userId);
-
-    // 非企业用户：返回空数据
-    if (!enterprise) {
-      return {
-        overallScore: 0,
-        trend: 'stable',
-        statistics: {
-          totalChecks: 0,
-          passedChecks: 0,
-          failedChecks: 0,
-          warningChecks: 0,
-          pendingChecks: 0,
-          byCategory: emptyByCategory(),
-        },
-        recentIssues: [],
-        upcomingDeadlines: [],
-        categoryScores: emptyScores(),
-      };
-    }
 
     await this.initializeChecksIfNeeded(enterprise.id);
 
@@ -412,9 +446,6 @@ export class ComplianceService {
     request: GetComplianceReportRequest = {}
   ): Promise<ComplianceReport> {
     const enterprise = await this.requireEnterprise(userId);
-    if (!enterprise) {
-      return emptyReport(request);
-    }
 
     await this.initializeChecksIfNeeded(enterprise.id);
 
@@ -519,6 +550,7 @@ export class ComplianceService {
         (check.checklistResults as unknown as ChecklistResult[]) ?? [];
       const failedItems = results.filter(r => r.status === 'failed').length;
       const warningItems = results.filter(r => r.status === 'warning').length;
+      const remediationStatus = (check.remediationStatus ?? '').toLowerCase();
       return {
         id: check.id,
         category: inferCategory(check.rule),
@@ -532,9 +564,9 @@ export class ComplianceService {
             ? CompliancePriority.HIGH
             : CompliancePriority.MEDIUM,
         status:
-          check.remediationStatus === 'COMPLETED'
+          remediationStatus === 'completed'
             ? 'resolved'
-            : check.remediationStatus === 'IN_PROGRESS'
+            : remediationStatus === 'in_progress'
               ? 'in_progress'
               : 'open',
         identifiedDate: check.checkDate,
@@ -591,7 +623,7 @@ export class ComplianceService {
         where: {
           enterpriseId,
           remediationDeadline: { lte: thirtyDaysLater },
-          remediationStatus: { in: ['pending', 'IN_PROGRESS'] },
+          remediationStatus: { in: ['pending', 'in_progress', 'IN_PROGRESS'] },
         },
         include: { rule: { select: { ruleName: true } } },
         orderBy: { remediationDeadline: 'asc' },
@@ -689,34 +721,4 @@ function emptyByCategory() {
   for (const cat of Object.values(ComplianceCategory))
     r[cat] = { total: 0, passed: 0, failed: 0 };
   return r;
-}
-
-function emptyScores() {
-  const r = {} as Record<ComplianceCategory, number>;
-  for (const cat of Object.values(ComplianceCategory)) r[cat] = 0;
-  return r;
-}
-
-function emptyReport(request: GetComplianceReportRequest): ComplianceReport {
-  return {
-    id: `report_${Date.now()}`,
-    title: '企业合规自查报告',
-    reportDate: new Date(),
-    period: {
-      startDate: request.startDate ?? new Date(new Date().getFullYear(), 0, 1),
-      endDate: request.endDate ?? new Date(),
-    },
-    overallScore: 0,
-    summary: '未找到企业账号，请先完成企业认证后再使用合规管理功能。',
-    statistics: {
-      totalChecks: 0,
-      passedChecks: 0,
-      failedChecks: 0,
-      warningChecks: 0,
-      pendingChecks: 0,
-      byCategory: emptyByCategory(),
-    },
-    issues: [],
-    recommendations: ['请联系管理员完成企业认证'],
-  };
 }

@@ -3,12 +3,22 @@
  */
 
 import { NextRequest } from 'next/server';
-import { GET, OPTIONS } from '@/app/api/follow-up-tasks/route';
+import { GET, OPTIONS, POST } from '@/app/api/follow-up-tasks/route';
 
-// Mock dependencies
 jest.mock('@/lib/client/follow-up-task-processor');
 jest.mock('@/lib/middleware/auth');
 jest.mock('@/app/api/lib/responses/success');
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    client: {
+      findFirst: jest.fn(),
+    },
+  },
+}));
+
+import { prisma } from '@/lib/db';
+
+const mockClientFindFirst = prisma.client.findFirst as jest.Mock;
 
 describe('/api/follow-up-tasks', () => {
   beforeEach(() => {
@@ -271,6 +281,55 @@ describe('/api/follow-up-tasks', () => {
       expect(response.headers.get('Access-Control-Allow-Methods')).toContain(
         'OPTIONS'
       );
+    });
+  });
+
+  describe('POST', () => {
+    it('不应允许给已软删除客户创建跟进任务', async () => {
+      const { getAuthUser } = await import('@/lib/middleware/auth');
+      (getAuthUser as jest.Mock).mockResolvedValue({
+        userId: 'user-1',
+        role: 'user',
+      });
+      mockClientFindFirst.mockResolvedValue(null);
+
+      const { FollowUpTaskProcessor } =
+        await import('@/lib/client/follow-up-task-processor');
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/follow-up-tasks',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: 'client-soft-deleted',
+            type: 'PHONE',
+            summary: '跟进软删除客户',
+            priority: 'MEDIUM',
+            dueDate: '2026-01-25T10:00:00.000Z',
+          }),
+        }
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data).toMatchObject({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: '客户不存在或无权限访问',
+        },
+      });
+      expect(mockClientFindFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'client-soft-deleted',
+          userId: 'user-1',
+          deletedAt: null,
+        },
+      });
+      expect(FollowUpTaskProcessor.createTask).not.toHaveBeenCalled();
     });
   });
 });

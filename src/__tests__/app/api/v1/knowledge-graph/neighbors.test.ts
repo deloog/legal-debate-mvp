@@ -21,6 +21,7 @@ jest.mock('@/lib/db', () => ({
   prisma: {
     lawArticle: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     lawArticleRelation: {
       findMany: jest.fn(),
@@ -129,6 +130,20 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
         articleNumber: '第123条',
         category: 'CIVIL',
       });
+      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'article-2',
+          lawName: '《民法典》',
+          articleNumber: '第456条',
+          category: 'CIVIL',
+        },
+        {
+          id: 'article-3',
+          lawName: '《民法典》',
+          articleNumber: '第789条',
+          category: 'CIVIL',
+        },
+      ]);
 
       // Mock关系数据
       (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([
@@ -162,6 +177,13 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       expect(data.data.nodeId).toBe('article-1');
       expect(data.data.neighbors.degree1).toBeDefined();
       expect(data.data.neighbors.degree1.length).toBeGreaterThan(0);
+      expect(data.data.neighbors.degree1[0]).toMatchObject({
+        id: 'article-2',
+        title: '《民法典》第456条',
+        sourceId: 'article-1',
+        targetId: 'article-2',
+        direction: 'outgoing',
+      });
     });
 
     it('应该返回2度邻居', async () => {
@@ -212,8 +234,52 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
           relationType: expect.any(String),
           strength: expect.any(Number),
           distance: 1,
+          title: '《民法典》第456条',
+          sourceId: 'article-1',
+          targetId: 'article-2',
         });
       }
+    });
+
+    it('应该返回只有入边的邻居并保留原始方向', async () => {
+      (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([
+        {
+          sourceId: 'article-4',
+          targetId: 'article-1',
+          relationType: 'SUPPORTS',
+          strength: 0.7,
+        },
+      ]);
+      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
+        {
+          id: 'article-4',
+          lawName: '《民法典》',
+          articleNumber: '第999条',
+          category: 'CIVIL',
+        },
+      ]);
+
+      const request = new Request(
+        'http://localhost:3000/api/v1/knowledge-graph/neighbors?nodeId=article-1&depth=1',
+        {
+          method: 'GET',
+        }
+      );
+
+      const response = await GET(request as any);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.neighbors.degree1).toEqual([
+        expect.objectContaining({
+          id: 'article-4',
+          title: '《民法典》第999条',
+          relationType: 'SUPPORTS',
+          sourceId: 'article-4',
+          targetId: 'article-1',
+          direction: 'incoming',
+        }),
+      ]);
     });
 
     it('应该处理没有邻居的情况', async () => {

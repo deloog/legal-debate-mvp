@@ -62,14 +62,15 @@ async function mapTeamMemberToDetail(
 
 async function checkTeamAccess(
   teamId: string,
-  userId: string
+  userId: string,
+  requireAdmin = true
 ): Promise<boolean> {
   const member = await prisma.teamMember.findFirst({
     where: {
       teamId,
       userId,
-      role: TeamRole.ADMIN,
       status: MemberStatus.ACTIVE,
+      ...(requireAdmin ? { role: TeamRole.ADMIN } : {}),
     },
   });
   return member !== null;
@@ -94,7 +95,7 @@ export const GET = withErrorHandler(
 
     const { id: teamId } = await params;
 
-    const hasAccess = await checkTeamAccess(teamId, authUser.userId);
+    const hasAccess = await checkTeamAccess(teamId, authUser.userId, false);
     if (!hasAccess) {
       return NextResponse.json(
         { error: '权限不足', message: '您没有权限查看此团队成员' },
@@ -216,6 +217,27 @@ export const POST = withErrorHandler(
     });
 
     if (existingMember) {
+      if (existingMember.status !== MemberStatus.ACTIVE) {
+        const member = await prisma.teamMember.update({
+          where: {
+            teamId_userId: {
+              teamId,
+              userId: validatedData.userId,
+            },
+          },
+          data: {
+            role: validatedData.role,
+            status: MemberStatus.ACTIVE,
+            notes: validatedData.notes,
+            metadata: validatedData.metadata as Prisma.InputJsonValue,
+          },
+        });
+
+        const memberDetail = await mapTeamMemberToDetail(member);
+
+        return createCreatedResponse(memberDetail);
+      }
+
       return NextResponse.json(
         { error: '成员已存在', message: '该用户已经是团队成员' },
         { status: 409 }
@@ -227,6 +249,7 @@ export const POST = withErrorHandler(
         teamId,
         userId: validatedData.userId,
         role: validatedData.role,
+        status: MemberStatus.ACTIVE,
         notes: validatedData.notes,
         metadata: validatedData.metadata as Prisma.InputJsonValue,
       },

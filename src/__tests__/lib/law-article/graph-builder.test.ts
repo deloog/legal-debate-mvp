@@ -402,6 +402,60 @@ describe('GraphBuilder', () => {
       expect(graph.links[0].strength).toBe(0.75);
       expect(graph.links[0].confidence).toBe(0.88);
     });
+
+    it('应该从入边展开图谱但保留原始关系方向', async () => {
+      const centerArticle = {
+        id: 'article-1',
+        lawName: '民法典',
+        articleNumber: '1',
+        category: 'CIVIL',
+      };
+
+      const sourceArticle = {
+        id: 'article-0',
+        lawName: '民法典',
+        articleNumber: '0',
+        category: 'CIVIL',
+      };
+
+      const incomingRelation = {
+        id: 'rel-incoming',
+        sourceId: 'article-0',
+        targetId: 'article-1',
+        relationType: RelationType.CITES,
+        strength: 0.7,
+        confidence: 0.8,
+        verificationStatus: VerificationStatus.VERIFIED,
+        source: sourceArticle,
+        target: centerArticle,
+      };
+
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        centerArticle
+      );
+      (prisma.lawArticleRelation.findMany as jest.Mock)
+        .mockResolvedValueOnce([incomingRelation])
+        .mockResolvedValueOnce([]);
+
+      const graph = await GraphBuilder.buildGraph('article-1', 1);
+
+      expect(graph.nodes.map(node => node.id)).toEqual([
+        'article-1',
+        'article-0',
+      ]);
+      expect(graph.nodes.find(node => node.id === 'article-0')?.level).toBe(1);
+      expect(graph.links[0]).toMatchObject({
+        source: 'article-0',
+        target: 'article-1',
+      });
+      expect(prisma.lawArticleRelation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [{ sourceId: 'article-1' }, { targetId: 'article-1' }],
+          }),
+        })
+      );
+    });
   });
 
   describe('buildFullGraph', () => {
@@ -535,6 +589,7 @@ describe('GraphBuilder', () => {
         strength: 0.9,
         confidence: 0.95,
         verificationStatus: VerificationStatus.VERIFIED,
+        source: articles[i % 100],
         target: articles[(i + 1) % 100],
       }));
 

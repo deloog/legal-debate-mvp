@@ -113,13 +113,21 @@ export class GraphBuilder {
       // 如果已经到达最大深度，不再继续遍历
       if (currentDepth >= depth) continue;
 
-      // 获取该节点的所有出边
+      // 展示型图谱按无向邻接展开：保留原始方向，但入边也应让中心节点可见。
       const relations = await prisma.lawArticleRelation.findMany({
         where: {
-          sourceId: id,
+          OR: [{ sourceId: id }, { targetId: id }],
           verificationStatus: VerificationStatus.VERIFIED,
         },
         include: {
+          source: {
+            select: {
+              id: true,
+              lawName: true,
+              articleNumber: true,
+              category: true,
+            },
+          },
           target: {
             select: {
               id: true,
@@ -133,6 +141,21 @@ export class GraphBuilder {
 
       // 处理每个关系
       for (const rel of relations) {
+        const neighbor =
+          rel.sourceId === id
+            ? {
+                id: rel.target.id,
+                lawName: rel.target.lawName,
+                articleNumber: rel.target.articleNumber,
+                category: rel.target.category,
+              }
+            : {
+                id: rel.source.id,
+                lawName: rel.source.lawName,
+                articleNumber: rel.source.articleNumber,
+                category: rel.source.category,
+              };
+
         // 添加边
         links.push({
           source: rel.sourceId,
@@ -143,19 +166,19 @@ export class GraphBuilder {
         });
 
         // 如果目标节点还没访问过，添加到队列和节点集合
-        if (!visited.has(rel.targetId)) {
-          visited.add(rel.targetId);
+        if (!visited.has(neighbor.id)) {
+          visited.add(neighbor.id);
 
-          nodes.set(rel.targetId, {
-            id: rel.target.id,
-            lawName: rel.target.lawName,
-            articleNumber: rel.target.articleNumber,
-            category: rel.target.category,
+          nodes.set(neighbor.id, {
+            id: neighbor.id,
+            lawName: neighbor.lawName,
+            articleNumber: neighbor.articleNumber,
+            category: neighbor.category,
             level: currentDepth + 1,
           });
 
           queue.push({
-            id: rel.targetId,
+            id: neighbor.id,
             currentDepth: currentDepth + 1,
           });
         }

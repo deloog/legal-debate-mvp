@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
+import { buildScheduleAccessWhere } from '@/lib/court-schedule/schedule-access';
 import type {
   DashboardData,
   StatCard,
@@ -10,6 +11,7 @@ import type {
   RecentActivity,
 } from '@/types/dashboard';
 import { logger } from '@/lib/logger';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * GET /api/dashboard
@@ -29,6 +31,10 @@ export async function GET(request: NextRequest) {
       );
     }
     const userId = authUser.userId;
+    const scheduleAccessWhere = await buildScheduleAccessWhere(
+      userId,
+      CasePermission.VIEW_SCHEDULES
+    );
 
     // 从数据库获取统计数据
     const [totalCases, totalClients, pendingTasks, todaySchedules] =
@@ -50,7 +56,7 @@ export async function GET(request: NextRequest) {
         // 获取待办任务数
         prisma.task.count({
           where: {
-            createdBy: userId,
+            OR: [{ createdBy: userId }, { assignedTo: userId }],
             status: 'TODO',
             deletedAt: null,
           },
@@ -58,13 +64,12 @@ export async function GET(request: NextRequest) {
         // 获取今日日程数
         prisma.courtSchedule.count({
           where: {
-            case: {
-              userId,
-            },
+            AND: [scheduleAccessWhere],
             startTime: {
               gte: new Date(new Date().setHours(0, 0, 0, 0)),
               lte: new Date(new Date().setHours(23, 59, 59, 999)),
             },
+            status: { not: 'CANCELLED' },
           },
         }),
       ]);
@@ -101,12 +106,11 @@ export async function GET(request: NextRequest) {
 
     const recentSchedules = await prisma.courtSchedule.findMany({
       where: {
-        case: {
-          userId,
-        },
+        AND: [scheduleAccessWhere],
         startTime: {
           gte: new Date(),
         },
+        status: { not: 'CANCELLED' },
       },
       orderBy: { startTime: 'asc' },
       take: 1,

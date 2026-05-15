@@ -46,6 +46,10 @@ const QuerySchema = z.object({
     .transform(val => (val ? parseInt(val, 10) : 20)),
 });
 
+function optionalSearchParam(value: string | null): string | undefined {
+  return value ?? undefined;
+}
+
 /**
  * GET /api/v1/knowledge-graph/snapshots
  * 获取快照列表
@@ -80,12 +84,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const queryParams = QuerySchema.parse({
-      version: searchParams.get('version'),
-      status: searchParams.get('status'),
-      startDate: searchParams.get('startDate'),
-      endDate: searchParams.get('endDate'),
-      page: searchParams.get('page'),
-      pageSize: searchParams.get('pageSize'),
+      version: optionalSearchParam(searchParams.get('version')),
+      status: optionalSearchParam(searchParams.get('status')),
+      startDate: optionalSearchParam(searchParams.get('startDate')),
+      endDate: optionalSearchParam(searchParams.get('endDate')),
+      page: optionalSearchParam(searchParams.get('page')),
+      pageSize: optionalSearchParam(searchParams.get('pageSize')),
     });
 
     const result = await snapshotService.getSnapshots({
@@ -114,19 +118,31 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: '参数验证失败',
+            details: error.format(),
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     logger.error('获取快照列表失败:', error);
-    // 数据库表可能不存在，返回空结果
-    return NextResponse.json({
-      success: true,
-      data: [],
-      pagination: {
-        total: 0,
-        page: 1,
-        pageSize: 20,
-        totalPages: 0,
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: '获取快照列表失败',
+        },
       },
-      message: '快照功能暂不可用',
-    });
+      { status: 500 }
+    );
   }
 }
 

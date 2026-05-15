@@ -4,18 +4,43 @@
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/compliance/report/route';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { ComplianceCategory, CompliancePriority } from '@/types/compliance';
 
 // Mock合规服务
 jest.mock('@/lib/compliance/compliance-service', () => ({
+  ComplianceAccessError: class ComplianceAccessError extends Error {
+    code: string;
+    status: number;
+
+    constructor(code: string, message: string, status: number) {
+      super(message);
+      this.name = 'ComplianceAccessError';
+      this.code = code;
+      this.status = status;
+    }
+  },
   ComplianceService: {
     generateReport: jest.fn(),
+  },
+}));
+
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    error: jest.fn(),
   },
 }));
 
 describe('合规报告API测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: 'enterprise-user-1',
+    });
   });
 
   describe('GET /api/compliance/report', () => {
@@ -90,6 +115,14 @@ describe('合规报告API测试', () => {
       expect(data.success).toBe(true);
       expect(data.data).toBeDefined();
       expect(data.data.overallScore).toBe(85);
+      expect(ComplianceService.generateReport).toHaveBeenCalledWith(
+        'enterprise-user-1',
+        {
+          startDate: undefined,
+          endDate: undefined,
+          category: undefined,
+        }
+      );
     });
 
     it('应该支持日期范围筛选', async () => {
@@ -146,6 +179,7 @@ describe('合规报告API测试', () => {
 
       expect(response.status).toBe(200);
       expect(ComplianceService.generateReport).toHaveBeenCalledWith(
+        'enterprise-user-1',
         expect.objectContaining({
           startDate: expect.any(Date),
           endDate: expect.any(Date),
@@ -171,6 +205,30 @@ describe('合规报告API测试', () => {
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
       expect(data.error.code).toBe('SERVICE_ERROR');
+    });
+
+    it('企业认证未通过时应返回403', async () => {
+      const { ComplianceAccessError, ComplianceService } =
+        await import('@/lib/compliance/compliance-service');
+
+      (ComplianceService.generateReport as jest.Mock).mockRejectedValue(
+        new ComplianceAccessError(
+          'ENTERPRISE_NOT_APPROVED',
+          '企业认证尚未通过，暂不可使用合规管理功能',
+          403
+        )
+      );
+
+      const request = new NextRequest(
+        'http://localhost:3000/api/compliance/report'
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('ENTERPRISE_NOT_APPROVED');
     });
   });
 });

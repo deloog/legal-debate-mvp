@@ -108,6 +108,7 @@ export function proxy(request: NextRequest) {
     '/payment/fail', // 支付失败页面（无敏感数据）
     '/api/auth/login',
     '/api/auth/register',
+    '/api/auth/refresh',
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/auth/oauth', // OAuth 回调端点无需登录（第三方授权回调）
@@ -119,6 +120,19 @@ export function proxy(request: NextRequest) {
     '/api/memberships/tiers', // 会员等级列表允许公开查看
     '/api/payments/wechat/callback', // 微信支付前端跳转回调（浏览器无凭据调用）
     '/api/payments/alipay/callback', // 支付宝前端跳转回调
+    '/api/payment/notify', // 微信支付服务端异步通知（微信服务器无凭据回调）
+  ];
+
+  const userAllowedPaths = [
+    '/qualifications',
+    '/enterprise',
+    '/api/qualifications/me',
+    '/api/qualifications/photo',
+    '/api/qualifications/upload',
+    '/api/enterprise/register',
+    '/api/enterprise/me',
+    '/api/enterprise/qualification',
+    '/api/enterprise/qualification/upload',
   ];
 
   // 检查是否是公开路径
@@ -177,7 +191,10 @@ export function proxy(request: NextRequest) {
   if (payload.role === 'USER') {
     if (pathname.startsWith('/api/')) {
       // 放行认证相关接口（刷新 token、登出等），其余业务 API 一律 403
-      if (!pathname.startsWith('/api/auth/')) {
+      const isUserAllowedPath = userAllowedPaths.some(
+        path => pathname === path || pathname.startsWith(`${path}/`)
+      );
+      if (!pathname.startsWith('/api/auth/') && !isUserAllowedPath) {
         const errorRes = NextResponse.json(
           {
             success: false,
@@ -192,9 +209,14 @@ export function proxy(request: NextRequest) {
       }
     } else {
       // 页面路由：重定向回首页（首页会展示"资质受限"提示）
-      const res = NextResponse.redirect(new URL('/', request.url));
-      addCorsHeaders(res, corsOrigin);
-      return res;
+      const isUserAllowedPath = userAllowedPaths.some(
+        path => pathname === path || pathname.startsWith(`${path}/`)
+      );
+      if (!isUserAllowedPath) {
+        const res = NextResponse.redirect(new URL('/', request.url));
+        addCorsHeaders(res, corsOrigin);
+        return res;
+      }
     }
   }
 

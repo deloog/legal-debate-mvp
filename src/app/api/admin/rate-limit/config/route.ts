@@ -10,6 +10,10 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { rateLimitConfig } from '@/lib/middleware/rate-limit-config';
 import { logger } from '@/lib/logger';
+import {
+  validateAdminStepUpToken,
+  validateSensitiveOperationReason,
+} from '@/lib/admin/step-up';
 
 /**
  * GET /api/admin/rate-limit/config
@@ -73,9 +77,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
-    const { endpoint, config, globalSettings } = body;
+    const { endpoint, config, globalSettings, changeReason } = body;
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     // 更新全局设置
     if (globalSettings) {
@@ -160,9 +185,32 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const endpoint = searchParams.get('endpoint');
+    const changeReason = searchParams.get('changeReason') ?? '';
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!endpoint) {
       return NextResponse.json(
@@ -213,9 +261,31 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     return permissionError;
   }
 
+  const stepUp = validateAdminStepUpToken(request, user.userId);
+  if (!stepUp.valid) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          message: stepUp.reason ?? '需要二次认证',
+        },
+      },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
-    const { endpoint, enabled } = body;
+    const { endpoint, enabled, changeReason } = body;
+
+    const reasonCheck = validateSensitiveOperationReason(changeReason);
+    if (!reasonCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: reasonCheck.message },
+        { status: 400 }
+      );
+    }
 
     if (!endpoint || typeof enabled !== 'boolean') {
       return NextResponse.json(

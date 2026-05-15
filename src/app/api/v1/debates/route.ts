@@ -16,11 +16,17 @@ import { buildPaginationOptions } from '@/app/api/lib/responses/pagination';
 import { prisma } from '@/lib/db/prisma';
 import { DebateStatus } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { isAdminRole } from '@/lib/middleware/resource-permission';
+import {
+  checkResourceOwnership,
+  isAdminRole,
+  ResourceType,
+} from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
 import { logCreateAction } from '@/lib/audit/logger';
 import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * GET /api/v1/debates
@@ -173,19 +179,35 @@ const handleCreateDebate = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  // 非管理员只能在自己的案件下创建辩论
+  // 非管理员：允许案件所有者、案件团队成员、共享团队成员
+  // 只要具备 EDIT_DEBATES 权限即可创建辩论
   const isAdmin = authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
-  if (!isAdmin && existingCase.userId !== authUser.userId) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: '您无权在此案件下创建辩论',
-        },
-      },
-      { status: 403 }
+  if (!isAdmin) {
+    const ownership = await checkResourceOwnership(
+      authUser.userId,
+      body.caseId,
+      ResourceType.CASE
     );
+    const access: { hasAccess: boolean; reason?: string } =
+      ownership.hasPermission
+        ? { hasAccess: true }
+        : await canAccessSharedCase(
+            authUser.userId,
+            body.caseId,
+            CasePermission.EDIT_DEBATES
+          );
+    if (!access.hasAccess) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: access.reason ?? '您无权在此案件下创建辩论',
+          },
+        },
+        { status: 403 }
+      );
+    }
   }
 
   // 从token获取用户ID

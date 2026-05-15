@@ -1,5 +1,9 @@
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
+  createForbiddenResponse,
+  createUnauthorizedResponse,
+} from '@/app/api/lib/responses/error-response';
+import {
   createCreatedResponse,
   createSuccessResponse,
 } from '@/app/api/lib/responses/success';
@@ -89,10 +93,7 @@ export const GET = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id: clientId } = await params;
@@ -104,10 +105,7 @@ export const GET = withErrorHandler(
         userId: authUser.userId,
         clientId,
       });
-      return NextResponse.json(
-        { error: '无权限', message: '您没有权限访问此客户的沟通记录' },
-        { status: 403 }
-      );
+      return createForbiddenResponse('您没有权限访问此客户的沟通记录');
     }
 
     const { searchParams } = new URL(request.url);
@@ -173,10 +171,7 @@ export const POST = withErrorHandler(
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
-        { status: 401 }
-      );
+      return createUnauthorizedResponse();
     }
 
     const { id: clientId } = await params;
@@ -190,10 +185,7 @@ export const POST = withErrorHandler(
         userId: authUser.userId,
         clientId,
       });
-      return NextResponse.json(
-        { error: '无权限', message: '您没有权限为此客户创建沟通记录' },
-        { status: 403 }
-      );
+      return createForbiddenResponse('您没有权限为此客户创建沟通记录');
     }
 
     const communication = await prisma.communicationRecord.create({

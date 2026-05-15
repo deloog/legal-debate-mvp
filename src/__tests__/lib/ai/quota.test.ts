@@ -23,10 +23,26 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: mockPrisma,
 }));
 
+jest.mock('@/lib/config/system-config', () => ({
+  getNumberConfig: jest.fn(async (key: string, defaultValue: number) => {
+    if (key === 'business.ai_quota_free_monthly') {
+      return 120;
+    }
+    if (key === 'business.ai_quota_basic_monthly') {
+      return 1500;
+    }
+    if (key === 'business.ai_quota_enterprise_monthly') {
+      return 12000;
+    }
+    return defaultValue;
+  }),
+}));
+
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { prisma } from '@/lib/db/prisma';
 import {
   getUserQuotaConfig,
+  getUserQuotaConfigAsync,
   checkAIQuota,
   recordAIUsage,
   getUserQuotaUsage,
@@ -122,6 +138,29 @@ describe('AI配额管理系统', () => {
     });
   });
 
+  describe('getUserQuotaConfigAsync', () => {
+    it('应该优先读取系统配置中的配额值', async () => {
+      const config = await getUserQuotaConfigAsync('FREE');
+      expect(config.monthlyLimit).toBe(120);
+      expect(config.dailyLimit).toBe(10);
+      expect(config.perRequestLimit).toBe(1000);
+    });
+
+    it('应该支持基本会员系统配额覆盖', async () => {
+      const config = await getUserQuotaConfigAsync('BASIC');
+      expect(config.monthlyLimit).toBe(1500);
+      expect(config.dailyLimit).toBe(50);
+      expect(config.perRequestLimit).toBe(2000);
+    });
+
+    it('应该支持企业会员系统配额覆盖', async () => {
+      const config = await getUserQuotaConfigAsync('ENTERPRISE');
+      expect(config.monthlyLimit).toBe(12000);
+      expect(config.dailyLimit).toBe(500);
+      expect(config.perRequestLimit).toBe(8000);
+    });
+  });
+
   describe('checkAIQuota', () => {
     it('应该允许管理员使用（无配额限制）', async () => {
       const result = await checkAIQuota('user-1', 'ADMIN');
@@ -173,17 +212,17 @@ describe('AI配额管理系统', () => {
     it('应该拒绝每月配额已用完的用户', async () => {
       mockCount
         .mockResolvedValueOnce(0 as unknown as never) // 今日使用量为0
-        .mockResolvedValueOnce(1000 as unknown as never); // 模拟本月已用完
+        .mockResolvedValueOnce(1500 as unknown as never); // 模拟本月已用完
 
       const result = await checkAIQuota('user-6', 'BASIC', 0);
       expect(result).toEqual({
         allowed: false,
-        reason: '本月配额已用完（1000次）',
+        reason: '本月配额已用完（1500次）',
         remaining: 0,
         dailyUsed: 0,
         dailyLimit: 50,
-        monthlyUsed: 1000,
-        monthlyLimit: 1000,
+        monthlyUsed: 1500,
+        monthlyLimit: 1500,
       });
     });
 

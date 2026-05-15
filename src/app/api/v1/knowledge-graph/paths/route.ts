@@ -60,18 +60,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!sourceId || !targetId) {
       logger.warn('路径查询缺少必需参数', { sourceId, targetId });
-      return NextResponse.json({
-        success: true,
-        data: {
-          sourceId: sourceId || null,
-          targetId: targetId || null,
-          path: [],
-          pathLength: -1,
-          relationTypes: [],
-          exists: false,
+      return NextResponse.json(
+        {
+          error: sourceId ? '缺少必需参数: targetId' : '缺少必需参数: sourceId',
         },
-        message: '请提供 sourceId 和 targetId 参数以查询路径',
-      });
+        { status: 400 }
+      );
     }
 
     // 验证节点ID格式（防止注入）

@@ -22,6 +22,11 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/middleware/resource-permission', () => ({
+  checkResourceOwnership: jest.fn(),
+  ResourceType: { CASE: 'CASE' },
+}));
+
 jest.mock('@/lib/case/share-permission-validator', () => ({
   canShareCase: jest.fn(),
   canAccessSharedCase: jest.fn(),
@@ -29,6 +34,7 @@ jest.mock('@/lib/case/share-permission-validator', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { checkResourceOwnership } from '@/lib/middleware/resource-permission';
 import {
   canShareCase,
   canAccessSharedCase,
@@ -37,6 +43,9 @@ import {
 describe('案件共享API - POST /api/cases/[id]/share', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: false,
+    });
   });
 
   it('应该返回401未认证错误', async () => {
@@ -195,6 +204,9 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
 describe('案件共享API - GET /api/cases/[id]/share', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: false,
+    });
   });
 
   it('应该返回401未认证错误', async () => {

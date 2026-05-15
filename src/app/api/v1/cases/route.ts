@@ -3,6 +3,7 @@ import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { CaseType, CaseStatus, Prisma, OwnerType } from '@prisma/client';
+import { generateCaseNumber } from '@/lib/case/case-number-service';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
@@ -241,15 +242,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
   }
 
+  const caseType = typeMap[body.type?.toLowerCase()] || 'CIVIL';
+  const caseStatus = statusMap[body.status?.toLowerCase()] || 'DRAFT';
+  const caseNumber =
+    body.caseNumber || (await generateCaseNumber(prisma, caseType, caseStatus));
+
   const caseData = await prisma.case.create({
     data: {
       userId: authUser.userId,
       title: body.title,
       description: body.description || '',
-      type: typeMap[body.type?.toLowerCase()] || 'CIVIL',
-      status: statusMap[body.status?.toLowerCase()] || 'DRAFT',
+      type: caseType,
+      status: caseStatus,
       amount: body.amount ? new Prisma.Decimal(body.amount) : null,
-      caseNumber: body.caseNumber,
+      caseNumber,
       cause: body.cause,
       court: body.court,
       plaintiffName: body.plaintiffName,

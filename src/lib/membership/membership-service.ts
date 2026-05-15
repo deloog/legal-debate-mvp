@@ -18,6 +18,22 @@ export interface ActivateMembershipParams {
   performedBy?: string;
 }
 
+interface PaidOrderMembershipActivationInput {
+  order: {
+    id: string;
+    orderNo: string;
+    userId: string;
+    membershipTierId: string;
+    amount: { toNumber: () => number } | number;
+    metadata: unknown;
+  };
+  tier: {
+    tier: MembershipTierType;
+    name: string;
+  };
+  performedBy?: string;
+}
+
 export interface UpgradeMembershipParams {
   userId: string;
   newTierId: string;
@@ -149,6 +165,110 @@ function calculateDaysRemaining(endDate: Date): number {
   return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 }
 
+async function activateMembershipFromPaidOrderInTransaction(
+  tx: Prisma.TransactionClient,
+  params: PaidOrderMembershipActivationInput
+): Promise<{
+  id: string;
+  userId: string;
+  tierId: string;
+  status: MembershipStatus;
+  startDate: Date;
+  endDate: Date;
+  autoRenew: boolean;
+  tier: {
+    tier: MembershipTierType;
+    name: string;
+  };
+}> {
+  const { order, tier, performedBy } = params;
+  const now = new Date();
+  const metadata = (order.metadata as Record<string, unknown>) || {};
+  const billingCycle = (metadata.billingCycle as BillingCycle) || 'MONTHLY';
+  const autoRenew = (metadata.autoRenew as boolean) || false;
+  let endDate = calculateEndDate(now, billingCycle);
+
+  const currentMembership = await tx.userMembership.findFirst({
+    where: {
+      userId: order.userId,
+      status: MembershipStatus.ACTIVE,
+    },
+    orderBy: {
+      endDate: 'desc',
+    },
+    include: {
+      tier: true,
+    },
+  });
+
+  if (currentMembership && new Date(currentMembership.endDate) > now) {
+    const currentEndDate = new Date(currentMembership.endDate);
+    endDate = calculateEndDate(currentEndDate, billingCycle);
+    logger.info('[MembershipService] 延长会员到期时间:', {
+      currentEndDate,
+      newEndDate: endDate,
+    });
+  }
+
+  const membership = await tx.userMembership.create({
+    data: {
+      userId: order.userId,
+      tierId: order.membershipTierId,
+      status: MembershipStatus.ACTIVE,
+      startDate: now,
+      endDate,
+      autoRenew,
+      notes: `通过订单${order.orderNo}开通会员`,
+    },
+    include: {
+      tier: true,
+    },
+  });
+
+  await tx.membershipHistory.create({
+    data: {
+      userId: order.userId,
+      membershipId: membership.id,
+      changeType: currentMembership ? 'RENEW' : 'UPGRADE',
+      fromTier: (currentMembership?.tier?.tier as MembershipTierType) || 'FREE',
+      toTier: (membership.tier?.tier as MembershipTierType) || 'BASIC',
+      fromStatus: currentMembership?.status || 'EXPIRED',
+      toStatus: MembershipStatus.ACTIVE,
+      reason: `通过订单${order.orderNo}开通会员`,
+      performedBy: performedBy || order.userId,
+      metadata: {
+        orderId: order.id,
+        orderNo: order.orderNo,
+        billingCycle,
+        amount:
+          typeof order.amount === 'number'
+            ? order.amount
+            : order.amount.toNumber(),
+      },
+    },
+  });
+
+  logger.info('[MembershipService] 会员激活成功:', {
+    membershipId: membership.id,
+    tier: membership.tier?.tier,
+    endDate: membership.endDate,
+  });
+
+  return {
+    id: membership.id,
+    userId: membership.userId,
+    tierId: membership.tierId,
+    status: membership.status,
+    startDate: membership.startDate,
+    endDate: membership.endDate,
+    autoRenew: membership.autoRenew,
+    tier: {
+      tier: (membership.tier?.tier as MembershipTierType) || tier.tier,
+      name: membership.tier?.name || tier.name,
+    },
+  };
+}
+
 // =============================================================================
 // 核心服务函数
 // =============================================================================
@@ -205,104 +325,26 @@ export async function activateMembership(
     throw new Error('会员套餐不存在');
   }
 
-  // 3. 解析订单元数据
-  const metadata = (order.metadata as Record<string, unknown>) || {};
-  const billingCycle = (metadata.billingCycle as BillingCycle) || 'MONTHLY';
-  const autoRenew = (metadata.autoRenew as boolean) || false;
-
-  // 4. 使用事务处理会员激活
-  const result = await prisma.$transaction(
-    async (tx: Prisma.TransactionClient) => {
-      const now = new Date();
-      let endDate = calculateEndDate(now, billingCycle);
-
-      // 查询当前有效的会员
-      const currentMembership = await tx.userMembership.findFirst({
-        where: {
-          userId,
-          status: MembershipStatus.ACTIVE,
-        },
-        orderBy: {
-          endDate: 'desc',
-        },
-        include: {
-          tier: true,
-        },
-      });
-
-      // 如果当前会员未到期，则延长到期时间
-      if (currentMembership && new Date(currentMembership.endDate) > now) {
-        const currentEndDate = new Date(currentMembership.endDate);
-        // 在现有到期时间上增加新的周期
-        endDate = calculateEndDate(currentEndDate, billingCycle);
-        logger.info('[MembershipService] 延长会员到期时间:', {
-          currentEndDate,
-          newEndDate: endDate,
-        });
-      }
-
-      // 创建新的会员记录
-      const membership = await tx.userMembership.create({
-        data: {
-          userId,
-          tierId: order.membershipTierId,
-          status: MembershipStatus.ACTIVE,
-          startDate: now,
-          endDate,
-          autoRenew,
-          notes: `通过订单${order.orderNo}开通会员`,
-        },
-        include: {
-          tier: true,
-        },
-      });
-
-      // 记录会员变更历史
-      await tx.membershipHistory.create({
-        data: {
-          userId,
-          membershipId: membership.id,
-          changeType: currentMembership ? 'RENEW' : 'UPGRADE',
-          fromTier:
-            (currentMembership?.tier?.tier as MembershipTierType) || 'FREE',
-          toTier: (membership.tier?.tier as MembershipTierType) || 'BASIC',
-          fromStatus: currentMembership?.status || 'EXPIRED',
-          toStatus: MembershipStatus.ACTIVE,
-          reason: `通过订单${order.orderNo}开通会员`,
-          performedBy: performedBy || userId,
-          metadata: {
-            orderId: order.id,
-            orderNo: order.orderNo,
-            billingCycle,
-            amount: order.amount,
-          },
-        },
-      });
-
-      logger.info('[MembershipService] 会员激活成功:', {
-        membershipId: membership.id,
-        tier: membership.tier?.tier,
-        endDate: membership.endDate,
-      });
-
-      return membership;
-    }
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) =>
+    activateMembershipFromPaidOrderInTransaction(tx, {
+      order: {
+        id: order.id,
+        orderNo: order.orderNo,
+        userId: order.userId,
+        membershipTierId: order.membershipTierId,
+        amount: order.amount,
+        metadata: order.metadata,
+      },
+      tier: {
+        tier: tier.tier as MembershipTierType,
+        name: tier.name,
+      },
+      performedBy: performedBy || userId,
+    })
   );
-
-  return {
-    id: result.id,
-    userId: result.userId,
-    tierId: result.tierId,
-    status: result.status,
-    startDate: result.startDate,
-    endDate: result.endDate,
-    autoRenew: result.autoRenew,
-    tier: {
-      tier: (result.tier?.tier as MembershipTierType) || 'BASIC',
-      name: result.tier?.name || '',
-    },
-  };
 }
+
+export { activateMembershipFromPaidOrderInTransaction };
 
 /**
  * 升级会员套餐

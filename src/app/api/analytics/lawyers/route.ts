@@ -231,7 +231,7 @@ async function getLawyerCaseVolume(
       COUNT(*) FILTER (WHERE "c"."status" = 'COMPLETED') as "completedCases",
       COUNT(*) FILTER (WHERE "c"."status" = 'ARCHIVED') as "archivedCases"
     FROM "users" u
-    INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
+    INNER JOIN "cases" c ON "c"."userId" = "u"."id"
     WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     ORDER BY "totalCases" DESC`
@@ -296,7 +296,7 @@ async function getLawyerSuccessRate(
       COUNT("c"."id") as "totalCases",
       COUNT(*) FILTER (WHERE "c"."status" = 'COMPLETED') as "successfulCases"
     FROM "users" u
-    INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
+    INNER JOIN "cases" c ON "c"."userId" = "u"."id"
     WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0
@@ -337,7 +337,7 @@ async function getLawyerSuccessRate(
         COUNT("c"."id") as "totalCases",
         COUNT(*) FILTER (WHERE "c"."status" = 'COMPLETED') as "successfulCases"
       FROM "cases" c
-      WHERE "c"."createdBy" = ${lawyer.lawyerId}
+      WHERE "c"."userId" = ${lawyer.lawyerId}
         AND "c"."createdAt" >= ${startDate}
         AND "c"."createdAt" <= ${endDate}
         AND "c"."deletedAt" IS NULL
@@ -415,7 +415,7 @@ async function getLawyerRevenue(
       ROUND(MAX("c"."amount"), 2) as "max",
       ROUND(MIN("c"."amount"), 2) as "min"
     FROM "users" u
-    INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
+    INNER JOIN "cases" c ON "c"."userId" = "u"."id"
     WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING SUM("c"."amount") IS NOT NULL
@@ -452,7 +452,7 @@ async function getLawyerRevenue(
         ROUND(SUM("c"."amount"), 2) as "totalRevenue",
         COUNT("c"."id") as "count"
       FROM "cases" c
-      WHERE "c"."createdBy" = ${lawyer.lawyerId}
+      WHERE "c"."userId" = ${lawyer.lawyerId}
         AND "c"."createdAt" >= ${startDate}
         AND "c"."createdAt" <= ${endDate}
         AND "c"."deletedAt" IS NULL
@@ -533,7 +533,7 @@ async function getLawyerEfficiency(
       ROUND(MIN(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "fastestDuration",
       ROUND(MAX(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "slowestDuration"
     FROM "users" u
-    INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
+    INNER JOIN "cases" c ON "c"."userId" = "u"."id"
     WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0
@@ -616,7 +616,7 @@ async function getLawyerWorkHours(
       ROUND(AVG(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "avgDurationDays",
       COUNT(DISTINCT DATE("c"."createdAt")) as "workDays"
     FROM "users" u
-    INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
+    INNER JOIN "cases" c ON "c"."userId" = "u"."id"
     WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0

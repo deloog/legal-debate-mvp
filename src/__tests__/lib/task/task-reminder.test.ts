@@ -89,6 +89,15 @@ describe('TaskReminderGenerator', () => {
       });
 
       expect(mockCreateReminders).toHaveBeenCalled();
+      expect(mockCreateReminders).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: ReminderType.FOLLOW_UP,
+            relatedType: 'Task',
+            userId: 'user-1',
+          }),
+        ])
+      );
     });
 
     it('不应该为已完成的任务生成提醒', async () => {

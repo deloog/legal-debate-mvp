@@ -82,4 +82,31 @@ describe('ApprovalFlow', () => {
     expect(screen.getByRole('button', { name: /通过/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /拒绝/i })).toBeInTheDocument();
   });
+
+  it('未指定审批人的待审批步骤不应显示操作按钮，并提示配置错误', () => {
+    const approvalWithoutApprover = {
+      ...mockApproval,
+      steps: [
+        {
+          ...mockApproval.steps[0],
+          approverId: null,
+          approverName: null,
+        },
+      ],
+    };
+
+    render(
+      <ApprovalFlow
+        approval={approvalWithoutApprover}
+        currentUserId='user-2'
+        onApprove={jest.fn()}
+        onReject={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole('button', { name: /通过/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/该审批步骤未指定审批人/)).toBeInTheDocument();
+  });
 });

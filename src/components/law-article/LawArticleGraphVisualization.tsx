@@ -24,6 +24,35 @@ interface Props {
   depth?: number;
 }
 
+function normalizeGraphPayload(payload: unknown): {
+  nodes: GraphNode[];
+  links: GraphLink[];
+} {
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('无效的图谱数据格式');
+  }
+
+  const candidate =
+    'data' in payload && payload.data && typeof payload.data === 'object'
+      ? payload.data
+      : payload;
+
+  return {
+    nodes:
+      'nodes' in candidate && Array.isArray(candidate.nodes)
+        ? (candidate.nodes as GraphNode[])
+        : [],
+    links:
+      'links' in candidate && Array.isArray(candidate.links)
+        ? (candidate.links as GraphLink[])
+        : [],
+  };
+}
+
+function isDirectColor(value: string): boolean {
+  return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
+}
+
 /**
  * 法条关系图谱可视化组件
  */
@@ -70,19 +99,7 @@ export function LawArticleGraphVisualization({
             throw new Error(errorData.error || `请求失败: ${response.status}`);
           }
 
-          const data = await response.json();
-
-          // 验证数据结构，确保 nodes 和 links 是数组
-          if (!data || typeof data !== 'object') {
-            throw new Error('无效的图谱数据格式');
-          }
-
-          const graphData = {
-            nodes: Array.isArray(data.nodes) ? data.nodes : [],
-            links: Array.isArray(data.links) ? data.links : [],
-          };
-
-          setGraphData(graphData);
+          setGraphData(normalizeGraphPayload(await response.json()));
         } catch {
           // 客户端错误处理：显示空数据而非使用console
           setGraphData({ nodes: [], links: [] });
@@ -350,6 +367,8 @@ export function LawArticleGraphVisualization({
 
   // 分类颜色映射
   function getCategoryColor(category: string): string {
+    if (isDirectColor(category)) return category;
+
     const colors: Record<string, string> = {
       CIVIL: '#3b82f6',
       CRIMINAL: '#ef4444',

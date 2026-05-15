@@ -219,6 +219,7 @@ async function getValueAnalysis(
     where: { userId, deletedAt: null, createdAt: dateFilter },
     include: {
       cases: {
+        where: { deletedAt: null },
         select: { amount: true },
       },
       _count: {
@@ -275,6 +276,7 @@ async function getTopClients(
     where: { userId, deletedAt: null, createdAt: dateFilter },
     include: {
       cases: {
+        where: { deletedAt: null },
         select: { amount: true },
       },
       _count: {
@@ -324,7 +326,7 @@ async function calculateClientValue(
 ): Promise<ClientValueAnalysis> {
   // 获取案件数据
   const cases = await prisma.case.findMany({
-    where: { clientId, deletedAt: null },
+    where: { clientId, userId, deletedAt: null },
     select: { amount: true, createdAt: true, status: true },
   });
 
@@ -337,8 +339,8 @@ async function calculateClientValue(
   });
 
   // 计算合作时长（天数）
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId, deletedAt: null },
     select: { createdAt: true },
   });
   const cooperationDuration = client

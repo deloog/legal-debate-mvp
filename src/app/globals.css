@@ -53,7 +53,8 @@
   body {
     background: var(--background);
     color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
       'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue',
       Arial, sans-serif;
   }
@@ -117,14 +118,21 @@
 }
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(4px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ── 移动端适配 ──────────────────────────────────────────────────────────── */
 
 /* 消除 iOS/Android 按钮点击 300ms 延迟 */
-a, button {
+a,
+button {
   touch-action: manipulation;
 }
 
@@ -162,9 +170,15 @@ a, button {
   margin-bottom: 0.5rem;
   line-height: 1.4;
 }
-.ai-markdown h1 { font-size: 1rem; }
-.ai-markdown h2 { font-size: 0.9375rem; }
-.ai-markdown h3 { font-size: 0.875rem; }
+.ai-markdown h1 {
+  font-size: 1rem;
+}
+.ai-markdown h2 {
+  font-size: 0.9375rem;
+}
+.ai-markdown h3 {
+  font-size: 0.875rem;
+}
 .ai-markdown h1:first-child,
 .ai-markdown h2:first-child,
 .ai-markdown h3:first-child {

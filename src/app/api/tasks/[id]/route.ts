@@ -9,6 +9,8 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { TaskStatus, TaskPriority } from '@/types/task';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { CasePermission } from '@/types/case-collaboration';
 
 /**
  * 更新任务Schema
@@ -39,6 +41,28 @@ function getTaskId(request: NextRequest): string {
     throw new ApiError(400, 'INVALID_TASK_ID', 'Invalid task ID');
   }
   return taskId;
+}
+
+async function canAssignTaskToUser(
+  actorId: string,
+  assignedTo?: string | null,
+  caseId?: string | null
+): Promise<boolean> {
+  if (!assignedTo || assignedTo === actorId) {
+    return true;
+  }
+
+  if (!caseId) {
+    return false;
+  }
+
+  const assigneeAccess = await canAccessSharedCase(
+    assignedTo,
+    caseId,
+    CasePermission.VIEW_CASE
+  );
+
+  return assigneeAccess.hasAccess;
 }
 
 /**
@@ -181,6 +205,41 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
   ) {
     return NextResponse.json(
       { error: '无权操作', message: '您没有权限更新此任务' },
+      { status: 403 }
+    );
+  }
+
+  const nextCaseId =
+    validatedData.caseId !== undefined
+      ? validatedData.caseId
+      : existingTask.caseId;
+  const nextAssignedTo =
+    validatedData.assignedTo !== undefined
+      ? validatedData.assignedTo
+      : existingTask.assignedTo;
+
+  if (validatedData.caseId !== undefined && validatedData.caseId) {
+    const accessResult = await canAccessSharedCase(
+      authUser.userId,
+      validatedData.caseId,
+      CasePermission.VIEW_CASE
+    );
+    if (!accessResult.hasAccess) {
+      return NextResponse.json(
+        { error: '无权操作', message: '您没有权限将任务关联到此案件' },
+        { status: 403 }
+      );
+    }
+  }
+
+  if (
+    !(await canAssignTaskToUser(authUser.userId, nextAssignedTo, nextCaseId))
+  ) {
+    return NextResponse.json(
+      {
+        error: '无权操作',
+        message: '只能将任务分配给自己或有权访问该案件的成员',
+      },
       { status: 403 }
     );
   }

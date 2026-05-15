@@ -19,6 +19,7 @@ import {
   AlipayTradeStatus,
 } from '@/types/payment';
 import { paymentService } from '@/lib/payment/payment-service';
+import { handlePaymentSuccess } from '@/lib/order/order-service';
 import { logger } from '@/lib/logger';
 
 /**
@@ -146,20 +147,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           wechatTradeState === WechatPayTradeState.SUCCESS &&
           order.status !== 'PAID'
         ) {
-          // 支付成功，更新订单和支付记录状态
-          updatedPaymentRecord = await prisma.$transaction(async tx => {
-            await tx.order.update({
-              where: { id: order.id },
-              data: { status: 'PAID', paidAt: new Date() },
-            });
-
-            return tx.paymentRecord.update({
-              where: { id: paymentRecord.id },
-              data: {
-                status: PaymentStatus.SUCCESS,
-                transactionId: wechatResponse.transaction_id,
-              },
-            });
+          // 支付成功：触发完整支付成功流程（含会员开通），再更新支付记录 transactionId
+          await handlePaymentSuccess(
+            order.id,
+            wechatResponse.transaction_id ?? '',
+            order.orderNo
+          );
+          updatedPaymentRecord = await prisma.paymentRecord.update({
+            where: { id: paymentRecord.id },
+            data: {
+              status: PaymentStatus.SUCCESS,
+              transactionId: wechatResponse.transaction_id,
+            },
           });
 
           // 重新查询订单获取完整信息
@@ -233,20 +232,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           alipayTradeStatus === AlipayTradeStatus.TRADE_SUCCESS &&
           order.status !== 'PAID'
         ) {
-          // 支付成功，更新订单和支付记录状态
-          updatedPaymentRecord = await prisma.$transaction(async tx => {
-            await tx.order.update({
-              where: { id: order.id },
-              data: { status: 'PAID', paidAt: new Date() },
-            });
-
-            return tx.paymentRecord.update({
-              where: { id: paymentRecord.id },
-              data: {
-                status: PaymentStatus.SUCCESS,
-                transactionId: alipayResponse.tradeNo,
-              },
-            });
+          // 支付成功：触发完整支付成功流程（含会员开通），再更新支付记录 transactionId
+          await handlePaymentSuccess(
+            order.id,
+            alipayResponse.tradeNo ?? '',
+            order.orderNo
+          );
+          updatedPaymentRecord = await prisma.paymentRecord.update({
+            where: { id: paymentRecord.id },
+            data: {
+              status: PaymentStatus.SUCCESS,
+              transactionId: alipayResponse.tradeNo,
+            },
           });
 
           // 重新查询订单获取完整信息
@@ -285,10 +282,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           });
           paymentStatus = PaymentStatus.CANCELLED;
         } else if (alipayTradeStatus === AlipayTradeStatus.TRADE_FINISHED) {
-          // 交易结束，通常已支付
+          // 交易结束（超过退款期）：用户已付款，同样触发会员开通
+          await handlePaymentSuccess(
+            order.id,
+            alipayResponse.tradeNo ?? '',
+            order.orderNo
+          );
           updatedPaymentRecord = await prisma.paymentRecord.update({
             where: { id: paymentRecord.id },
-            data: { status: PaymentStatus.SUCCESS },
+            data: {
+              status: PaymentStatus.SUCCESS,
+              transactionId: alipayResponse.tradeNo,
+            },
           });
           paymentStatus = PaymentStatus.SUCCESS;
         }

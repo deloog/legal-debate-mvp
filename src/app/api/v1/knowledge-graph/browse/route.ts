@@ -63,7 +63,7 @@ interface BrowseResponse {
 /**
  * 获取知识图谱浏览数据
  *
- * 策略：先查"种子"法条（有 VERIFIED 关系的法条，按出度排序），
+ * 策略：先查"种子"法条（有 VERIFIED 关系的法条，按度数排序），
  * 再拉取它们的关系，并补充关系对端节点，确保图中有可见连接。
  */
 export async function GET(
@@ -109,40 +109,56 @@ export async function GET(
 
     // ── Step 1: 查找有 VERIFIED 关系的种子法条 ──────────────────────────────
     // 只展示有关系的法条，避免孤立节点充斥图谱
+    const relationFilter = {
+      verificationStatus: VerificationStatus.VERIFIED,
+      ...(relationType ? { relationType } : {}),
+    };
     const seedWhere: {
       category?: LawCategory;
       OR?: Array<{
+        sourceRelations?: {
+          some: typeof relationFilter;
+        };
+        targetRelations?: {
+          some: typeof relationFilter;
+        };
         lawName?: { contains: string; mode: 'insensitive' };
         articleNumber?: { contains: string; mode: 'insensitive' };
       }>;
-      sourceRelations?: {
-        some: {
-          verificationStatus: VerificationStatus;
-          relationType?: RelationType;
-        };
-      };
     } = {
-      sourceRelations: {
-        some: {
-          verificationStatus: VerificationStatus.VERIFIED,
-          ...(relationType ? { relationType } : {}),
-        },
-      },
+      OR: [
+        { sourceRelations: { some: relationFilter } },
+        { targetRelations: { some: relationFilter } },
+      ],
     };
 
     if (category) seedWhere.category = category;
 
     if (search) {
       seedWhere.OR = [
-        { lawName: { contains: search, mode: 'insensitive' } },
-        { articleNumber: { contains: search, mode: 'insensitive' } },
+        {
+          sourceRelations: { some: relationFilter },
+          lawName: { contains: search, mode: 'insensitive' },
+        },
+        {
+          sourceRelations: { some: relationFilter },
+          articleNumber: { contains: search, mode: 'insensitive' },
+        },
+        {
+          targetRelations: { some: relationFilter },
+          lawName: { contains: search, mode: 'insensitive' },
+        },
+        {
+          targetRelations: { some: relationFilter },
+          articleNumber: { contains: search, mode: 'insensitive' },
+        },
       ];
     }
 
     // 统计种子法条总数（用于分页）
     let total = await prisma.lawArticle.count({ where: seedWhere });
 
-    // 查询本页种子法条（按出度排序：出度高的节点优先显示）
+    // 查询本页种子法条（按度数排序：关系多的节点优先显示）
     let seedArticles = await prisma.lawArticle.findMany({
       where: seedWhere,
       select: {
@@ -153,6 +169,7 @@ export async function GET(
       },
       orderBy: [
         { sourceRelations: { _count: 'desc' } },
+        { targetRelations: { _count: 'desc' } },
         { lawName: 'asc' },
         { articleNumber: 'asc' },
       ],
@@ -217,22 +234,17 @@ export async function GET(
     // ── Step 2: 拉取种子节点的关系 ──────────────────────────
     // 注意：正常情况下（种子来自 VERIFIED 查询），限制 VERIFIED
     // 降级情况下（种子来自普通法条查询），放宽关系查询条件
-    const isNormalQuery =
-      seedWhere.sourceRelations?.some?.verificationStatus ===
-      VerificationStatus.VERIFIED;
-
     const relationWhere: {
       verificationStatus?: VerificationStatus;
       relationType?: RelationType;
-      sourceId: { in: string[] };
+      OR: Array<
+        { sourceId: { in: string[] } } | { targetId: { in: string[] } }
+      >;
     } = {
-      sourceId: { in: seedIds },
+      OR: [{ sourceId: { in: seedIds } }, { targetId: { in: seedIds } }],
     };
 
-    // 只有在正常查询情况下才限制 VERIFIED
-    if (isNormalQuery) {
-      relationWhere.verificationStatus = VerificationStatus.VERIFIED;
-    }
+    relationWhere.verificationStatus = VerificationStatus.VERIFIED;
 
     if (relationType) relationWhere.relationType = relationType;
 
@@ -273,7 +285,7 @@ export async function GET(
 
     // ── Step 3: 收集对端节点 ID，补充节点数据 ─────────────────────────────
     const neighborIds = relations
-      .map(r => r.targetId)
+      .flatMap(r => [r.sourceId, r.targetId])
       .filter(id => !seedIdSet.has(id));
 
     const uniqueNeighborIds = [...new Set(neighborIds)];

@@ -3,6 +3,7 @@
  * POST /api/consultations/[id]/assess - 执行AI案件评估
  */
 import { createCaseAssessmentService } from '@/lib/consultation/case-assessment-service';
+import { createServiceUnavailableResponse } from '@/app/api/lib/responses/error-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { ErrorResponse, SuccessResponse } from '@/types/api-response';
@@ -44,11 +45,12 @@ export async function POST(
       );
     }
 
-    // 查询咨询记录
+    // 查询咨询记录（同时校验所有权，防止 IDOR）
     const consultation = await prisma.consultation.findFirst({
       where: {
         id,
         deletedAt: null,
+        userId: authUser.userId,
       },
     });
 
@@ -108,16 +110,7 @@ export async function POST(
   } catch (error) {
     logger.error('AI评估失败:', error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'ASSESSMENT_FAILED',
-          message: '评估失败，请重试',
-        },
-      },
-      { status: 500 }
-    );
+    return createServiceUnavailableResponse('AI案件评估暂时不可用，请稍候重试');
   }
 }
 
@@ -154,11 +147,12 @@ export async function GET(
       );
     }
 
-    // 查询咨询记录
+    // 查询咨询记录（同时校验所有权，防止 IDOR）
     const consultation = await prisma.consultation.findFirst({
       where: {
         id,
         deletedAt: null,
+        userId: authUser.userId,
       },
       select: {
         aiAssessment: true,
