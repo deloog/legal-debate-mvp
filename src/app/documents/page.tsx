@@ -14,6 +14,12 @@ import {
   Trash2,
   RefreshCw,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  User,
+  DollarSign,
+  Calendar,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,9 +34,37 @@ interface Document {
   mimeType: string;
   analysisStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   analysisError?: string | null;
-  extractedData?: Record<string, unknown> | null;
+  extractedData?: ExtractedData | null;
   createdAt: string;
   case?: { id: string; title: string } | null;
+}
+
+interface ExtractedParty {
+  name?: string;
+  role?: string;
+  type?: string;
+}
+
+interface ExtractedClaim {
+  content?: string;
+  amount?: number;
+  type?: string;
+}
+
+interface ExtractedTimeline {
+  date?: string;
+  event?: string;
+  description?: string;
+}
+
+interface ExtractedData {
+  parties?: ExtractedParty[];
+  claims?: ExtractedClaim[];
+  timeline?: ExtractedTimeline[];
+  totalAmount?: number;
+  currency?: string;
+  summary?: string;
+  disputeFocus?: string[];
 }
 
 interface DocumentsResponse {
@@ -85,6 +119,111 @@ function getDocumentAdvice(document: Document): string | null {
   return null;
 }
 
+function AnalysisResult({ data }: { data: ExtractedData }) {
+  return (
+    <div className='mt-4 space-y-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/20'>
+      <p className='text-xs font-semibold uppercase tracking-wide text-green-700 dark:text-green-400'>
+        案情提取摘要
+      </p>
+
+      {data.parties && data.parties.length > 0 && (
+        <div>
+          <div className='mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300'>
+            <User className='h-4 w-4' />
+            当事人
+          </div>
+          <div className='flex flex-wrap gap-2'>
+            {data.parties.map((p, i) => (
+              <span
+                key={i}
+                className='inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs shadow-sm dark:bg-zinc-900'
+              >
+                <span className='font-medium'>{p.name ?? '—'}</span>
+                {p.role && <span className='text-zinc-400'>（{p.role}）</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(data.totalAmount !== undefined ||
+        (data.claims && data.claims.some(c => c.amount))) && (
+        <div>
+          <div className='mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300'>
+            <DollarSign className='h-4 w-4' />
+            诉讼请求
+          </div>
+          <div className='space-y-1'>
+            {data.claims?.map((c, i) => (
+              <div
+                key={i}
+                className='flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400'
+              >
+                <span className='mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400' />
+                <span>
+                  {c.content}
+                  {c.amount !== undefined && (
+                    <span className='ml-1 font-semibold text-zinc-900 dark:text-zinc-100'>
+                      （{data.currency ?? '¥'}
+                      {c.amount.toLocaleString()}）
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.timeline && data.timeline.length > 0 && (
+        <div>
+          <div className='mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300'>
+            <Calendar className='h-4 w-4' />
+            关键时间线
+          </div>
+          <div className='space-y-2'>
+            {data.timeline.map((t, i) => (
+              <div key={i} className='flex gap-3 text-sm'>
+                <span className='shrink-0 text-xs font-medium text-zinc-500 dark:text-zinc-400 pt-0.5 w-24'>
+                  {t.date ?? '—'}
+                </span>
+                <span className='text-zinc-600 dark:text-zinc-400'>
+                  {t.event ?? t.description}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.disputeFocus && data.disputeFocus.length > 0 && (
+        <div>
+          <div className='mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300'>
+            <Target className='h-4 w-4' />
+            争议焦点
+          </div>
+          <div className='flex flex-wrap gap-2'>
+            {data.disputeFocus.map((f, i) => (
+              <span
+                key={i}
+                className='rounded-md bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.summary && (
+        <div className='rounded-md bg-white/60 p-3 text-sm text-zinc-600 dark:bg-zinc-900/40 dark:text-zinc-400'>
+          {data.summary}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DocumentsPage() {
   const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -96,6 +235,7 @@ export default function DocumentsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [analysisNotice, setAnalysisNotice] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
@@ -199,6 +339,18 @@ export default function DocumentsPage() {
     pending: documents.filter(d => d.analysisStatus === 'PENDING').length,
     failed: documents.filter(d => d.analysisStatus === 'FAILED').length,
   };
+
+  const loadDocumentAnalysisResult = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/v1/documents/${id}`);
+      const data = await res.json();
+      if (!data?.success) return null;
+      return (data?.data?.analysisResult?.extractedData ??
+        null) as ExtractedData | null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   return (
     <div className='min-h-screen bg-zinc-50 dark:bg-black'>
@@ -446,18 +598,56 @@ export default function DocumentsPage() {
                             分析
                           </Button>
                         )}
-                        {doc.analysisStatus === 'COMPLETED' && doc.case && (
-                          <Button
-                            size='sm'
-                            variant='outline'
-                            onClick={() =>
-                              router.push(`/cases/${doc.case!.id}`)
-                            }
-                            className='gap-1 text-xs'
-                          >
-                            <Eye className='h-3 w-3' />
-                            查看结果
-                          </Button>
+                        {doc.analysisStatus === 'COMPLETED' && (
+                          <>
+                            <Button
+                              size='sm'
+                              variant='ghost'
+                              onClick={async () => {
+                                if (expandedId === doc.id) {
+                                  setExpandedId(null);
+                                  return;
+                                }
+
+                                if (!doc.extractedData) {
+                                  const extractedData =
+                                    await loadDocumentAnalysisResult(doc.id);
+                                  if (extractedData) {
+                                    setDocuments(prev =>
+                                      prev.map(item =>
+                                        item.id === doc.id
+                                          ? { ...item, extractedData }
+                                          : item
+                                      )
+                                    );
+                                  }
+                                }
+
+                                setExpandedId(doc.id);
+                              }}
+                              className='gap-1 text-xs'
+                            >
+                              {expandedId === doc.id ? (
+                                <ChevronUp className='h-3.5 w-3.5' />
+                              ) : (
+                                <ChevronDown className='h-3.5 w-3.5' />
+                              )}
+                              {expandedId === doc.id ? '收起摘要' : '查看摘要'}
+                            </Button>
+                            {doc.case && (
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                onClick={() =>
+                                  router.push(`/cases/${doc.case!.id}`)
+                                }
+                                className='gap-1 text-xs'
+                              >
+                                <Eye className='h-3 w-3' />
+                                进入案件
+                              </Button>
+                            )}
+                          </>
                         )}
                         <Button
                           size='sm'
@@ -478,6 +668,39 @@ export default function DocumentsPage() {
                 ))}
               </tbody>
             </table>
+            {documents.map(
+              doc =>
+                expandedId === doc.id &&
+                doc.extractedData && (
+                  <div
+                    key={`${doc.id}-summary`}
+                    className='border-t border-zinc-100 px-4 pb-4 dark:border-zinc-800'
+                  >
+                    <AnalysisResult data={doc.extractedData} />
+                    <div className='mt-3 flex gap-2'>
+                      {doc.case && (
+                        <Button
+                          size='sm'
+                          onClick={() => router.push(`/cases/${doc.case!.id}`)}
+                          className='gap-1'
+                        >
+                          <ChevronRight className='h-3.5 w-3.5' />
+                          去案件页继续办案
+                        </Button>
+                      )}
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => router.push('/chat')}
+                        className='gap-1'
+                      >
+                        <FileText className='h-3.5 w-3.5' />
+                        去聊天继续分析
+                      </Button>
+                    </div>
+                  </div>
+                )
+            )}
           </div>
         )}
       </main>

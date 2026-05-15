@@ -228,6 +228,18 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [analysisNotice, setAnalysisNotice] = useState<string | null>(null);
 
+  const loadDocumentAnalysisResult = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/v1/documents/${id}`);
+      const data = await res.json();
+      if (!data?.success) return null;
+      return (data?.data?.analysisResult?.extractedData ??
+        null) as ExtractedData | null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
     try {
@@ -443,13 +455,32 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
                       分析
                     </Button>
                   )}
-                  {doc.analysisStatus === 'COMPLETED' && doc.extractedData && (
+                  {doc.analysisStatus === 'COMPLETED' && (
                     <Button
                       size='sm'
                       variant='ghost'
-                      onClick={() =>
-                        setExpandedId(prev => (prev === doc.id ? null : doc.id))
-                      }
+                      onClick={async () => {
+                        if (expandedId === doc.id) {
+                          setExpandedId(null);
+                          return;
+                        }
+
+                        if (!doc.extractedData) {
+                          const extractedData =
+                            await loadDocumentAnalysisResult(doc.id);
+                          if (extractedData) {
+                            setDocuments(prev =>
+                              prev.map(item =>
+                                item.id === doc.id
+                                  ? { ...item, extractedData }
+                                  : item
+                              )
+                            );
+                          }
+                        }
+
+                        setExpandedId(doc.id);
+                      }}
                       className='gap-1 text-xs'
                     >
                       {expandedId === doc.id ? (
@@ -457,7 +488,7 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
                       ) : (
                         <ChevronDown className='h-3.5 w-3.5' />
                       )}
-                      {expandedId === doc.id ? '收起' : '查看提取结果'}
+                      {expandedId === doc.id ? '收起摘要' : '查看摘要'}
                     </Button>
                   )}
                 </div>
@@ -476,6 +507,16 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
               {expandedId === doc.id && doc.extractedData && (
                 <div className='border-t border-zinc-100 px-4 pb-4 dark:border-zinc-800'>
                   <AnalysisResult data={doc.extractedData} />
+                  <div className='mt-3 flex gap-2'>
+                    <Button
+                      size='sm'
+                      onClick={() => (window.location.href = '/chat')}
+                      className='gap-1'
+                    >
+                      <FileText className='h-3.5 w-3.5' />
+                      去聊天继续分析
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
