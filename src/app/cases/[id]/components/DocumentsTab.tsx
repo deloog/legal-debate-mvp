@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   FileText,
   Upload,
@@ -82,6 +82,25 @@ const STATUS_LABEL: Record<string, string> = {
 function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getDocumentAdvice(document: Document): string | null {
+  if (document.analysisStatus === 'PROCESSING') {
+    return '系统正在自动提取文本并生成案件结构化摘要。';
+  }
+
+  if (document.analysisStatus === 'FAILED') {
+    if (document.analysisError?.includes('扫描件')) {
+      return '建议改传文本型 PDF、Word 或 TXT；扫描件 OCR 能力后续补充。';
+    }
+    return '建议重新上传一次，或改传 Word / TXT 版本。';
+  }
+
+  if (document.analysisStatus === 'COMPLETED') {
+    return '可展开查看提取结果，并继续后续办案。';
+  }
+
+  return null;
 }
 
 function AnalysisResult({ data }: { data: ExtractedData }) {
@@ -207,8 +226,9 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
   const [showUpload, setShowUpload] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [analysisNotice, setAnalysisNotice] = useState<string | null>(null);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/v1/documents?caseId=${caseId}&pageSize=50`);
@@ -223,12 +243,25 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [caseId]);
 
   useEffect(() => {
     void fetchDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, fetchDocuments]);
+
+  useEffect(() => {
+    const hasProcessing = documents.some(
+      doc =>
+        doc.analysisStatus === 'PENDING' || doc.analysisStatus === 'PROCESSING'
+    );
+    if (!hasProcessing) return;
+
+    const interval = setInterval(() => {
+      void fetchDocuments();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [documents, fetchDocuments]);
 
   const handleAnalyze = async (id: string) => {
     setAnalyzingId(id);
@@ -245,9 +278,7 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
             d.id === id ? { ...d, analysisStatus: 'PROCESSING' } : d
           )
         );
-        setTimeout(() => {
-          void fetchDocuments();
-        }, 4000);
+        void fetchDocuments();
       } else {
         alert(data.message || '分析启动失败');
       }
@@ -258,15 +289,13 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
     }
   };
 
-  const handleUploadSuccess = (files: UploadedFile[]) => {
+  const handleUploadSuccess = (_files: UploadedFile[]) => {
     setShowUpload(false);
+    setAnalysisNotice(
+      '文档已上传，系统正在自动分析。若 PDF 为扫描件，可能需要 OCR 才能提取内容。'
+    );
+    setTimeout(() => setAnalysisNotice(null), 6000);
     void fetchDocuments();
-    if (files.length > 0) {
-      // 自动触发分析第一个文件
-      setTimeout(() => {
-        if (files[0]) void handleAnalyze(files[0].id);
-      }, 1000);
-    }
   };
 
   if (loading) {
@@ -281,9 +310,14 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
     <div className='space-y-4'>
       {/* 头部操作 */}
       <div className='flex items-center justify-between'>
-        <p className='text-sm text-zinc-500 dark:text-zinc-400'>
-          上传文件后，AI 将自动提取当事人、诉求金额、关键时间线等信息
-        </p>
+        <div>
+          <p className='text-sm text-zinc-500 dark:text-zinc-400'>
+            上传文件后，AI 将自动提取当事人、诉求金额、关键时间线等信息
+          </p>
+          <p className='mt-1 text-xs text-amber-600 dark:text-amber-400'>
+            当前最稳支持：文本型 PDF、Word、TXT。扫描件 PDF 可能无法自动提取。
+          </p>
+        </div>
         <div className='flex gap-2'>
           <Button
             variant='outline'
@@ -324,6 +358,13 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
         </div>
       )}
 
+      {analysisNotice && (
+        <div className='flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300'>
+          <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
+          {analysisNotice}
+        </div>
+      )}
+
       {/* 文档列表 */}
       {documents.length === 0 ? (
         <div className='flex flex-col items-center justify-center py-16 text-zinc-400'>
@@ -359,6 +400,11 @@ export function DocumentsTab({ caseId, canManage }: DocumentsTabProps) {
                     {formatFileSize(doc.fileSize)} ·{' '}
                     {new Date(doc.createdAt).toLocaleDateString('zh-CN')}
                   </p>
+                  {getDocumentAdvice(doc) && (
+                    <p className='mt-1 text-[11px] text-zinc-500 dark:text-zinc-400'>
+                      {getDocumentAdvice(doc)}
+                    </p>
+                  )}
                 </div>
                 <span
                   className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[doc.analysisStatus]}`}

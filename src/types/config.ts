@@ -99,6 +99,16 @@ export interface AIServiceConfig {
   retryDelay: number;
 }
 
+export interface OcrConfig {
+  provider: string;
+  tencent: {
+    secretId: string;
+    secretKey: string;
+    region: string;
+    endpoint: string;
+  };
+}
+
 /**
  * 法律之星API配置
  */
@@ -409,6 +419,7 @@ export interface AppConfig {
   cache: CacheConfig;
   auth: AuthConfig;
   ai: AIServiceConfig;
+  ocr: OcrConfig;
   lawstar: LawstarConfig;
   payment: PaymentConfig;
   membership: MembershipConfig;

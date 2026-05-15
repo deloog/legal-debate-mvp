@@ -50,6 +50,7 @@
 8. `ALERT_WEBHOOK_URL`
 9. `ALERT_SMS_RECIPIENTS`
 10. 短信供应商相关凭据
+11. 如接入扫描件 OCR，再核对 `OCR_PROVIDER` / `TENCENT_OCR_SECRET_ID` / `TENCENT_OCR_SECRET_KEY`
 
 ## 3. 发布当晚执行顺序
 
@@ -114,6 +115,7 @@ curl -I https://<prod-domain>/api/health
    - 如有兼容调用，再验证 `/api/payments/alipay/query`
 6. 打开聊天页，确认欢迎态问候、快捷入口、输入框和顶部按钮显示正常。
 7. 至少抽查一条文档模板接口或后台导出接口，确认基础后台权限链正常。
+8. 如测试扫描版 PDF，请确认当前版本仍以“文本型 PDF / Word / TXT”为主支持路径。
 
 ## 5. 发布后 30 分钟观察项
 
@@ -138,3 +140,4 @@ curl -I https://<prod-domain>/api/health
 1. 本地构建日志里出现的 `your_db_host:5432` 连接失败，是因为当前机器的 `.env.production` 仍是占位配置；这提醒我们生产环境必须提供真实数据库地址。
 2. 由于系统配置会在部分服务初始化阶段被读取，生产环境数据库连通性应在发布前先确认。
 3. 如果需要在 Windows 本机再次执行 `prisma generate`，请先关闭占用 Prisma 引擎文件的 `next dev` 或其他 Node 进程。
+4. 当前正式文档分析主流程优先支持文本型 PDF、Word、TXT；扫描版 PDF 的 OCR provider 基础接口已预留，待腾讯 OCR 账号接入后启用。

@@ -30,6 +30,7 @@ import {
   ExternalLinkIcon,
   MenuIcon,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import type { ChatMessage, AnnotationType } from '@/types/chat';
 import { ANNOTATION_META } from '@/types/chat';
@@ -343,6 +344,16 @@ export function ChatArea({
     count: number;
     types: string[];
   } | null>(null);
+  const [attachmentNotice, setAttachmentNotice] = useState<{
+    accepted: Array<{
+      fileName: string;
+      extractedChars: number;
+    }>;
+    rejected: Array<{
+      fileName: string;
+      reason: string;
+    }>;
+  } | null>(null);
   // 当前 AI 提供商（从 API 响应获取）
   const [aiProvider, setAiProvider] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -505,12 +516,41 @@ export function ChatArea({
           }
         );
       }
-      if (!apiRes.ok) throw new Error('发送失败');
+      if (!apiRes.ok) {
+        const errorData = (await apiRes.json().catch(() => null)) as {
+          error?:
+            | string
+            | {
+                message?: string;
+              };
+          attachmentErrors?: Array<{
+            fileName: string;
+            reason: string;
+          }>;
+        } | null;
+
+        const message =
+          typeof errorData?.error === 'string'
+            ? errorData.error
+            : errorData?.error?.message || '发送失败';
+
+        throw new Error(message);
+      }
 
       // 读取脱敏统计和 provider 信息
       const apiData = (await apiRes.json()) as {
         piiRedacted?: { count: number; types: string[] } | null;
         provider?: string;
+        attachmentSummary?: {
+          accepted?: Array<{
+            fileName: string;
+            extractedChars: number;
+          }>;
+          rejected?: Array<{
+            fileName: string;
+            reason: string;
+          }>;
+        };
       };
       if (apiData.piiRedacted?.count) {
         setPiiNotice(apiData.piiRedacted);
@@ -518,11 +558,27 @@ export function ChatArea({
         setTimeout(() => setPiiNotice(null), 5000);
       }
       if (apiData.provider) setAiProvider(apiData.provider);
+      if (
+        apiData.attachmentSummary?.accepted?.length ||
+        apiData.attachmentSummary?.rejected?.length
+      ) {
+        setAttachmentNotice({
+          accepted: apiData.attachmentSummary?.accepted ?? [],
+          rejected: apiData.attachmentSummary?.rejected ?? [],
+        });
+      } else {
+        setAttachmentNotice(null);
+      }
 
       await loadMessages();
       onMessageSent?.();
-    } catch {
+    } catch (error) {
       setMessages(prev => prev.filter(m => m.id !== tempId));
+      const message = error instanceof Error ? error.message : '发送失败';
+      setAttachmentNotice(null);
+      toast.error('文件或消息发送失败', {
+        description: message,
+      });
     } finally {
       setSending(false);
     }
@@ -863,6 +919,34 @@ export function ChatArea({
                 </span>
               </div>
             )}
+
+            {attachmentNotice &&
+              (attachmentNotice.accepted.length > 0 ||
+                attachmentNotice.rejected.length > 0) && (
+                <div className='mb-2 px-3 py-2 rounded-xl border border-amber-100 bg-amber-50'>
+                  <div className='text-xs text-amber-800 space-y-1'>
+                    {attachmentNotice.accepted.length > 0 && (
+                      <p>
+                        已读取附件：
+                        <strong>
+                          {attachmentNotice.accepted
+                            .map(item => item.fileName)
+                            .join('、')}
+                        </strong>
+                      </p>
+                    )}
+                    {attachmentNotice.rejected.length > 0 && (
+                      <div className='space-y-1'>
+                        {attachmentNotice.rejected.map(item => (
+                          <p key={`${item.fileName}-${item.reason}`}>
+                            {item.fileName}：{item.reason}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
             {sharedInputPanel}
 

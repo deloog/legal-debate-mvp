@@ -114,6 +114,7 @@ manual_export_*.docx
 rejected_qual.json
 .codex-doc-test.txt
 admin_*.txt
+temp_test_uploads/
 
 # Coverage reports
 coverage-*/

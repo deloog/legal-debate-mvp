@@ -12,7 +12,7 @@ export const VALIDATION_RULES = {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain',
   ],
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxFileSize: 20 * 1024 * 1024, // 20MB
   maxFiles: 10,
   imageExtensions: ['.jpg', '.jpeg', '.png', '.gif'],
 } as const;
@@ -26,7 +26,7 @@ export class FileValidator {
     if (file.size > VALIDATION_RULES.maxFileSize) {
       return {
         code: 'FILE_TOO_LARGE',
-        message: `文件 ${file.name} 超过最大限制 10MB`,
+        message: `文件 ${file.name} 超过最大限制 20MB`,
         file,
       };
     }
@@ -51,6 +51,7 @@ export class FileValidator {
     // 验证MIME类型
     if (
       file.type &&
+      file.type !== 'application/octet-stream' &&
       !VALIDATION_RULES.allowedMimeTypes.includes(
         file.type as (typeof VALIDATION_RULES.allowedMimeTypes)[number]
       )

@@ -17,6 +17,8 @@ import { CasePermission } from '@/types/case-collaboration';
 import { logger } from '@/lib/logger';
 import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
 import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
+import { inferMimeType } from '@/lib/chat/file-extractor';
+import { inspectPdfText } from '@/lib/ocr/pdf';
 
 /**
  * 文件上传API
@@ -97,6 +99,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const normalizedMimeType = inferMimeType(file.type, file.name);
+
     // 验证文件类型
     const allowedTypes = [
       'application/pdf',
@@ -107,11 +111,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       'image/png',
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(normalizedMimeType)) {
       return NextResponse.json(
         {
           success: false,
-          error: `不支持的文件类型: ${file.type}`,
+          error: `不支持的文件类型: ${normalizedMimeType || file.type || 'unknown'}`,
           code: 'UNSUPPORTED_FILE_TYPE',
         },
         { status: 400 }
@@ -136,7 +140,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       'image/jpeg': [0xff, 0xd8, 0xff],
       'image/png': [0x89, 0x50, 0x4e, 0x47],
     };
-    const expectedMagic = fileMagicMap[file.type];
+    const expectedMagic = fileMagicMap[normalizedMimeType];
     if (
       expectedMagic &&
       !expectedMagic.every((byte, i) => buffer[i] === byte)
@@ -154,7 +158,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 上传文件（本地或OSS）
     await uploadFile(buffer, ossKey, {
       isPrivate: true,
-      contentType: file.type,
+      contentType: normalizedMimeType,
     });
 
     // 始终写入本地分析工作目录，保证手动/自动分析都能读取到源文件
@@ -177,7 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         filePath: ossKey,
         fileType: extension,
         fileSize: file.size,
-        mimeType: file.type,
+        mimeType: normalizedMimeType,
         analysisStatus: 'PENDING',
       },
     });
@@ -272,6 +276,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       });
     } else {
+      await prisma.document.update({
+        where: { id: document.id },
+        data: {
+          analysisStatus: 'PROCESSING',
+          analysisError: null,
+        },
+      });
+
       // 真实PDF文件，异步触发文档分析
       triggerDocumentAnalysis(document.id, caseId, ossKey, extension).catch(
         error => {
@@ -298,7 +310,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         filePath: document.filePath,
         fileSize: document.fileSize,
         mimeType: document.mimeType,
-        analysisStatus: document.analysisStatus,
+        analysisStatus: isTestPDF ? 'COMPLETED' : 'PROCESSING',
         createdAt: document.createdAt.toISOString(),
       },
     });
@@ -340,6 +352,23 @@ async function triggerDocumentAnalysis(
       'private_uploads',
       filePath.startsWith('/') ? filePath.substring(1) : filePath
     );
+
+    if (fileType.toUpperCase() === 'PDF') {
+      const buffer = await (await import('fs/promises')).readFile(fullFilePath);
+      const inspection = await inspectPdfText(buffer);
+      if (inspection.scannedLike) {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            analysisStatus: 'FAILED',
+            analysisError:
+              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+            updatedAt: new Date(),
+          },
+        });
+        return;
+      }
+    }
 
     // 创建DocAnalyzer Agent实例（测试环境使用Mock）
     const useMock =
@@ -430,6 +459,16 @@ async function triggerDocumentAnalysis(
 }
 
 function toUserFriendlyError(raw: string): string {
+  if (/SCANNED_PDF_DETECTED/i.test(raw)) {
+    return '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。';
+  }
+  if (
+    /文档内容为空|无法从文档中提取有效文本内容|OCR质量不合格|PDF文件解析失败/i.test(
+      raw
+    )
+  ) {
+    return '未能从 PDF 中提取可分析文本。若该 PDF 为扫描件，请先转为可复制文本，或补充 OCR 能力后再试。';
+  }
   if (/fetch failed|ECONNREFUSED|ETIMEDOUT|timeout|network|socket/i.test(raw)) {
     return 'AI 服务暂时不可用，请稍候重试';
   }

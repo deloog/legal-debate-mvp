@@ -124,7 +124,10 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = props => {
               {isUploading ? '上传中...' : '上传文档'}
             </p>
             <p className='text-sm text-gray-500'>
-              支持 PDF、Word、TXT 格式，单个文件最大 10MB
+              支持 PDF、Word、TXT 格式，单个文件最大 20MB
+            </p>
+            <p className='mt-2 text-xs text-blue-600'>
+              上传成功后系统会自动开始分析，无需再次手动点击“分析”
             </p>
           </div>
         </DragDropZone>

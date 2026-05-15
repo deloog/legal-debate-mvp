@@ -33,6 +33,7 @@ export function loadConfig(): AppConfig {
     cache: loadCacheConfig(),
     auth: loadAuthConfig(),
     ai: loadAIConfig(),
+    ocr: loadOcrConfig(),
     lawstar: loadLawstarConfig(),
     payment: loadPaymentConfig(),
     membership: loadMembershipConfig(),
@@ -153,6 +154,18 @@ function loadAIConfig() {
     timeout: getNumberEnv('AI_SERVICE_TIMEOUT', 30000),
     retryCount: getNumberEnv('AI_SERVICE_RETRY_COUNT', 3),
     retryDelay: getNumberEnv('AI_SERVICE_RETRY_DELAY', 1000),
+  };
+}
+
+function loadOcrConfig() {
+  return {
+    provider: getStringEnv('OCR_PROVIDER', 'disabled'),
+    tencent: {
+      secretId: getStringEnv('TENCENT_OCR_SECRET_ID', ''),
+      secretKey: getStringEnv('TENCENT_OCR_SECRET_KEY', ''),
+      region: getStringEnv('TENCENT_OCR_REGION', 'ap-beijing'),
+      endpoint: getStringEnv('TENCENT_OCR_ENDPOINT', 'ocr.tencentcloudapi.com'),
+    },
   };
 }
 

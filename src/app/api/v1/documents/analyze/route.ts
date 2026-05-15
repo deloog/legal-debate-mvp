@@ -4,6 +4,7 @@ import { DocAnalyzerAgentAdapter } from '@/lib/agent/doc-analyzer/adapter';
 import { AgentContext, TaskPriority } from '@/types/agent';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { retryDocAnalysis } from '@/lib/ai/retry-handler';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
@@ -14,8 +15,16 @@ import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
 import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 import { CasePermission } from '@/types/case-collaboration';
 import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
+import { inspectPdfText } from '@/lib/ocr/pdf';
 
 function toUserFriendlyError(raw: string): string {
+  if (
+    /文档内容为空|无法从文档中提取有效文本内容|OCR质量不合格|PDF文件解析失败/i.test(
+      raw
+    )
+  ) {
+    return '未能从 PDF 中提取可分析文本。若该 PDF 为扫描件，请先转为可复制文本，或补充 OCR 能力后再试。';
+  }
   if (/fetch failed|ECONNREFUSED|ETIMEDOUT|timeout|network|socket/i.test(raw)) {
     return 'AI 服务暂时不可用，请稍候重试';
   }
@@ -162,6 +171,31 @@ export async function POST(request: NextRequest) {
         },
         { status: 404 }
       );
+    }
+
+    if (fileType === 'PDF') {
+      const buffer = await readFile(fullFilePath);
+      const inspection = await inspectPdfText(buffer);
+      if (inspection.scannedLike) {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            analysisStatus: 'FAILED',
+            analysisError:
+              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+            updatedAt: new Date(),
+          },
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+          },
+          { status: 400 }
+        );
+      }
     }
 
     await prisma.document.update({

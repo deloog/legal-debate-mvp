@@ -16,6 +16,13 @@ interface UploadOptions {
   maxRetries?: number;
 }
 
+interface UploadApiResponse {
+  success: boolean;
+  data?: UploadedFile;
+  error?: string;
+  message?: string;
+}
+
 interface UploadFileContext {
   file: File;
   fileId: string;
@@ -107,7 +114,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
    * 上传单个文件
    */
   const uploadFile = useCallback(
-    async (context: UploadFileContext): Promise<unknown> => {
+    async (context: UploadFileContext): Promise<UploadedFile> => {
       const { file, fileId } = context;
 
       setUploadProgress(prev =>
@@ -130,7 +137,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
       try {
         const formData = createFormData(file, fileId);
 
-        const response = await new Promise<unknown>((resolve, reject) => {
+        const response = await new Promise<UploadedFile>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
           xhr.upload.addEventListener('progress', event => {
@@ -142,13 +149,40 @@ export const useDocumentUpload = (options: UploadOptions) => {
           xhr.addEventListener('load', () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               try {
-                const result = JSON.parse(xhr.responseText);
-                resolve(result);
+                const result = JSON.parse(
+                  xhr.responseText
+                ) as UploadApiResponse;
+                if (!result?.success) {
+                  reject(
+                    new Error(
+                      result?.error || result?.message || '上传失败，请稍后重试'
+                    )
+                  );
+                  return;
+                }
+                if (!result.data) {
+                  reject(new Error('上传成功，但服务端未返回文档信息'));
+                  return;
+                }
+                resolve(result.data);
               } catch {
                 reject(new Error('解析响应失败'));
               }
             } else {
-              reject(new Error(`上传失败: ${xhr.status}`));
+              try {
+                const result = JSON.parse(
+                  xhr.responseText
+                ) as UploadApiResponse;
+                reject(
+                  new Error(
+                    result?.error ||
+                      result?.message ||
+                      `上传失败: ${xhr.status}`
+                  )
+                );
+              } catch {
+                reject(new Error(`上传失败: ${xhr.status}`));
+              }
             }
           });
 
@@ -274,7 +308,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
         uploadContextRef.current.set(ctx.fileId, ctx);
       });
 
-      const results: unknown[] = [];
+      const results: UploadedFile[] = [];
       const failedFiles: string[] = [];
 
       for (const ctx of contexts) {
@@ -309,7 +343,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
           new Error(`以下文件上传失败: ${failedFiles.join(', ')}`)
         );
       } else {
-        onUploadSuccess?.(results as UploadedFile[]);
+        onUploadSuccess?.(results);
       }
     },
     [generateFileId, uploadFile, onUploadError, onUploadSuccess, maxRetries]

@@ -23,6 +23,7 @@ import {
   validateMagicBytes,
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE,
+  inferMimeType,
 } from '@/lib/chat/file-extractor';
 import { redactPII, type RedactionResult } from '@/lib/chat/pii-redactor';
 import { Prisma } from '@prisma/client';
@@ -398,6 +399,15 @@ export async function POST(request: NextRequest, { params }: Params) {
       fileSize: number;
       fileType: string;
     }[] = [];
+    const rejectedAttachments: {
+      fileName: string;
+      reason: string;
+      code:
+        | 'FILE_TOO_LARGE'
+        | 'UNSUPPORTED_FILE_TYPE'
+        | 'INVALID_FILE_CONTENT'
+        | 'TEXT_EXTRACTION_FAILED';
+    }[] = [];
 
     if (isMultipart) {
       const formData = await request.formData();
@@ -407,13 +417,37 @@ export async function POST(request: NextRequest, { params }: Params) {
       // 并行提取所有文件文本
       await mkdir(CHAT_UPLOADS_DIR, { recursive: true });
 
-      await Promise.allSettled(
+      await Promise.all(
         uploadedFiles.map(async file => {
-          if (file.size > MAX_FILE_SIZE) return;
-          if (!ALLOWED_MIME_TYPES.includes(file.type)) return;
+          const normalizedMimeType = inferMimeType(file.type, file.name);
+
+          if (file.size > MAX_FILE_SIZE) {
+            rejectedAttachments.push({
+              fileName: file.name,
+              code: 'FILE_TOO_LARGE',
+              reason: `文件大小超过 ${Math.round(MAX_FILE_SIZE / 1024 / 1024)}MB 限制`,
+            });
+            return;
+          }
+
+          if (!ALLOWED_MIME_TYPES.includes(normalizedMimeType)) {
+            rejectedAttachments.push({
+              fileName: file.name,
+              code: 'UNSUPPORTED_FILE_TYPE',
+              reason: `暂不支持 ${file.name} 的文件类型`,
+            });
+            return;
+          }
 
           const buffer = Buffer.from(await file.arrayBuffer());
-          if (!validateMagicBytes(buffer, file.type)) return;
+          if (!validateMagicBytes(buffer, normalizedMimeType)) {
+            rejectedAttachments.push({
+              fileName: file.name,
+              code: 'INVALID_FILE_CONTENT',
+              reason: `${file.name} 的文件内容与类型不匹配`,
+            });
+            return;
+          }
 
           // 保存文件
           const ext = file.name.split('.').pop() ?? 'bin';
@@ -422,13 +456,44 @@ export async function POST(request: NextRequest, { params }: Params) {
           const fileUrl = `/private_uploads/chat/${storedName}`;
 
           // 提取文本
-          const text = await extractFileText(buffer, file.type, file.name);
+          let text = '';
+          try {
+            text = await extractFileText(buffer, normalizedMimeType, file.name);
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            if (message.startsWith('SCANNED_PDF_DETECTED:')) {
+              const [, pages, avgChars] = message.split(':');
+              rejectedAttachments.push({
+                fileName: file.name,
+                code: 'TEXT_EXTRACTION_FAILED',
+                reason: `${file.name} 更像扫描件（约 ${pages} 页，平均每页 ${avgChars} 字），当前聊天仅支持文本型 PDF 分析`,
+              });
+              return;
+            }
+
+            rejectedAttachments.push({
+              fileName: file.name,
+              code: 'TEXT_EXTRACTION_FAILED',
+              reason: `${file.name} 已上传，但暂时无法提取可分析内容`,
+            });
+            return;
+          }
+          if (!text.trim()) {
+            rejectedAttachments.push({
+              fileName: file.name,
+              code: 'TEXT_EXTRACTION_FAILED',
+              reason: `${file.name} 已上传，但暂时无法提取可分析内容`,
+            });
+            return;
+          }
+
           extractedAttachments.push({
             fileName: file.name,
             text,
             fileUrl,
             fileSize: file.size,
-            fileType: file.type,
+            fileType: normalizedMimeType,
           });
         })
       );
@@ -438,10 +503,20 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     if (!content && extractedAttachments.length === 0) {
+      const fileErrorMessage =
+        rejectedAttachments.length > 0
+          ? rejectedAttachments
+              .map(item => `${item.fileName}：${item.reason}`)
+              .join('；')
+          : '消息内容不能为空';
       return NextResponse.json(
         {
           success: false,
-          error: { code: 'BAD_REQUEST', message: '消息内容不能为空' },
+          error: {
+            code: 'BAD_REQUEST',
+            message: fileErrorMessage,
+          },
+          attachmentErrors: rejectedAttachments,
         },
         { status: 400 }
       );
@@ -642,6 +717,15 @@ export async function POST(request: NextRequest, { params }: Params) {
           piiResult.count > 0
             ? { count: piiResult.count, types: piiResult.types }
             : null,
+        attachmentSummary: {
+          accepted: extractedAttachments.map(item => ({
+            fileName: item.fileName,
+            fileType: item.fileType,
+            fileSize: item.fileSize,
+            extractedChars: item.text.length,
+          })),
+          rejected: rejectedAttachments,
+        },
         // 当前 AI 提供商（用于前端透明展示）
         provider: CHAT_PROVIDER,
       },

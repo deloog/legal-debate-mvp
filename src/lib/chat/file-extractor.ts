@@ -5,18 +5,29 @@
  */
 
 import { logger } from '@/lib/logger';
+import { inspectPdfText } from '@/lib/ocr/pdf';
 
 const MAX_CHARS = 15000; // 单文件最多提取 15000 字，避免超 token 限制
+
+const MIME_TYPE_BY_EXTENSION: Record<string, string> = {
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  txt: 'text/plain',
+};
 
 // ── PDF ──────────────────────────────────────────────────────────────────────
 
 async function extractPdf(buffer: Buffer): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require('pdf-parse') as (
-    buf: Buffer
-  ) => Promise<{ text: string }>;
-  const result = await pdfParse(buffer);
-  return result.text?.trim() ?? '';
+  const inspection = await inspectPdfText(buffer);
+
+  if (inspection.scannedLike) {
+    throw new Error(
+      `SCANNED_PDF_DETECTED:${inspection.pageCount}:${Math.round(inspection.avgCharsPerPage)}`
+    );
+  }
+
+  return inspection.text;
 }
 
 // ── DOCX ─────────────────────────────────────────────────────────────────────
@@ -72,8 +83,20 @@ export async function extractFileText(
     return text;
   } catch (err) {
     logger.error('文件内容提取失败', { fileName, mimeType, err });
-    return '';
+    throw err instanceof Error ? err : new Error(String(err));
   }
+}
+
+export function inferMimeType(
+  originalMimeType: string,
+  fileName: string
+): string {
+  if (ALLOWED_MIME_TYPES.includes(originalMimeType)) {
+    return originalMimeType;
+  }
+
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  return MIME_TYPE_BY_EXTENSION[extension] ?? originalMimeType;
 }
 
 // ── 安全校验（magic bytes） ───────────────────────────────────────────────────

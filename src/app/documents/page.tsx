@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Upload,
@@ -66,6 +66,25 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function getDocumentAdvice(document: Document): string | null {
+  if (document.analysisStatus === 'PROCESSING') {
+    return '系统正在提取文本并生成结构化分析，通常会在 10-60 秒内完成。';
+  }
+
+  if (document.analysisStatus === 'FAILED') {
+    if (document.analysisError?.includes('扫描件')) {
+      return '建议改传可复制文本的 PDF、Word 或 TXT；扫描件 OCR 将在后续接入。';
+    }
+    return '建议重新上传一次，或改传 Word / TXT 版本以提高稳定性。';
+  }
+
+  if (document.analysisStatus === 'COMPLETED') {
+    return '可进入案件查看提取结果，再继续聊天或文书起草。';
+  }
+
+  return null;
+}
+
 export default function DocumentsPage() {
   const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -76,8 +95,9 @@ export default function DocumentsPage() {
   const [uploadCaseId, setUploadCaseId] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [analysisNotice, setAnalysisNotice] = useState<string | null>(null);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -95,12 +115,25 @@ export default function DocumentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery]);
 
   useEffect(() => {
     void fetchDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchDocuments]);
+
+  useEffect(() => {
+    const hasProcessing = documents.some(
+      doc =>
+        doc.analysisStatus === 'PENDING' || doc.analysisStatus === 'PROCESSING'
+    );
+    if (!hasProcessing) return;
+
+    const interval = setInterval(() => {
+      void fetchDocuments();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [documents, fetchDocuments]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,9 +173,7 @@ export default function DocumentsPage() {
             d.id === id ? { ...d, analysisStatus: 'PROCESSING' } : d
           )
         );
-        setTimeout(() => {
-          void fetchDocuments();
-        }, 3000);
+        void fetchDocuments();
       } else {
         alert(data.message || '分析启动失败');
       }
@@ -155,6 +186,10 @@ export default function DocumentsPage() {
 
   const handleUploadSuccess = (_files: UploadedFile[]) => {
     setShowUpload(false);
+    setAnalysisNotice(
+      '文档已上传，系统正在自动分析。若 PDF 为扫描件，可能需要 OCR 才能提取内容。'
+    );
+    setTimeout(() => setAnalysisNotice(null), 6000);
     void fetchDocuments();
   };
 
@@ -246,6 +281,10 @@ export default function DocumentsPage() {
               <p className='mt-1 text-xs text-zinc-400'>
                 可在&quot;案件管理&quot;中查看案件 ID
               </p>
+              <p className='mt-2 text-xs text-amber-600 dark:text-amber-400'>
+                当前最稳支持：文本型 PDF、Word、TXT。扫描件 PDF
+                可能无法自动提取。
+              </p>
             </div>
             {uploadCaseId ? (
               <DocumentUpload
@@ -296,6 +335,11 @@ export default function DocumentsPage() {
             <AlertCircle className='h-5 w-5 shrink-0' />
             <span>{error}</span>
           </div>
+        ) : analysisNotice ? (
+          <div className='flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300'>
+            <Loader2 className='h-5 w-5 shrink-0 animate-spin' />
+            <span>{analysisNotice}</span>
+          </div>
         ) : documents.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20 text-zinc-400'>
             <FileText className='mb-4 h-12 w-12' />
@@ -331,9 +375,16 @@ export default function DocumentsPage() {
                     <td className='px-4 py-3'>
                       <div className='flex items-center gap-2'>
                         <FileText className='h-4 w-4 shrink-0 text-zinc-400' />
-                        <span className='max-w-[200px] truncate font-medium text-zinc-900 dark:text-zinc-100'>
-                          {doc.filename}
-                        </span>
+                        <div className='min-w-0'>
+                          <span className='max-w-[200px] truncate font-medium text-zinc-900 dark:text-zinc-100 block'>
+                            {doc.filename}
+                          </span>
+                          {getDocumentAdvice(doc) && (
+                            <span className='block mt-1 text-[11px] text-zinc-500 dark:text-zinc-400 max-w-[320px]'>
+                              {getDocumentAdvice(doc)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className='px-4 py-3'>

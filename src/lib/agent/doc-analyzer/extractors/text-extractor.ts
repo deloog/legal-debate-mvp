@@ -7,6 +7,7 @@
 import { SecureFileUtils } from '../../../agent/security/file-utils';
 import { AnalysisError } from '../../../agent/security/errors';
 import { ERROR_MESSAGES } from '../core/constants';
+import { inspectPdfText } from '@/lib/ocr/pdf';
 
 export class TextExtractor {
   /**
@@ -58,14 +59,18 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      const pdfParseModule = await import('pdf-parse');
-      const pdfParse = pdfParseModule.default || pdfParseModule;
       const buffer = await SecureFileUtils.readFileSecurely(filePath);
+      const inspection = await inspectPdfText(buffer);
 
-      const data = await (
-        pdfParse as unknown as (buffer: Buffer) => Promise<{ text: string }>
-      )(buffer);
-      return data.text;
+      if (inspection.scannedLike) {
+        throw new AnalysisError(
+          `SCANNED_PDF_DETECTED:${inspection.pageCount}:${Math.round(inspection.avgCharsPerPage)}`,
+          new Error('PDF appears to be scanned'),
+          { filePath }
+        );
+      }
+
+      return inspection.text;
     } catch (error) {
       throw new AnalysisError(
         'PDF文件解析失败',
