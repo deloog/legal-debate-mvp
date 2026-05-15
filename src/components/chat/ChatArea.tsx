@@ -35,6 +35,7 @@ import type { ChatMessage, AnnotationType } from '@/types/chat';
 import { ANNOTATION_META } from '@/types/chat';
 import { useAnnotationGuide } from '@/hooks/useAnnotationGuide';
 import type { GuidePhase } from '@/hooks/useAnnotationGuide';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface ChatAreaProps {
   conversationId: string;
@@ -240,61 +241,70 @@ function InputPanel({
 
 // ─── 欢迎页（空对话） ──────────────────────────────────────────────────────
 
+function getTimeOfDay(): string {
+  const h = new Date().getHours();
+  if (h < 12) return '上午';
+  if (h < 18) return '下午';
+  return '晚上';
+}
+
 function WelcomeState({
+  userName,
   onSelectScenario,
   inputPanel,
 }: {
+  userName: string;
   onSelectScenario: (prompt: string) => void;
   inputPanel: React.ReactNode;
 }) {
+  const timeOfDay = getTimeOfDay();
   return (
-    <div className='flex flex-col items-center justify-center min-h-full py-8 sm:py-12 px-4 sm:px-6'>
-      <div className='w-full max-w-2xl'>
-        {/* Brand */}
-        <div className='text-center mb-6 sm:mb-8'>
-          <div className='inline-flex w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 items-center justify-center mb-4 sm:mb-5 shadow-lg'>
-            <span className='text-white text-xl sm:text-2xl font-bold tracking-tight'>
-              律
-            </span>
-          </div>
-          <h2 className='text-xl sm:text-2xl font-medium text-gray-900 tracking-tight'>
+    <div className='flex flex-col min-h-full pt-14 pb-10 px-4 sm:px-8'>
+      <div className='w-full max-w-2xl mx-auto'>
+        {/* 个性化问候，左对齐 */}
+        <div className='mb-5'>
+          {userName && (
+            <p className='text-sm text-gray-400 mb-1'>
+              {userName} 律师，{timeOfDay}好
+            </p>
+          )}
+          <h2 className='text-2xl font-medium text-gray-900 tracking-tight'>
             今天有什么法律问题？
           </h2>
-          <p className='text-gray-400 mt-2 text-sm'>
-            专为律师和法务设计的 AI 工作台
-          </p>
         </div>
 
-        {/* 场景快速入口 */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3'>
-          {SCENARIOS.map(s => (
-            <button
-              key={s.title}
-              onClick={() => onSelectScenario(s.prompt)}
-              className='text-left p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-slate-300 hover:shadow-sm bg-white transition-all duration-150 group'
-            >
-              <div className='flex items-center sm:items-start gap-3'>
-                <div className='w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center shrink-0 transition-colors'>
-                  <s.icon className='w-4 h-4 text-slate-700' />
-                </div>
-                <div className='min-w-0 flex sm:block items-center gap-2'>
-                  <div className='text-sm font-medium text-gray-900 shrink-0'>
-                    {s.title}
-                  </div>
-                  <div className='text-xs text-gray-500 sm:mt-0.5 leading-relaxed truncate sm:whitespace-normal'>
-                    {s.desc}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 输入框：比卡片更宽 */}
-      <div className='w-full max-w-3xl mt-6'>
+        {/* 输入框置顶 */}
         {inputPanel}
-        <p className='text-xs text-gray-400 text-center mt-3'>
+
+        {/* 快速开始：辅助入口 */}
+        <div className='mt-6'>
+          <p className='text-xs text-gray-400 mb-3'>快速开始</p>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+            {SCENARIOS.map(s => (
+              <button
+                key={s.title}
+                onClick={() => onSelectScenario(s.prompt)}
+                className='text-left p-3 rounded-xl border border-gray-200 hover:border-slate-300 hover:shadow-sm bg-gray-50 hover:bg-white transition-all duration-150 group'
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='w-8 h-8 rounded-lg bg-white border border-gray-200 group-hover:border-slate-300 flex items-center justify-center shrink-0 transition-colors'>
+                    <s.icon className='w-4 h-4 text-slate-600' />
+                  </div>
+                  <div>
+                    <div className='text-sm font-medium text-gray-900'>
+                      {s.title}
+                    </div>
+                    <div className='text-xs text-gray-500 mt-0.5 leading-relaxed'>
+                      {s.desc}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className='text-xs text-gray-400 text-center mt-6'>
           AI 回复仅供参考，重要法律决策请结合专业判断
         </p>
       </div>
@@ -313,6 +323,10 @@ export function ChatArea({
   onMessageSent,
   onMobileSidebarOpen,
 }: ChatAreaProps) {
+  const { user } = useAuth();
+  const userName =
+    user?.username ?? user?.name ?? user?.email?.split('@')[0] ?? '';
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -681,7 +695,7 @@ export function ChatArea({
         <button
           onClick={() => window.open(`/chat/${conversationId}/print`, '_blank')}
           title='导出为 PDF（打印）'
-          className='flex items-center gap-1 text-xs px-2 sm:px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
+          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border bg-white border-gray-200 text-gray-600 hover:border-slate-400 hover:text-slate-800 hover:shadow-sm transition-all font-medium'
         >
           <PrinterIcon className='w-3.5 h-3.5 shrink-0' />
           <span className='hidden sm:inline'>导出 PDF</span>
@@ -689,7 +703,7 @@ export function ChatArea({
         <button
           onClick={handleExportAnnotations}
           title='导出批注报告'
-          className='flex items-center gap-1 text-xs px-2 sm:px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
+          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border bg-white border-gray-200 text-gray-600 hover:border-slate-400 hover:text-slate-800 hover:shadow-sm transition-all font-medium'
         >
           <DownloadIcon className='w-3.5 h-3.5 shrink-0' />
           <span className='hidden sm:inline'>批注报告</span>
@@ -697,10 +711,10 @@ export function ChatArea({
         <button
           onClick={onTogglePreview}
           title={previewOpen ? '关闭文书预览' : '打开文书预览'}
-          className={`hidden sm:flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border transition-all shadow-sm ${
+          className={`hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all font-medium ${
             previewOpen
-              ? 'bg-slate-900 border-slate-900 text-white'
-              : 'bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700'
+              ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
+              : 'bg-white border-gray-200 text-gray-600 hover:border-slate-400 hover:text-slate-800 hover:shadow-sm'
           }`}
         >
           {previewOpen ? (
@@ -721,6 +735,7 @@ export function ChatArea({
         ) : isWelcome ? (
           // 欢迎态：输入框内嵌在页面中央，卡片正下方
           <WelcomeState
+            userName={userName}
             onSelectScenario={prompt => {
               setInput(prompt);
               setTimeout(() => textareaRef.current?.focus(), 0);

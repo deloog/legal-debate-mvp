@@ -7,16 +7,17 @@
 
 以下检查已在本地完成：
 
+1. `npm run lint:check` 通过。
 1. `npx prisma validate` 通过。
-2. `npm run type-check` 通过。
-3. `npm run test:legacy-auth` 通过。
+1. `npm run type-check` 通过。
+1. `npm run test:legacy-auth` 通过。
    - `debates-list-auth-smoke`
    - `debates-id-auth-permission-smoke`
    - `admin/export/cases`
    - `document-templates.api`
    - `payment-api`
-4. `npx jest --runInBand --config=jest.config.js --runTestsByPath src/__tests__/lib/ai/quota.test.ts src/__tests__/api/admin-step-up.test.ts src/__tests__/lib/monitoring/notification-channels.test.ts` 通过。
-5. `npm run build` 通过。
+1. `npx jest --runInBand --config=jest.config.js --runTestsByPath src/__tests__/lib/ai/quota.test.ts src/__tests__/api/admin-step-up.test.ts src/__tests__/lib/monitoring/notification-channels.test.ts` 通过。
+1. `npm run build` 通过。
 
 本轮已修复的发布阻塞项：
 
@@ -24,9 +25,8 @@
 
 当前仍需知晓但不构成发布阻塞的事项：
 
-1. `npm run lint:check` 未通过，失败点主要是仓库内既有的大量 Prettier/CRLF 格式问题，不集中于本次发布改动。
-2. 当前 Windows 本机执行 `npx prisma generate` 会因活跃 Node 进程占用 Prisma 引擎文件而报 `EPERM rename`。这属于本机文件锁问题，不代表代码生成本身有错误；在干净的 CI/Linux/服务器环境重新安装依赖时通常不会复现。
-3. `.github/workflows/deploy.yml` 的实际发布步骤仍是占位符；如果明晚走 GitHub Actions 自动发布，必须先补全真实部署命令。否则请按手册执行人工发布。
+1. 当前 Windows 本机执行 `npx prisma generate` 会因活跃 Node 进程占用 Prisma 引擎文件而报 `EPERM rename`。这属于本机文件锁问题，不代表代码生成本身有错误；在干净的 CI/Linux/服务器环境重新安装依赖时通常不会复现。
+2. `.github/workflows/deploy.yml` 的实际发布步骤仍是占位符；如果明晚走 GitHub Actions 自动发布，必须先补全真实部署命令。否则请按手册执行人工发布。
 
 ## 2. 发布前必须确认
 
@@ -112,7 +112,8 @@ curl -I https://<prod-domain>/api/health
 5. 支付查询接口验证：
    - `/api/payments/query`
    - 如有兼容调用，再验证 `/api/payments/alipay/query`
-6. 至少抽查一条文档模板接口或后台导出接口，确认基础后台权限链正常。
+6. 打开聊天页，确认欢迎态问候、快捷入口、输入框和顶部按钮显示正常。
+7. 至少抽查一条文档模板接口或后台导出接口，确认基础后台权限链正常。
 
 ## 5. 发布后 30 分钟观察项
 
