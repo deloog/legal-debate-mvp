@@ -5,7 +5,8 @@
 
 import { logger } from '@/lib/logger';
 import type { UsageType } from '@/types/membership';
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { checkUsageLimit, recordUsage } from '../usage/record-usage';
 import { getAuthUser } from './auth';
 
@@ -116,7 +117,7 @@ export function enforceUsageLimit(
     const targetUserId = (await getAuthUser(request))?.userId;
 
     if (!targetUserId) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '未认证',
           message: '请先登录',
@@ -129,7 +130,7 @@ export function enforceUsageLimit(
     const limitCheck = await checkUsageLimit(targetUserId, usageType, quantity);
 
     if (limitCheck.exceeded) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '使用量已超过限制',
           message: `您已超过${getUsageTypeName(usageType)}的使用限制`,
@@ -196,7 +197,7 @@ export function createUsageLimitErrorResponse(
     remaining: number | null;
   }
 ): NextResponse {
-  return Response.json(
+  return NextResponse.json(
     {
       error: '使用量已超过限制',
       message: `您已超过${getUsageTypeName(usageType)}的使用限制`,
@@ -245,7 +246,7 @@ export async function checkAndRecordUsage(
   const user = await getAuthUser(request);
 
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       {
         error: '未认证',
         message: '请先登录',

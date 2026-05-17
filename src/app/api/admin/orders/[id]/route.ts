@@ -16,7 +16,7 @@ import {
   OrderDetailResponse,
   UpdateOrderStatusRequest,
 } from '@/types/admin-order';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -222,7 +222,7 @@ export async function PATCH(
       'EXPIRED',
     ];
     if (!validStatuses.includes(body.status)) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: '订单状态无效',

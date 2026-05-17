@@ -3,7 +3,7 @@
  * 提供用户会员变更历史记录的查询功能
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import type { MembershipChangeType } from '@/types/membership';
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const authUser = await getAuthUser(request);
 
     if (!authUser) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: '未授权，请先登录',
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const limit = limitParam ? parseInt(limitParam, 10) : 20;
 
     if (isNaN(page) || page < 1) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: 'page参数无效',
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     if (isNaN(limit) || limit < 1 || limit > 100) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: 'limit参数无效（1-100）',
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
 
     // 返回成功响应
-    return Response.json(
+    return NextResponse.json(
       {
         success: true,
         message: '查询成功',
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[GET /api/memberships/history] 查询失败:', error);
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         message: '查询失败，请稍后重试',

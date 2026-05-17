@@ -50,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -67,21 +67,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 验证必填字段
     if (!body.userIds || !Array.isArray(body.userIds)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '用户ID列表必须为数组' },
         { status: 400 }
       ) as unknown as NextResponse;
     }
 
     if (body.userIds.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '用户ID列表不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
     }
 
     if (!body.role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '角色不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 验证角色名称
     if (!isValidRole(body.role)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '无效的角色名称' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentUserRole = await getFreshUserRole(user.userId);
 
     if (body.userIds.includes(user.userId)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '禁止操作', message: '批量角色调整不能包含当前登录账号' },
         { status: 403 }
       ) as unknown as NextResponse;
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (users.length !== body.userIds.length) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '部分用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     if (touchesPrivilegedRoles && !canManagePrivilegedRole(currentUserRole)) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以批量管理管理员或超级管理员角色',
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       results,
     };
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: `成功分配 ${successCount} 个用户的角色，失败 ${failureCount} 个`,
         data: detailResult,
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('批量分配角色失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '批量分配角色失败' },
       { status: 500 }
     ) as unknown as NextResponse;

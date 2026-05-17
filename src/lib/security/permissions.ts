@@ -4,7 +4,7 @@
  * 提供细粒度的权限控制和验证
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth/jwt';
 import { logger } from '@/lib/logger';
 
@@ -213,7 +213,7 @@ export function requirePermission(permission: Permission) {
       // 从请求头获取token
       const authHeader = req.headers.get('authorization');
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '未提供认证令牌' },
           { status: 401 }
         );
@@ -223,7 +223,7 @@ export function requirePermission(permission: Permission) {
       const decoded = await verifyToken(token);
 
       if (!decoded || !decoded.userId) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '无效的认证令牌' },
           { status: 401 }
         );
@@ -232,7 +232,7 @@ export function requirePermission(permission: Permission) {
       // 检查权限
       const userRole = decoded.role || 'USER';
       if (!hasPermission(userRole, permission)) {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: '权限不足',
@@ -247,7 +247,7 @@ export function requirePermission(permission: Permission) {
       return null;
     } catch (error) {
       logger.error('权限检查失败:', error);
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
       );
@@ -263,7 +263,7 @@ export function requireAnyPermission(permissions: Permission[]) {
     try {
       const authHeader = req.headers.get('authorization');
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '未提供认证令牌' },
           { status: 401 }
         );
@@ -273,7 +273,7 @@ export function requireAnyPermission(permissions: Permission[]) {
       const decoded = await verifyToken(token);
 
       if (!decoded || !decoded.userId) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '无效的认证令牌' },
           { status: 401 }
         );
@@ -281,7 +281,7 @@ export function requireAnyPermission(permissions: Permission[]) {
 
       const userRole = decoded.role || 'USER';
       if (!hasAnyPermission(userRole, permissions)) {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: '权限不足',
@@ -295,7 +295,7 @@ export function requireAnyPermission(permissions: Permission[]) {
       return null;
     } catch (error) {
       logger.error('权限检查失败:', error);
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
       );
@@ -311,7 +311,7 @@ export function requireAllPermissions(permissions: Permission[]) {
     try {
       const authHeader = req.headers.get('authorization');
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '未提供认证令牌' },
           { status: 401 }
         );
@@ -321,7 +321,7 @@ export function requireAllPermissions(permissions: Permission[]) {
       const decoded = await verifyToken(token);
 
       if (!decoded || !decoded.userId) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '无效的认证令牌' },
           { status: 401 }
         );
@@ -329,7 +329,7 @@ export function requireAllPermissions(permissions: Permission[]) {
 
       const userRole = decoded.role || 'USER';
       if (!hasAllPermissions(userRole, permissions)) {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: '权限不足',
@@ -343,7 +343,7 @@ export function requireAllPermissions(permissions: Permission[]) {
       return null;
     } catch (error) {
       logger.error('权限检查失败:', error);
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
       );
@@ -406,7 +406,7 @@ export function requireOwnershipOrAdmin(
     try {
       const authHeader = req.headers.get('authorization');
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '未提供认证令牌' },
           { status: 401 }
         );
@@ -416,7 +416,7 @@ export function requireOwnershipOrAdmin(
       const decoded = await verifyToken(token);
 
       if (!decoded || !decoded.userId) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '无效的认证令牌' },
           { status: 401 }
         );
@@ -436,7 +436,7 @@ export function requireOwnershipOrAdmin(
         .find((_, i, arr) => arr[i - 1] === resourceType + 's');
 
       if (!resourceId) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '无效的资源ID' },
           { status: 400 }
         );
@@ -449,7 +449,7 @@ export function requireOwnershipOrAdmin(
       );
 
       if (!isOwner) {
-        return Response.json(
+        return NextResponse.json(
           { success: false, error: '权限不足：您不是该资源的所有者' },
           { status: 403 }
         );
@@ -458,7 +458,7 @@ export function requireOwnershipOrAdmin(
       return null;
     } catch (error) {
       logger.error('权限检查失败:', error);
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
       );

@@ -3,7 +3,7 @@
  * 提供用户使用量查询、统计和限制信息查询功能
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
 import { logger } from '@/lib/logger';
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const user = await getAuthUser(request);
 
     if (!user) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '未认证',
           message: '请先登录',
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     if (periodStartParam) {
       const parsedDate = new Date(periodStartParam);
       if (isNaN(parsedDate.getTime())) {
-        return Response.json(
+        return NextResponse.json(
           {
             error: '参数错误',
             message: 'periodStart参数格式无效',
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     if (periodEndParam) {
       const parsedDate = new Date(periodEndParam);
       if (isNaN(parsedDate.getTime())) {
-        return Response.json(
+        return NextResponse.json(
           {
             error: '参数错误',
             message: 'periodEnd参数格式无效',
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     // 返回成功响应
-    return Response.json({
+    return NextResponse.json({
       success: true,
       message: '查询成功',
       data: {
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[GET /api/memberships/usage] 查询失败:', error);
 
-    return Response.json(
+    return NextResponse.json(
       {
         error: '查询失败',
         message: '使用量查询失败，请稍后重试',
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const user = await getAuthUser(request);
 
     if (!user) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '未认证',
           message: '请先登录',
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // 验证请求参数
     if (!body || typeof body !== 'object') {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '参数错误',
           message: '请求体格式无效',
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // 验证日期参数
     if (periodStart && isNaN(new Date(periodStart).getTime())) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '参数错误',
           message: 'periodStart参数格式无效',
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     if (periodEnd && isNaN(new Date(periodEnd).getTime())) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '参数错误',
           message: 'periodEnd参数格式无效',
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     // 验证分页参数
     if (page !== undefined && (typeof page !== 'number' || page < 1)) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '参数错误',
           message: 'page参数必须大于0',
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       limit !== undefined &&
       (typeof limit !== 'number' || limit < 1 || limit > 100)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '参数错误',
           message: 'limit参数必须在1-100之间',
@@ -236,7 +236,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     );
 
     // 返回成功响应
-    return Response.json({
+    return NextResponse.json({
       success: true,
       message: '查询成功',
       data: stats,
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[POST /api/memberships/usage/query] 查询失败:', error);
 
-    return Response.json(
+    return NextResponse.json(
       {
         error: '查询失败',
         message: '使用量查询失败，请稍后重试',

@@ -3,7 +3,7 @@
  * 提供当前用户的会员信息、使用量统计和升级选项
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const authUser = await getAuthUser(request);
 
     if (!authUser) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           message: '未授权，请先登录',
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
 
     // 返回成功响应
-    return Response.json(
+    return NextResponse.json(
       {
         success: true,
         message: '查询成功',
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[GET /api/memberships/me] 查询失败:', error);
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         message: '查询失败，请稍后重试',

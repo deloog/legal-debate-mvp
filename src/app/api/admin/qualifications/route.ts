@@ -132,7 +132,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -205,13 +205,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     };
 
-    return Response.json(
+    return NextResponse.json(
       { data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('获取资格审核列表失败:', error);
-    return Response.json(
+    return NextResponse.json(
       {
         error: '服务器错误',
         message: '获取资格审核列表失败',

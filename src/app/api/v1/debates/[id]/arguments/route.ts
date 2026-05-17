@@ -3,7 +3,7 @@
  * 获取指定辩论的所有论点（跨所有轮次）
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
@@ -16,7 +16,10 @@ export async function GET(
 ) {
   const authUser = await getAuthUser(request);
   if (!authUser) {
-    return Response.json({ success: false, error: '未认证' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: '未认证' },
+      { status: 401 }
+    );
   }
 
   const { id: debateId } = await params;
@@ -28,7 +31,7 @@ export async function GET(
       CasePermission.VIEW_DEBATES
     );
     if (!access.allowed || !access.debate) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: access.reason === '辩论不存在' ? '辩论不存在' : '无权访问',
@@ -50,10 +53,10 @@ export async function GET(
       orderBy: [{ roundId: 'asc' }, { createdAt: 'asc' }],
     });
 
-    return Response.json({ success: true, data: args });
+    return NextResponse.json({ success: true, data: args });
   } catch (error) {
     logger.error('获取辩论论点失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { success: false, error: '获取论点失败' },
       { status: 500 }
     );

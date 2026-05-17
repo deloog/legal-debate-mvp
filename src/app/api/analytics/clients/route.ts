@@ -3,7 +3,7 @@
  * 提供客户高级分析功能：转化漏斗、价值分析、生命周期、满意度、风险分析
  */
 
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // 验证用户身份
     const authUser = await getAuthUser(request);
     if (!authUser) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未认证', message: '请先登录' },
         { status: 401 }
       );
@@ -109,10 +109,10 @@ export async function GET(request: NextRequest): Promise<Response> {
       },
     };
 
-    return Response.json(analytics);
+    return NextResponse.json(analytics);
   } catch (error) {
     logger.error('[GET /api/analytics/clients] Error:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '获取分析数据失败', details: String(error) },
       { status: 500 }
     );

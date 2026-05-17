@@ -3,7 +3,7 @@
  * 提供客户数据的统计分析
  */
 
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import {
   createErrorResponse,
   createUnauthorizedResponse,
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       recentClients,
     };
 
-    return Response.json(statistics);
+    return NextResponse.json(statistics);
   } catch (error) {
     logger.error('[GET /api/clients/statistics] Error:', error);
     return createErrorResponse(

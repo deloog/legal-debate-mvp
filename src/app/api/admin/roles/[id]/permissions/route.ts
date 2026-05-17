@@ -59,7 +59,7 @@ export async function GET(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -77,7 +77,7 @@ export async function GET(
     // 检查角色是否存在
     const roleExists = await checkRoleExists(id);
     if (!roleExists) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -110,13 +110,13 @@ export async function GET(
       total: permissions.length,
     };
 
-    return Response.json(
+    return NextResponse.json(
       { data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('获取角色权限失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取角色权限失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -134,7 +134,7 @@ export async function POST(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -153,7 +153,7 @@ export async function POST(
     // 验证必填字段
     const { permissionId } = body;
     if (!permissionId) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '权限ID不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -162,7 +162,7 @@ export async function POST(
     // 检查角色是否存在
     const roleExists = await checkRoleExists(id);
     if (!roleExists) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -181,7 +181,7 @@ export async function POST(
       isSystemRoleName(role.name) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以修改系统内置角色的权限',
@@ -193,7 +193,7 @@ export async function POST(
     // 检查权限是否存在
     const permissionName = await getPermissionName(permissionId);
     if (!permissionName) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '权限不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -210,7 +210,7 @@ export async function POST(
     });
 
     if (existingAssignment) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '角色已拥有该权限' },
         { status: 409 }
       ) as unknown as NextResponse;
@@ -235,13 +235,13 @@ export async function POST(
       user.userId
     );
 
-    return Response.json(
+    return NextResponse.json(
       { message: '权限分配成功' },
       { status: 201 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('分配权限失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '分配权限失败' },
       { status: 500 }
     ) as unknown as NextResponse;

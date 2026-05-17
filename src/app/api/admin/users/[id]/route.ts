@@ -86,7 +86,7 @@ export async function GET(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -102,7 +102,7 @@ export async function GET(
 
   // 验证用户ID
   if (!isValidUserId(userId)) {
-    return Response.json(
+    return NextResponse.json(
       { error: '无效参数', message: '用户ID格式不正确' },
       { status: 400 }
     ) as unknown as NextResponse;
@@ -132,7 +132,7 @@ export async function GET(
     });
 
     if (!userData) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -180,13 +180,13 @@ export async function GET(
       statistics,
     };
 
-    return Response.json(
+    return NextResponse.json(
       { success: true, data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('获取用户详情失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取用户详情失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -204,7 +204,7 @@ export async function PUT(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -220,7 +220,7 @@ export async function PUT(
 
   // 验证用户ID
   if (!isValidUserId(userId)) {
-    return Response.json(
+    return NextResponse.json(
       { error: '无效参数', message: '用户ID格式不正确' },
       { status: 400 }
     ) as unknown as NextResponse;
@@ -239,7 +239,7 @@ export async function PUT(
     ]);
 
     if (!targetUser) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -247,7 +247,7 @@ export async function PUT(
 
     // 验证角色和状态
     if (body.role !== undefined && !isValidRole(body.role)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '无效参数', message: '角色值不正确' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -258,7 +258,7 @@ export async function PUT(
       userId === user.userId &&
       body.role !== targetUser.role
     ) {
-      return Response.json(
+      return NextResponse.json(
         { error: '禁止操作', message: '不能通过后台修改自己的角色' },
         { status: 403 }
       ) as unknown as NextResponse;
@@ -268,7 +268,7 @@ export async function PUT(
       requiresSuperAdminForUserRoleChange(targetUser.role, body.role) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以管理管理员或超级管理员账号',
@@ -278,7 +278,7 @@ export async function PUT(
     }
 
     if (body.status !== undefined && !isValidStatus(body.status)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '无效参数', message: '状态值不正确' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -311,7 +311,7 @@ export async function PUT(
     // 密码重置：只有 SUPER_ADMIN 可操作，且新密码不能少于8位
     if (body.newPassword !== undefined && body.newPassword !== '') {
       if (body.newPassword.length < 8) {
-        return Response.json(
+        return NextResponse.json(
           { error: '参数错误', message: '新密码不能少于8位' },
           { status: 400 }
         ) as unknown as NextResponse;
@@ -321,7 +321,7 @@ export async function PUT(
         select: { role: true },
       });
       if (currentUserInDb?.role !== 'SUPER_ADMIN') {
-        return Response.json(
+        return NextResponse.json(
           { error: '权限不足', message: '只有超级管理员可以重置密码' },
           { status: 403 }
         ) as unknown as NextResponse;
@@ -352,7 +352,7 @@ export async function PUT(
       },
     });
 
-    return Response.json(
+    return NextResponse.json(
       { data: { user: updatedUser }, message: '更新成功' },
       { status: 200 }
     ) as unknown as NextResponse;
@@ -362,12 +362,12 @@ export async function PUT(
       error instanceof Error &&
       error.message.includes('Record to update not found')
     ) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
     }
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '更新用户信息失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -385,7 +385,7 @@ export async function DELETE(
   // 验证用户身份
   const currentUser = await getAuthUser(request);
   if (!currentUser) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -401,7 +401,7 @@ export async function DELETE(
 
   // 验证用户ID
   if (!isValidUserId(userId)) {
-    return Response.json(
+    return NextResponse.json(
       { error: '无效参数', message: '用户ID格式不正确' },
       { status: 400 }
     ) as unknown as NextResponse;
@@ -409,7 +409,7 @@ export async function DELETE(
 
   // 不允许删除自己
   if (userId === currentUser.userId) {
-    return Response.json(
+    return NextResponse.json(
       { error: '禁止操作', message: '不能删除自己的账户' },
       { status: 403 }
     ) as unknown as NextResponse;
@@ -425,7 +425,7 @@ export async function DELETE(
     ]);
 
     if (!targetUser) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -435,7 +435,7 @@ export async function DELETE(
       requiresSuperAdminForUserRoleChange(targetUser.role, targetUser.role) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以删除管理员或超级管理员账号',
@@ -453,13 +453,13 @@ export async function DELETE(
       },
     });
 
-    return Response.json(
+    return NextResponse.json(
       { message: '删除成功' },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('删除用户失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '删除用户失败' },
       { status: 500 }
     ) as unknown as NextResponse;

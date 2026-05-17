@@ -65,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -145,13 +145,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     };
 
-    return Response.json(
+    return NextResponse.json(
       { data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('获取角色列表失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取角色列表失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -183,14 +183,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 验证必填字段
     if (!body.name || body.name.trim() === '') {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '角色名称不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
     }
 
     if (isSystemRoleName(body.name.trim())) {
-      return Response.json(
+      return NextResponse.json(
         { error: '操作不允许', message: '系统内置角色不能手动创建' },
         { status: 403 }
       ) as unknown as NextResponse;
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (existingRole) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '角色名称已存在' },
         { status: 409 }
       ) as unknown as NextResponse;
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       user.userId
     );
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: '角色创建成功',
         data: {
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('创建角色失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '创建角色失败' },
       { status: 500 }
     ) as unknown as NextResponse;

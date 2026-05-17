@@ -3,7 +3,8 @@
  * 用于API路由的权限验证
  */
 
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { hasPermission } from './permissions';
 import type { PermissionCheckResult } from '@/types/permission';
 import { getAuthUser } from './auth';
@@ -125,7 +126,7 @@ export function requirePermission(
 function createPermissionErrorResponse(
   result: PermissionCheckResult
 ): NextResponse {
-  return Response.json(
+  return NextResponse.json(
     {
       success: false,
       error: {
@@ -167,7 +168,7 @@ export async function validatePermissions(
   const user = await getAuthUser(request);
 
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;

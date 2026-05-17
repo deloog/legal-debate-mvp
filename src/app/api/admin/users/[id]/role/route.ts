@@ -46,7 +46,7 @@ export async function PUT(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -64,7 +64,7 @@ export async function PUT(
 
     // 验证必填字段
     if (!body.role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '角色不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -72,7 +72,7 @@ export async function PUT(
 
     // 验证角色名称
     if (!isValidRole(body.role)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '无效的角色名称' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -87,14 +87,14 @@ export async function PUT(
     ]);
 
     if (!targetUser) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
     }
 
     if (id === user.userId && body.role !== targetUser.role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '禁止操作', message: '不能通过后台修改自己的角色' },
         { status: 403 }
       ) as unknown as NextResponse;
@@ -104,7 +104,7 @@ export async function PUT(
       requiresSuperAdminForUserRoleChange(targetUser.role, body.role) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以管理管理员或超级管理员角色',
@@ -153,7 +153,7 @@ export async function PUT(
       logger.error('角色变更审计日志记录失败:', auditErr);
     });
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: true,
         message: '角色分配成功',
@@ -163,7 +163,7 @@ export async function PUT(
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('分配角色失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '分配角色失败' },
       { status: 500 }
     ) as unknown as NextResponse;

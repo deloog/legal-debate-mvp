@@ -3,7 +3,7 @@
  * 支持获取、更新、删除单个配置
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -68,7 +68,7 @@ export async function GET(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     );
@@ -89,16 +89,16 @@ export async function GET(
     });
 
     if (!config) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: `配置${key}不存在` },
         { status: 404 }
       );
     }
 
-    return Response.json({ data: config }, { status: 200 });
+    return NextResponse.json({ data: config }, { status: 200 });
   } catch (error) {
     logger.error('获取配置失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取配置失败' },
       { status: 500 }
     );
@@ -116,7 +116,7 @@ export async function PUT(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     );
@@ -130,7 +130,7 @@ export async function PUT(
 
   const stepUp = validateAdminStepUpToken(request, user.userId);
   if (!stepUp.valid) {
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         error: {
@@ -147,7 +147,7 @@ export async function PUT(
     const body: UpdateConfigRequest = await request.json();
     const reasonCheck = validateSensitiveOperationReason(body.changeReason);
     if (!reasonCheck.valid) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: reasonCheck.message },
         { status: 400 }
       );
@@ -159,7 +159,7 @@ export async function PUT(
     });
 
     if (!existingConfig) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: `配置${key}不存在` },
         { status: 404 }
       );
@@ -192,7 +192,7 @@ export async function PUT(
     if (body.value !== undefined) {
       // 验证配置值类型
       if (!validateConfigValue(body.value, existingConfig.type)) {
-        return Response.json(
+        return NextResponse.json(
           {
             error: '参数错误',
             message: `配置值类型与指定类型${existingConfig.type}不匹配`,
@@ -222,7 +222,7 @@ export async function PUT(
       request,
     });
 
-    return Response.json(
+    return NextResponse.json(
       {
         success: true,
         message: '配置更新成功',
@@ -232,7 +232,7 @@ export async function PUT(
     );
   } catch (error) {
     logger.error('更新配置失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '更新配置失败' },
       { status: 500 }
     );
@@ -250,7 +250,7 @@ export async function DELETE(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     );
@@ -264,7 +264,7 @@ export async function DELETE(
 
   const stepUp = validateAdminStepUpToken(request, user.userId);
   if (!stepUp.valid) {
-    return Response.json(
+    return NextResponse.json(
       {
         success: false,
         error: {
@@ -281,7 +281,7 @@ export async function DELETE(
     const reason = new URL(request.url).searchParams.get('changeReason') ?? '';
     const reasonCheck = validateSensitiveOperationReason(reason);
     if (!reasonCheck.valid) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: reasonCheck.message },
         { status: 400 }
       );
@@ -293,7 +293,7 @@ export async function DELETE(
     });
 
     if (!existingConfig) {
-      return Response.json(
+      return NextResponse.json(
         { error: '未找到', message: `配置${key}不存在` },
         { status: 404 }
       );
@@ -301,7 +301,7 @@ export async function DELETE(
 
     // 检查是否为必填配置
     if (existingConfig.isRequired) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '禁止操作',
           message: '必填配置不能删除',
@@ -327,7 +327,7 @@ export async function DELETE(
       request,
     });
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: '配置删除成功',
         data: { key },
@@ -336,7 +336,7 @@ export async function DELETE(
     );
   } catch (error) {
     logger.error('删除配置失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '删除配置失败' },
       { status: 500 }
     );

@@ -8,7 +8,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import type { EnterpriseListData, Pagination } from '@/types/admin-enterprise';
 import { EnterpriseStatus } from '@/types/enterprise';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
 function isValidStatus(status: string): status is EnterpriseStatus {
@@ -26,7 +26,7 @@ function isValidStatus(status: string): status is EnterpriseStatus {
 export async function GET(request: NextRequest): Promise<Response> {
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     );
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const endDate = searchParams.get('endDate');
 
   if (status !== null && status !== '' && !isValidStatus(status)) {
-    return Response.json(
+    return NextResponse.json(
       { error: '无效参数', message: '状态值不正确' },
       { status: 400 }
     );
@@ -140,10 +140,10 @@ export async function GET(request: NextRequest): Promise<Response> {
       pagination,
     };
 
-    return Response.json({ data: responseData }, { status: 200 });
+    return NextResponse.json({ data: responseData }, { status: 200 });
   } catch (error) {
     logger.error('获取企业认证列表失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取企业认证列表失败' },
       { status: 500 }
     );

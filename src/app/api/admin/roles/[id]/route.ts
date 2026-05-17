@@ -32,7 +32,7 @@ export async function GET(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -64,7 +64,7 @@ export async function GET(
     });
 
     if (!role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -93,13 +93,13 @@ export async function GET(
       updatedAt: role.updatedAt,
     };
 
-    return Response.json(
+    return NextResponse.json(
       { data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('获取角色详情失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '获取角色详情失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -117,7 +117,7 @@ export async function PUT(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -143,7 +143,7 @@ export async function PUT(
     });
 
     if (!existingRole) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -155,7 +155,7 @@ export async function PUT(
       isSystemRoleName(existingRole.name) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以修改系统内置角色',
@@ -167,7 +167,7 @@ export async function PUT(
     // 如果要修改角色名称，检查新名称是否已被使用
     if (body.name && body.name.trim() !== existingRole.name) {
       if (isSystemRoleName(body.name.trim())) {
-        return Response.json(
+        return NextResponse.json(
           { error: '操作不允许', message: '系统角色名称为保留名称' },
           { status: 403 }
         ) as unknown as NextResponse;
@@ -178,7 +178,7 @@ export async function PUT(
       });
 
       if (nameExists) {
-        return Response.json(
+        return NextResponse.json(
           { error: '参数错误', message: '角色名称已被使用' },
           { status: 409 }
         ) as unknown as NextResponse;
@@ -209,7 +209,7 @@ export async function PUT(
       user.userId
     );
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: '角色更新成功',
         data: {
@@ -223,7 +223,7 @@ export async function PUT(
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('更新角色失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '更新角色失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -241,7 +241,7 @@ export async function DELETE(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -262,7 +262,7 @@ export async function DELETE(
     });
 
     if (!existingRole) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -270,7 +270,7 @@ export async function DELETE(
 
     // 检查是否为系统内置角色
     if (isSystemRoleName(existingRole.name)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '操作不允许', message: '系统内置角色不能删除' },
         { status: 403 }
       ) as unknown as NextResponse;
@@ -282,7 +282,7 @@ export async function DELETE(
     });
 
     if (userCount > 0) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '操作不允许',
           message: `该角色下还有 ${userCount} 个用户，无法删除`,
@@ -312,13 +312,13 @@ export async function DELETE(
       where: { id },
     });
 
-    return Response.json(
+    return NextResponse.json(
       { message: '角色删除成功' },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('删除角色失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '删除角色失败' },
       { status: 500 }
     ) as unknown as NextResponse;

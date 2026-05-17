@@ -33,7 +33,7 @@ export async function PUT(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -51,14 +51,14 @@ export async function PUT(
 
     // 验证必填字段
     if (!body.permissionIds || !Array.isArray(body.permissionIds)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '权限ID列表必须为数组' },
         { status: 400 }
       ) as unknown as NextResponse;
     }
 
     if (body.permissionIds.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '权限ID列表不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -70,7 +70,7 @@ export async function PUT(
     });
 
     if (!role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -81,7 +81,7 @@ export async function PUT(
       isSystemRoleName(role.name) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以修改系统内置角色的权限',
@@ -98,7 +98,7 @@ export async function PUT(
     });
 
     if (permissions.length !== body.permissionIds.length) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '部分权限不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -113,7 +113,7 @@ export async function PUT(
       skipDuplicates: true,
     });
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: `成功分配 ${result.count} 个权限`,
         count: result.count,
@@ -122,7 +122,7 @@ export async function PUT(
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('批量分配权限失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '批量分配权限失败' },
       { status: 500 }
     ) as unknown as NextResponse;
@@ -140,7 +140,7 @@ export async function DELETE(
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
+    return NextResponse.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
@@ -158,14 +158,14 @@ export async function DELETE(
 
     // 验证必填字段
     if (!body.permissionIds || !Array.isArray(body.permissionIds)) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '权限ID列表必须为数组' },
         { status: 400 }
       ) as unknown as NextResponse;
     }
 
     if (body.permissionIds.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         { error: '参数错误', message: '权限ID列表不能为空' },
         { status: 400 }
       ) as unknown as NextResponse;
@@ -177,7 +177,7 @@ export async function DELETE(
     });
 
     if (!role) {
-      return Response.json(
+      return NextResponse.json(
         { error: '资源不存在', message: '角色不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
@@ -188,7 +188,7 @@ export async function DELETE(
       isSystemRoleName(role.name) &&
       !canManagePrivilegedRole(currentUserRole)
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: '权限不足',
           message: '只有超级管理员可以修改系统内置角色的权限',
@@ -205,7 +205,7 @@ export async function DELETE(
       },
     });
 
-    return Response.json(
+    return NextResponse.json(
       {
         message: `成功撤销 ${result.count} 个权限`,
         count: result.count,
@@ -214,7 +214,7 @@ export async function DELETE(
     ) as unknown as NextResponse;
   } catch (error) {
     logger.error('批量撤销权限失败:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: '服务器错误', message: '批量撤销权限失败' },
       { status: 500 }
     ) as unknown as NextResponse;
