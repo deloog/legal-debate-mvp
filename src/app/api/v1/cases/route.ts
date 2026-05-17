@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
-import { CaseType, CaseStatus, Prisma, OwnerType } from '@prisma/client';
-import { generateCaseNumber } from '@/lib/case/case-number-service';
+import { CaseType, CaseStatus, OwnerType } from '@prisma/client';
+import { createCase } from '@/lib/case/service';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
@@ -197,37 +197,6 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  // 类型转换
-  const typeMap: Record<string, CaseType> = {
-    civil: 'CIVIL',
-    criminal: 'CRIMINAL',
-    administrative: 'ADMINISTRATIVE',
-    commercial: 'COMMERCIAL',
-    labor: 'LABOR',
-    intellectual: 'INTELLECTUAL',
-    other: 'OTHER',
-  };
-
-  const statusMap: Record<string, CaseStatus> = {
-    draft: 'DRAFT',
-    active: 'ACTIVE',
-    completed: 'COMPLETED',
-    archived: 'ARCHIVED',
-  };
-
-  const ownerTypeMap: Record<string, OwnerType> = {
-    user: 'USER',
-    team: 'TEAM',
-  };
-
-  // 处理ownerType，默认为USER
-  const ownerTypeValue = body.ownerType
-    ? ownerTypeMap[body.ownerType?.toLowerCase()] || 'USER'
-    : 'USER';
-
-  // 处理sharedWithTeam，默认为false
-  const sharedWithTeamValue = body.sharedWithTeam === true;
-
   // 校验金额（如有提供，必须为正数）
   if (body.amount !== undefined && body.amount !== null) {
     const amountNum = Number(body.amount);
@@ -242,28 +211,21 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     }
   }
 
-  const caseType = typeMap[body.type?.toLowerCase()] || 'CIVIL';
-  const caseStatus = statusMap[body.status?.toLowerCase()] || 'DRAFT';
-  const caseNumber =
-    body.caseNumber || (await generateCaseNumber(prisma, caseType, caseStatus));
-
-  const caseData = await prisma.case.create({
-    data: {
-      userId: authUser.userId,
-      title: body.title,
-      description: body.description || '',
-      type: caseType,
-      status: caseStatus,
-      amount: body.amount ? new Prisma.Decimal(body.amount) : null,
-      caseNumber,
-      cause: body.cause,
-      court: body.court,
-      plaintiffName: body.plaintiffName,
-      defendantName: body.defendantName,
-      metadata: body.metadata || {},
-      ownerType: ownerTypeValue,
-      sharedWithTeam: sharedWithTeamValue,
-    },
+  const caseData = await createCase({
+    userId: authUser.userId,
+    title: body.title,
+    description: body.description,
+    type: body.type,
+    status: body.status,
+    amount: body.amount,
+    caseNumber: body.caseNumber,
+    cause: body.cause,
+    court: body.court,
+    plaintiffName: body.plaintiffName,
+    defendantName: body.defendantName,
+    metadata: body.metadata || {},
+    ownerType: body.ownerType,
+    sharedWithTeam: body.sharedWithTeam,
   });
 
   return createSuccessResponse(caseData);

@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { TimelineEventListResponse, CaseTimelineEventType } from '@/types/case';
 import { logger } from '@/lib/logger';
+import { addTimelineEvent } from '@/lib/case/service';
 
 const createTimelineEventSchema = z.object({
   eventType: z.enum([
@@ -123,16 +124,13 @@ export const POST = async (
     const body = await request.json();
     const validatedData = createTimelineEventSchema.parse(body);
 
-    // 创建时间线事件
-    const timelineEvent = await prisma.caseTimeline.create({
-      data: {
-        caseId,
-        eventType: validatedData.eventType,
-        title: validatedData.title,
-        description: validatedData.description || null,
-        eventDate: validatedData.eventDate,
-        metadata: (validatedData.metadata || {}) as never,
-      },
+    const timelineEvent = await addTimelineEvent({
+      caseId,
+      eventType: validatedData.eventType,
+      title: validatedData.title,
+      description: validatedData.description,
+      eventDate: validatedData.eventDate,
+      metadata: (validatedData.metadata || {}) as never,
     });
 
     return NextResponse.json(timelineEvent, { status: 201 });

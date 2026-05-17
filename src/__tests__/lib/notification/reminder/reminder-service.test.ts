@@ -21,6 +21,7 @@ jest.mock('@/lib/db/prisma', () => ({
     reminder: {
       create: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -133,6 +134,62 @@ describe('ReminderService', () => {
           message: '请准时出庭',
           reminderTime: scheduledAt,
           channels: [NotificationChannel.IN_APP],
+        }),
+      });
+    });
+
+    it('应该按 idempotencyKey 返回已存在提醒，避免重复创建', async () => {
+      const mockFindFirst = prisma.reminder.findFirst as jest.Mock;
+      const mockCreate = prisma.reminder.create as jest.Mock;
+      mockFindFirst.mockResolvedValue(mockReminder);
+
+      const result = await reminderService.createReminder(
+        {
+          userId: mockUserId,
+          type: ReminderType.COURT_SCHEDULE,
+          title: '法庭提醒',
+          scheduledAt: new Date('2024-12-01T09:00:00Z'),
+          channels: [NotificationChannel.IN_APP],
+        },
+        'proposal-1-CREATE_REMINDER-3'
+      );
+
+      expect(result.id).toBe('reminder-1');
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: {
+          metadata: {
+            path: ['idempotencyKey'],
+            equals: 'proposal-1-CREATE_REMINDER-3',
+          },
+        },
+      });
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('应该在创建提醒时写入 idempotencyKey 到 metadata', async () => {
+      const mockFindFirst = prisma.reminder.findFirst as jest.Mock;
+      const mockCreate = prisma.reminder.create as jest.Mock;
+      mockFindFirst.mockResolvedValue(null);
+      mockCreate.mockResolvedValue(mockReminder);
+
+      await reminderService.createReminder(
+        {
+          userId: mockUserId,
+          type: ReminderType.COURT_SCHEDULE,
+          title: '法庭提醒',
+          scheduledAt: new Date('2024-12-01T09:00:00Z'),
+          channels: [NotificationChannel.IN_APP],
+          metadata: { source: 'proposal' },
+        },
+        'proposal-1-CREATE_REMINDER-3'
+      );
+
+      expect(mockCreate).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          metadata: {
+            source: 'proposal',
+            idempotencyKey: 'proposal-1-CREATE_REMINDER-3',
+          },
         }),
       });
     });

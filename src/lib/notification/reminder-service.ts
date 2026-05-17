@@ -26,9 +26,29 @@ class ReminderService {
   /**
    * 创建提醒
    */
-  async createReminder(input: CreateReminderInput): Promise<Reminder> {
+  async createReminder(
+    input: CreateReminderInput,
+    idempotencyKey?: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<Reminder> {
     try {
-      const reminder = await prisma.reminder.create({
+      const db = tx ?? prisma;
+
+      if (idempotencyKey) {
+        const existing = await db.reminder.findFirst({
+          where: {
+            metadata: { path: ['idempotencyKey'], equals: idempotencyKey },
+          },
+        });
+        if (existing) return this.toReminder(existing);
+      }
+
+      const metadata = {
+        ...((input.metadata ?? {}) as Record<string, unknown>),
+        ...(idempotencyKey ? { idempotencyKey } : {}),
+      };
+
+      const reminder = await db.reminder.create({
         data: {
           userId: input.userId!,
           type: input.type as never,
@@ -38,7 +58,7 @@ class ReminderService {
           channels: input.channels ?? (input.channel ? [input.channel] : []),
           relatedType: input.relatedType ?? null,
           relatedId: input.relatedId ?? null,
-          metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
+          metadata: metadata as Prisma.InputJsonValue,
         },
       });
 

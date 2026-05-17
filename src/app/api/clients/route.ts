@@ -13,9 +13,9 @@ import {
   ClientStatus,
   ClientType,
 } from '@/types/client';
-import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createClient } from '@/lib/client/service';
 
 const createClientSchema = z
   .object({
@@ -234,26 +234,24 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   const validatedData = createClientSchema.parse(body);
 
-  const client = await prisma.client.create({
-    data: {
-      userId: authUser.userId,
-      clientType: validatedData.clientType,
-      name: validatedData.name,
-      gender: validatedData.gender,
-      age: validatedData.age,
-      profession: validatedData.profession,
-      phone: validatedData.phone,
-      email: validatedData.email,
-      address: validatedData.address,
-      idCardNumber: validatedData.idCardNumber,
-      company: validatedData.company,
-      creditCode: validatedData.creditCode,
-      legalRep: validatedData.legalRep,
-      source: validatedData.source,
-      tags: validatedData.tags || [],
-      notes: validatedData.notes,
-      metadata: validatedData.metadata as Prisma.InputJsonValue,
-    },
+  const client = await createClient({
+    userId: authUser.userId,
+    clientType: validatedData.clientType as ClientType,
+    name: validatedData.name,
+    gender: validatedData.gender,
+    age: validatedData.age,
+    profession: validatedData.profession,
+    phone: validatedData.phone,
+    email: validatedData.email,
+    address: validatedData.address,
+    idCardNumber: validatedData.idCardNumber,
+    company: validatedData.company,
+    creditCode: validatedData.creditCode,
+    legalRep: validatedData.legalRep,
+    source: validatedData.source as ClientSource | undefined,
+    tags: validatedData.tags || [],
+    notes: validatedData.notes,
+    metadata: validatedData.metadata as Record<string, unknown> | undefined,
   });
 
   const clientDetail = await mapClientToDetail(client, true);
