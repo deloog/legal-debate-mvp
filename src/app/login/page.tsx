@@ -32,6 +32,25 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  async function readErrorMessage(response: Response): Promise<string> {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return (
+        data.message ||
+        data.error?.message ||
+        '邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册'
+      );
+    }
+
+    if (response.status >= 500) {
+      return `服务器异常（HTTP ${response.status}），请联系管理员查看部署日志`;
+    }
+
+    return `请求失败（HTTP ${response.status}）`;
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
@@ -46,11 +65,18 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      if (!response.ok) {
+        setError(await readErrorMessage(response));
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         setError(
-          '邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册'
+          data.message ||
+            '邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册'
         );
         setLoading(false);
         return;
@@ -81,8 +107,8 @@ export default function LoginPage() {
         redirect !== '/' ? redirect : isAdminRole ? '/admin' : '/chat';
       router.push(destination);
       router.refresh();
-    } catch (_err) {
-      setError('登录失败，请稍后重试');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '登录失败，请稍后重试');
       setLoading(false);
     }
   };

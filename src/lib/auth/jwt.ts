@@ -9,13 +9,14 @@ import { logError } from '../utils/safe-logger';
 import { logger } from '@/lib/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+let hasWarnedMissingJwtSecret = false;
 
-// JWT_SECRET 安全检查（白名单原则：只有明确安全的环境才允许省略密钥）
-// 允许省略的场景：本地开发（development）、自动化测试（test）、Next.js 构建阶段
-// 其余所有环境（staging、preview、production 等）一律拒绝启动，无需额外标志位
-if (!JWT_SECRET) {
+function getEffectiveJwtSecret(): string {
+  if (JWT_SECRET) {
+    return JWT_SECRET;
+  }
+
   const isBuildPhase =
     process.env.NEXT_PHASE === 'phase-production-build' ||
     process.env.SKIP_ENV_VALIDATION === 'true';
@@ -25,23 +26,20 @@ if (!JWT_SECRET) {
 
   if (!isFallbackAllowed) {
     throw new Error(
-      '[JWT配置错误] JWT_SECRET环境变量未设置！\n' +
-        '请在环境变量中设置 JWT_SECRET（至少32位随机字符串）。\n' +
-        "生成命令：node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+      '[JWT配置错误] JWT_SECRET环境变量未设置。请在生产环境配置 JWT_SECRET（至少32位随机字符串）。'
     );
   }
 
-  if (isLocalDev) {
+  if (isLocalDev && !hasWarnedMissingJwtSecret) {
     logger.warn(
       '[JWT警告] JWT_SECRET 未设置，使用临时开发密钥。\n' +
         '⚠️  此密钥仅限本地开发，任何部署环境必须设置 JWT_SECRET。'
     );
+    hasWarnedMissingJwtSecret = true;
   }
-}
 
-// 有效的JWT密钥（仅 development/test/build 阶段会走到 fallback）
-const EFFECTIVE_JWT_SECRET =
-  JWT_SECRET ?? 'dev-only-jwt-secret-not-for-production';
+  return 'dev-only-jwt-secret-not-for-production';
+}
 
 /**
  * 生成 JWT Token
@@ -51,7 +49,7 @@ export function generateToken(payload: JwtPayload, expiresIn?: string): string {
     expiresIn: (expiresIn || JWT_EXPIRES_IN) as jwt.SignOptions['expiresIn'],
   };
 
-  return jwt.sign(payload, EFFECTIVE_JWT_SECRET, options);
+  return jwt.sign(payload, getEffectiveJwtSecret(), options);
 }
 
 /**
@@ -64,7 +62,7 @@ export function verifyToken(token: string): JwtVerifyResult {
       logger.debug('[verifyToken] 开始验证token');
     }
 
-    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET, {
+    const decoded = jwt.verify(token, getEffectiveJwtSecret(), {
       algorithms: ['HS256'],
     }) as JwtPayload;
 
@@ -155,7 +153,7 @@ export function generateRefreshToken(
     expiresIn: (expiresIn || '7d') as jwt.SignOptions['expiresIn'],
   };
 
-  return jwt.sign(refreshTokenPayload, EFFECTIVE_JWT_SECRET, options);
+  return jwt.sign(refreshTokenPayload, getEffectiveJwtSecret(), options);
 }
 
 /**
@@ -185,5 +183,5 @@ export function generateAccessToken(
     expiresIn: (expiresIn || '7d') as jwt.SignOptions['expiresIn'],
   };
 
-  return jwt.sign(payload, EFFECTIVE_JWT_SECRET, options);
+  return jwt.sign(payload, getEffectiveJwtSecret(), options);
 }

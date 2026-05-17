@@ -22,6 +22,21 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  async function readErrorMessage(response: Response): Promise<string> {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return data.message || data.error?.message || data.error || '注册失败';
+    }
+
+    if (response.status >= 500) {
+      return `服务器异常（HTTP ${response.status}），请联系管理员查看部署日志`;
+    }
+
+    return `请求失败（HTTP ${response.status}）`;
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
@@ -35,9 +50,15 @@ export default function RegisterPage() {
         body: JSON.stringify({ email, password, name, role }),
       });
 
+      if (!response.ok) {
+        setError(await readErrorMessage(response));
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         setError(data.message || data.error?.message || '注册失败');
         setLoading(false);
         return;
@@ -45,8 +66,8 @@ export default function RegisterPage() {
 
       // 注册成功后跳转到登录页
       router.push('/login?registered=1');
-    } catch {
-      setError('注册失败，请稍后重试');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '注册失败，请稍后重试');
       setLoading(false);
     }
   };

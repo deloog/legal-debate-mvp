@@ -14,6 +14,17 @@ import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
 
+function getLoginErrorMessage(error: unknown): string {
+  if (
+    error instanceof Error &&
+    error.message.includes('JWT_SECRET环境变量未设置')
+  ) {
+    return '服务端认证配置不完整，请联系管理员检查 JWT_SECRET';
+  }
+
+  return '登录失败，请稍后重试';
+}
+
 /**
  * POST /api/auth/login
  * 用户登录（应用严格速率限制：每分钟5次）
@@ -199,7 +210,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
     });
     const response: AuthResponse = {
       success: false,
-      message: '登录失败，请稍后重试',
+      message: getLoginErrorMessage(error),
       error: 'SERVER_ERROR',
     };
     return NextResponse.json(response, { status: 500 });

@@ -14,6 +14,17 @@ import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
 
+function getRegisterErrorMessage(error: unknown): string {
+  if (
+    error instanceof Error &&
+    error.message.includes('JWT_SECRET环境变量未设置')
+  ) {
+    return '服务端认证配置不完整，请联系管理员检查 JWT_SECRET';
+  }
+
+  return '注册失败，请稍后重试';
+}
+
 /**
  * POST /api/auth/register
  * 用户注册
@@ -187,7 +198,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     logger.error('注册失败:', error);
     const response: AuthResponse = {
       success: false,
-      message: '注册失败，请稍后重试',
+      message: getRegisterErrorMessage(error),
       error: 'SERVER_ERROR',
     };
     return NextResponse.json(response, { status: 500 });
