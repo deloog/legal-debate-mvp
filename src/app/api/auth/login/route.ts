@@ -13,6 +13,7 @@ import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
+import { getIntendedRoleFromPreferences } from '@/lib/auth/role-onboarding';
 
 function getLoginErrorMessage(error: unknown): string {
   if (
@@ -57,6 +58,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
         role: true,
         status: true,
         password: true,
+        preferences: true,
         loginCount: true,
         createdAt: true,
       },
@@ -101,12 +103,17 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(response, { status: 401 });
     }
 
+    const intendedRole = getIntendedRoleFromPreferences(user.preferences);
+    const effectiveRole =
+      user.role === 'USER' && intendedRole ? intendedRole : user.role;
+
     // 更新最后登录时间和登录次数
     await prisma.user.update({
       where: { id: user.id },
       data: {
         lastLoginAt: new Date(),
         loginCount: user.loginCount + 1,
+        ...(effectiveRole !== user.role && { role: effectiveRole }),
       },
     });
 
@@ -124,7 +131,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
     const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role,
+      role: effectiveRole,
       jti: session.id,
     };
     const accessToken = generateAccessToken(payload);
@@ -155,7 +162,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
           email: user.email,
           username: user.username,
           name: user.name,
-          role: user.role,
+          role: effectiveRole,
           createdAt: user.createdAt,
         },
         token: isTestEnv ? accessToken : '', // 测试环境返回 token，生产环境留空

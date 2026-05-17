@@ -13,6 +13,7 @@ import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
+import { normalizeOnboardingRole } from '@/lib/auth/role-onboarding';
 
 function getRegisterErrorMessage(error: unknown): string {
   if (
@@ -85,6 +86,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
 
     // 加密密码
     const hashedPassword = await hashPassword(password);
+    const onboardingRole = normalizeOnboardingRole(requestedRole);
 
     // 创建用户（使用Prisma create方法）
     const user = await prisma.user.create({
@@ -94,11 +96,11 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
         name: name || username || null,
         status: 'ACTIVE',
         password: hashedPassword,
-        role: 'USER',
-        preferences: requestedRole
+        role: onboardingRole ?? 'USER',
+        preferences: onboardingRole
           ? ({
               onboarding: {
-                intendedRole: requestedRole,
+                intendedRole: onboardingRole,
               },
             } as const)
           : undefined,

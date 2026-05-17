@@ -103,8 +103,16 @@ export default function LoginPage() {
       // - 否则管理员进后台，普通用户进工作台
       const userRole = data.data?.user?.role as string | undefined;
       const isAdminRole = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+      const canUseWorkspace =
+        userRole === 'LAWYER' || userRole === 'ENTERPRISE';
       const destination =
-        redirect !== '/' ? redirect : isAdminRole ? '/admin' : '/chat';
+        redirect !== '/'
+          ? redirect
+          : isAdminRole
+            ? '/admin'
+            : canUseWorkspace
+              ? '/chat'
+              : '/qualifications';
       router.push(destination);
       router.refresh();
     } catch (error) {
