@@ -1,9 +1,6 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { verifyToken } from '@/lib/auth/jwt';
 import { OrderList } from '@/components/order/OrderList';
+import { getServerAuthUser } from '@/lib/auth/server-session';
 
 /**
  * 订单列表页面
@@ -11,23 +8,8 @@ import { OrderList } from '@/components/order/OrderList';
  * 认证优先级：1. JWT accessToken cookie  2. NextAuth session
  */
 export default async function OrdersPage() {
-  // 1. 先尝试从 accessToken cookie 中获取 JWT 用户信息
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('accessToken')?.value;
-  let userId: string | null = null;
-
-  if (accessToken) {
-    const tokenResult = verifyToken(accessToken);
-    if (tokenResult.valid && tokenResult.payload?.userId) {
-      userId = tokenResult.payload.userId;
-    }
-  }
-
-  // 2. 若 JWT cookie 无效，回退到 NextAuth session
-  if (!userId) {
-    const session = await getServerSession(authOptions);
-    userId = session?.user?.id ?? null;
-  }
+  const user = await getServerAuthUser();
+  const userId = user?.id;
 
   // 未登录则跳转到登录页
   if (!userId) {

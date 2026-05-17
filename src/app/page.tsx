@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { getDefaultAuthDestination } from '@/lib/auth/role-onboarding';
 import {
   MessageSquareIcon,
   ScaleIcon,
@@ -90,7 +91,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/chat');
+      router.replace(getDefaultAuthDestination(user.role));
     }
   }, [user, loading, router]);
 

@@ -153,7 +153,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       expires: sessionExpires,
     });
 
-    const expiresIn = 15 * 60; // 15分钟
+    const expiresIn = 7 * 24 * 60 * 60; // 7天
 
     // token 通过 httpOnly cookie 传递，不在响应体中暴露（防止 XSS 窃取）
     // 在测试环境下同时在响应体中返回 token，以便 E2E 测试使用
@@ -161,7 +161,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
 
     const responseBody: AuthResponse = {
       success: true,
-      message: '注册成功，请使用邮箱登录',
+      message: '注册成功',
       data: {
         user: {
           id: user.id,
@@ -191,7 +191,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60, // 15分钟
+      maxAge: 7 * 24 * 60 * 60, // 7天（与登录/刷新接口保持一致）
       path: '/',
     });
 

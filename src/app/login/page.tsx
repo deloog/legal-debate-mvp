@@ -17,11 +17,13 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { getDefaultAuthDestination } from '@/lib/auth/role-onboarding';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // 校验 redirect 参数：必须以 / 开头且不以 // 开头（防止 //evil.com 绕过）
-  const rawRedirect = searchParams.get('redirect') || '/';
+  const rawRedirect =
+    searchParams.get('redirect') || searchParams.get('callbackUrl') || '/';
   const redirect =
     rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
       ? rawRedirect
@@ -101,18 +103,10 @@ export default function LoginPage() {
       // 按角色决定跳转目标：
       // - 有明确的 redirect 参数（非默认 /）时，优先跳转到指定页面
       // - 否则管理员进后台，普通用户进工作台
-      const userRole = data.data?.user?.role as string | undefined;
-      const isAdminRole = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
-      const canUseWorkspace =
-        userRole === 'LAWYER' || userRole === 'ENTERPRISE';
       const destination =
         redirect !== '/'
           ? redirect
-          : isAdminRole
-            ? '/admin'
-            : canUseWorkspace
-              ? '/chat'
-              : '/qualifications';
+          : getDefaultAuthDestination(data.data?.user?.role);
       router.push(destination);
       router.refresh();
     } catch (error) {

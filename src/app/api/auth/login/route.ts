@@ -13,7 +13,7 @@ import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
-import { getIntendedRoleFromPreferences } from '@/lib/auth/role-onboarding';
+import { getEffectiveUserRole } from '@/lib/auth/role-onboarding';
 
 function getLoginErrorMessage(error: unknown): string {
   if (
@@ -103,9 +103,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(response, { status: 401 });
     }
 
-    const intendedRole = getIntendedRoleFromPreferences(user.preferences);
-    const effectiveRole =
-      user.role === 'USER' && intendedRole ? intendedRole : user.role;
+    const effectiveRole = getEffectiveUserRole(user.role, user.preferences);
 
     // 更新最后登录时间和登录次数
     await prisma.user.update({

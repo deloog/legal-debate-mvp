@@ -132,7 +132,7 @@ interface EnterpriseResponseData {
 /**
  * 创建测试用户
  * @param apiContext - Playwright API请求上下文
- * @param role - 注册时选择的目标身份，注册后仍先创建为 USER
+ * @param role - 注册时选择的目标身份，LAWYER/ENTERPRISE 会直接进入工作台角色
  */
 async function createTestUser(
   apiContext: APIRequestContext,
@@ -503,7 +503,7 @@ test.describe('密码找回与重置', () => {
 
 test.describe('律师资格验证流程', () => {
   test('应该提交律师资格申请', async ({ request }) => {
-    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
+    // LAWYER 注册用户可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
 
     const { token } = await loginUser(
@@ -535,7 +535,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证执业证号格式', async ({ request }) => {
-    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
+    // LAWYER 注册用户可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -562,7 +562,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证身份证号格式', async ({ request }) => {
-    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
+    // LAWYER 注册用户可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -589,7 +589,7 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该获取当前用户的资格状态', async ({ request }) => {
-    // LAWYER 意向用户在注册后仍先是 USER，但可继续走律师资质认证链
+    // LAWYER 注册用户可继续走律师资质认证链
     const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
@@ -707,7 +707,7 @@ test.describe('律师资格验证流程', () => {
 
 test.describe('企业认证流程', () => {
   test('应该提交企业注册申请', async ({ request }) => {
-    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
+    // ENTERPRISE 注册用户可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -735,7 +735,7 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该验证统一社会信用代码格式', async ({ request }) => {
-    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
+    // ENTERPRISE 注册用户可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -759,7 +759,7 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该获取当前用户的企业信息', async ({ request }) => {
-    // ENTERPRISE 意向用户在注册后仍先是 USER，但可继续走企业认证链
+    // ENTERPRISE 注册用户可继续走企业认证链
     const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
@@ -843,7 +843,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const email = `lifecycle-${timestamp}@example.com`;
     const password = 'Lifecycle123';
 
-    // 使用 LAWYER 意向注册，但账号角色仍应先保持 USER
+    // 使用 LAWYER 身份注册后应直接进入工作台角色
     const registerResponse = await request.post(
       `${BASE_URL}/api/auth/register`,
       {
@@ -860,7 +860,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const registerData: AuthResponseData = await registerResponse.json();
     expect(registerResponse.ok()).toBeTruthy();
     expect(registerData.success).toBe(true);
-    expect(registerData.data?.user.role).toBe('USER');
+    expect(registerData.data?.user.role).toBe('LAWYER');
 
     // 2. 登录
     const { token, refreshToken: rt } = await loginUser(
@@ -879,7 +879,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const meData: CurrentUserResponseData = await meResponse.json();
     expect(meResponse.ok()).toBeTruthy();
     expect(meData.data?.user.email).toBe(email);
-    expect(meData.data?.user.role).toBe('USER');
+    expect(meData.data?.user.role).toBe('LAWYER');
     expect(meData.data?.user.preferences?.onboarding?.intendedRole).toBe(
       'LAWYER'
     );

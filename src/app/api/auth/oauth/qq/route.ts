@@ -105,8 +105,14 @@ async function handleQqCallback(request: NextRequest) {
     });
     response.cookies.set('accessToken', loginResult.token, {
       ...cookieOpts,
-      maxAge: 15 * 60,
+      maxAge: 7 * 24 * 60 * 60,
     });
+    if (loginResult.refreshToken) {
+      response.cookies.set('refreshToken', loginResult.refreshToken, {
+        ...cookieOpts,
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
     return response;
   } catch (_error) {
     logger.error('QQ callback error:', _error);

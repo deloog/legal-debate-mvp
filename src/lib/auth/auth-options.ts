@@ -17,6 +17,7 @@ import { type DefaultJWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { prisma } from '@/lib/db/prisma';
+import { getEffectiveUserRole } from '@/lib/auth/role-onboarding';
 
 // ---------------------------------------------------------------------------
 // 类型扩展：在 session/token 中携带 id 和 role
@@ -71,6 +72,7 @@ function buildProviders(): NextAuthOptions['providers'] {
             role: true,
             status: true,
             password: true,
+            preferences: true,
           },
         });
 
@@ -83,7 +85,7 @@ function buildProviders(): NextAuthOptions['providers'] {
           id: user.id,
           email: user.email,
           name: user.name || user.username || '',
-          role: user.role,
+          role: getEffectiveUserRole(user.role, user.preferences),
         };
       },
     })
@@ -112,6 +114,7 @@ function buildProviders(): NextAuthOptions['providers'] {
               username: true,
               role: true,
               status: true,
+              preferences: true,
             },
           });
 
@@ -121,7 +124,7 @@ function buildProviders(): NextAuthOptions['providers'] {
             id: user.id,
             email: user.email ?? '',
             name: user.name || user.username || '',
-            role: user.role,
+            role: getEffectiveUserRole(user.role, user.preferences),
           };
         },
       })

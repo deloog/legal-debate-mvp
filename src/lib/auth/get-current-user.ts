@@ -5,6 +5,7 @@
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { getServerAuthUser } from '@/lib/auth/server-session';
 
 /**
  * 获取当前用户ID
@@ -12,13 +13,13 @@ import { authOptions } from '@/lib/auth/auth-options';
  * @returns {Promise<string>} 当前用户ID
  */
 export async function getCurrentUserId(): Promise<string> {
-  const session = await getServerSession(authOptions);
+  const user = await getServerAuthUser();
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Unauthorized: User not authenticated');
   }
 
-  return session.user.id;
+  return user.id;
 }
 
 /**
@@ -26,8 +27,8 @@ export async function getCurrentUserId(): Promise<string> {
  * @returns {Promise<string | null>} 当前用户ID，如果未登录则返回null
  */
 export async function getCurrentUserIdOptional(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id || null;
+  const user = await getServerAuthUser();
+  return user?.id || null;
 }
 
 /**

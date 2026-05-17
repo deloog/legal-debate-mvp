@@ -5,6 +5,10 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import {
+  getDefaultAuthDestination,
+  isAdminRole,
+} from '@/lib/auth/role-onboarding';
 
 interface JwtPayloadLite {
   userId?: string;
@@ -32,10 +36,6 @@ function parseAccessToken(request: NextRequest): JwtPayloadLite | null {
   } catch {
     return null;
   }
-}
-
-function isAdminRole(role: string | undefined): boolean {
-  return role === 'ADMIN' || role === 'SUPER_ADMIN';
 }
 
 /**
@@ -156,7 +156,7 @@ export function proxy(request: NextRequest) {
     if (pathname.startsWith('/login') || pathname.startsWith('/register')) {
       const payload = parseAccessToken(request);
       if (payload?.userId) {
-        const dest = isAdminRole(payload.role) ? '/admin' : '/';
+        const dest = getDefaultAuthDestination(payload.role);
         const res = NextResponse.redirect(new URL(dest, request.url));
         addCorsHeaders(res, corsOrigin);
         return res;

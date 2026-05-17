@@ -13,16 +13,19 @@ import {
 import { InvoiceApplyForm } from '@/components/invoice/InvoiceApplyForm';
 import { InvoiceType } from '@/types/payment';
 
-// Mock next-auth
-jest.mock('next-auth/react', () => ({
-  useSession: jest.fn(() => ({
-    data: {
-      user: {
-        id: 'user123',
-        email: 'test@example.com',
-        name: 'Test User',
-      },
+// Mock AuthProvider
+jest.mock('@/app/providers/AuthProvider', () => ({
+  useAuth: jest.fn(() => ({
+    user: {
+      id: 'user123',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'LAWYER',
+      createdAt: new Date(),
     },
+    loading: false,
+    checkAuth: jest.fn(),
+    logout: jest.fn(),
   })),
 }));
 

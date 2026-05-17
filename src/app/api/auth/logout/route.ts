@@ -9,6 +9,13 @@ import { prisma } from '@/lib/db/prisma';
 import type { LogoutResponse } from '@/types/auth';
 import { logger } from '@/lib/logger';
 
+function readCookieValue(cookieHeader: string, name: string): string | null {
+  const segments = cookieHeader.split(';');
+  const prefix = `${name}=`;
+  const segment = segments.find(item => item.trim().startsWith(prefix));
+  return segment ? segment.trim().slice(prefix.length) : null;
+}
+
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<LogoutResponse>> {
@@ -66,8 +73,7 @@ export async function POST(
       }
 
       // 从cookie中解析refresh token
-      const refreshTokenMatch = cookieHeader.match(/refreshToken=([^;]+)/);
-      const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
+      const refreshToken = readCookieValue(cookieHeader, 'refreshToken');
       logger.info('[LOGOUT] Parsed refresh token:', {
         found: !!refreshToken,
         tokenLength: refreshToken?.length || 0,
@@ -110,6 +116,8 @@ export async function POST(
     };
     response.cookies.set('accessToken', '', cookieOpts);
     response.cookies.set('refreshToken', '', cookieOpts);
+    response.cookies.set('next-auth.session-token', '', cookieOpts);
+    response.cookies.set('__Secure-next-auth.session-token', '', cookieOpts);
 
     return response;
   } catch (error) {

@@ -21,6 +21,23 @@ test.describe('用户注册与登录流程', () => {
     expect(testUser.role).toBe('USER');
   });
 
+  test('注册律师身份后应直接获得工作台角色', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/auth/register`, {
+      data: {
+        email: generateTestEmail(),
+        password: generateTestPassword(),
+        name: '律师测试用户',
+        role: 'LAWYER',
+      },
+    });
+
+    const data = await response.json();
+    expect(response.ok()).toBeTruthy();
+    expect(data.success).toBe(true);
+    expect(data.data?.user.role).toBe('LAWYER');
+    expect(data.data?.expiresIn).toBe(7 * 24 * 60 * 60);
+  });
+
   test('注册时应该验证邮箱格式', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/auth/register`, {
       data: {

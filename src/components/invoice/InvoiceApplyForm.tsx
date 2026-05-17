@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card } from '@/components/ui/card';
 import { AlertCircle, CheckCircle2, FileText } from 'lucide-react';
 import { InvoiceType } from '@/types/payment';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface InvoiceApplyFormProps {
   orderId: string;
@@ -42,14 +42,14 @@ export function InvoiceApplyForm({
   onCancel,
 }: InvoiceApplyFormProps) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     type: InvoiceType.PERSONAL,
     title: '',
     taxNumber: '',
-    email: session?.user?.email || '',
+    email: user?.email || '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [success, setSuccess] = useState(false);

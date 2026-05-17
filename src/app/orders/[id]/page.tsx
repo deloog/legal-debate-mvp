@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
 import { getOrder } from '@/lib/order/order-service';
 import type { OrderStatus } from '@/types/payment';
 import { OrderDetailHeader } from '@/components/order/OrderDetailHeader';
 import { OrderPaymentInfo } from '@/components/order/OrderPaymentInfo';
 import { OrderMembershipInfo } from '@/components/order/OrderMembershipInfo';
 import { OrderActions } from '@/components/order/OrderActions';
+import { getServerAuthUser } from '@/lib/auth/server-session';
 
 /**
  * 订单详情页面
@@ -17,11 +16,10 @@ export default async function OrderDetailPage({
 }: {
   params: { id: string };
 }) {
-  // 获取用户会话
-  const session = await getServerSession(authOptions);
+  const user = await getServerAuthUser();
 
   // 未登录则跳转到登录页
-  if (!session?.user?.id) {
+  if (!user?.id) {
     redirect(`/login?callbackUrl=/orders/${params.id}`);
   }
 
@@ -54,7 +52,7 @@ export default async function OrderDetailPage({
   }
 
   // 验证订单所有权
-  if (order.userId !== session.user.id) {
+  if (order.userId !== user.id) {
     return (
       <div className='container mx-auto min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8'>
         <div className='rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center'>

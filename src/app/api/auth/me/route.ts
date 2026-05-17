@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { getEffectiveUserRole } from '@/lib/auth/role-onboarding';
 
 /**
  * GET /api/auth/me
@@ -60,6 +61,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         },
         { status: 403 }
       );
+    }
+
+    const effectiveRole = getEffectiveUserRole(
+      currentUser.role,
+      currentUser.preferences
+    );
+    if (effectiveRole !== currentUser.role) {
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: { role: effectiveRole },
+      });
+      currentUser.role = effectiveRole as typeof currentUser.role;
     }
 
     return NextResponse.json(

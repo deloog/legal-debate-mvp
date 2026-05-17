@@ -34,7 +34,7 @@ test.describe('用户会话管理', () => {
     });
     expect(refreshData.success).toBe(true);
     expect(refreshData.data?.token).toBeTruthy();
-    expect(refreshData.data?.expiresIn).toBe(15 * 60);
+    expect(refreshData.data?.expiresIn).toBe(7 * 24 * 60 * 60);
   });
 
   test('应该支持登出当前设备', async ({ request }) => {

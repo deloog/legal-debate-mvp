@@ -18,6 +18,7 @@ import { logError } from '@/lib/utils/safe-logger';
 import type { JwtPayload } from '@/types/auth';
 import type { RefreshTokenResponse } from '@/types/auth';
 import { logger } from '@/lib/logger';
+import { getEffectiveUserRole } from '@/lib/auth/role-onboarding';
 
 async function handleRefresh(
   request: NextRequest
@@ -89,6 +90,7 @@ async function handleRefresh(
         name: true,
         role: true,
         status: true,
+        preferences: true,
       },
     });
 
@@ -144,10 +146,18 @@ async function handleRefresh(
     }
 
     // 生成新的访问令牌（添加随机盐值确保每次生成的token都不同）
+    const effectiveRole = getEffectiveUserRole(user.role, user.preferences);
+    if (effectiveRole !== user.role) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: effectiveRole },
+      });
+    }
+
     const accessTokenPayload = {
       userId: payload.userId,
       email: payload.email,
-      role: payload.role,
+      role: effectiveRole,
       jti: session.id,
       r: Math.random().toString(36).substring(2), // 随机盐值
     };

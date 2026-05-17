@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Scale, Building2 } from 'lucide-react';
+import { getDefaultAuthDestination } from '@/lib/auth/role-onboarding';
 
 /**
  * 注册页面
@@ -64,8 +65,11 @@ export default function RegisterPage() {
         return;
       }
 
-      // 注册成功后跳转到登录页
-      router.push('/login?registered=1');
+      sessionStorage.setItem('user', JSON.stringify(data.data.user));
+      window.dispatchEvent(new CustomEvent('login-success'));
+
+      router.push(getDefaultAuthDestination(data.data.user.role));
+      router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : '注册失败，请稍后重试');
       setLoading(false);

@@ -155,6 +155,27 @@ global.Response = class Response {
 
     // 创建Headers对象而不是Map
     this.headers = new global.Headers();
+    this.cookies = {
+      set: (name, value, options = {}) => {
+        const attributes = [`${name}=${value}`];
+        if (options.maxAge !== undefined) {
+          attributes.push(`Max-Age=${options.maxAge}`);
+        }
+        if (options.path) {
+          attributes.push(`Path=${options.path}`);
+        }
+        if (options.httpOnly) {
+          attributes.push('HttpOnly');
+        }
+        if (options.secure) {
+          attributes.push('Secure');
+        }
+        if (options.sameSite) {
+          attributes.push(`SameSite=${options.sameSite}`);
+        }
+        this.headers.append('set-cookie', attributes.join('; '));
+      },
+    };
 
     // 先设置init中的headers
     if (init.headers) {
