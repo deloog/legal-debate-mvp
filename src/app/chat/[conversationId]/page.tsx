@@ -4,16 +4,16 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
+import { ChatContextPanel } from '@/components/chat/ChatContextPanel';
 import { PreviewPane } from '@/components/chat/PreviewPane';
 import { DataNotice } from '@/components/chat/DataNotice';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 const SIDEBAR_MIN = 180;
 const SIDEBAR_MAX = 400;
-const SIDEBAR_DEFAULT = 240;
-const PREVIEW_MIN = 280;
-const PREVIEW_MAX = 700;
-const PREVIEW_DEFAULT = 380;
+const SIDEBAR_DEFAULT = 220;
+const CONTEXT_WIDTH = 280;
+const PREVIEW_WIDTH = 380;
 
 export default function ChatConversationPage() {
   const params = useParams();
@@ -31,10 +31,10 @@ export default function ChatConversationPage() {
   } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
-  const [previewWidth, setPreviewWidth] = useState(PREVIEW_DEFAULT);
   const [isMobile, setIsMobile] = useState(false);
+  // 每次发送消息时递增，触发 ChatContextPanel 重新拉取数据
+  const [contextRefreshKey, setContextRefreshKey] = useState(0);
 
-  // 检测移动端：< 768px 为移动设备，侧边栏默认收起
   useEffect(() => {
     const check = () => {
       const mobile = window.innerWidth < 768;
@@ -46,33 +46,19 @@ export default function ChatConversationPage() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // ── 拖拽调宽逻辑 ──────────────────────────────────────────────────────────
-  const drag = useRef<{
-    target: 'sidebar' | 'preview';
-    startX: number;
-    startWidth: number;
-  } | null>(null);
+  // ── 拖拽侧边栏宽度 ────────────────────────────────────────────────────────
+  const drag = useRef<{ startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!drag.current) return;
       const delta = e.clientX - drag.current.startX;
-      if (drag.current.target === 'sidebar') {
-        setSidebarWidth(
-          Math.max(
-            SIDEBAR_MIN,
-            Math.min(SIDEBAR_MAX, drag.current.startWidth + delta)
-          )
-        );
-      } else {
-        // 预览区：拖拽点在左边，向左拖 = 变宽
-        setPreviewWidth(
-          Math.max(
-            PREVIEW_MIN,
-            Math.min(PREVIEW_MAX, drag.current.startWidth - delta)
-          )
-        );
-      }
+      setSidebarWidth(
+        Math.max(
+          SIDEBAR_MIN,
+          Math.min(SIDEBAR_MAX, drag.current.startWidth + delta)
+        )
+      );
     };
     const onUp = () => {
       if (!drag.current) return;
@@ -91,29 +77,11 @@ export default function ChatConversationPage() {
   const startSidebarDrag = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      drag.current = {
-        target: 'sidebar',
-        startX: e.clientX,
-        startWidth: sidebarWidth,
-      };
+      drag.current = { startX: e.clientX, startWidth: sidebarWidth };
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
     },
     [sidebarWidth]
-  );
-
-  const startPreviewDrag = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      drag.current = {
-        target: 'preview',
-        startX: e.clientX,
-        startWidth: previewWidth,
-      };
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    },
-    [previewWidth]
   );
 
   // ── 侧边栏刷新（AI 生成标题后更新列表） ───────────────────────────────────
@@ -122,8 +90,8 @@ export default function ChatConversationPage() {
     refreshSidebarRef.current = fn;
   }, []);
   const refreshSidebar = useCallback(() => {
-    // 延迟 2 秒等待标题生成完毕
     setTimeout(() => refreshSidebarRef.current?.(), 2000);
+    setContextRefreshKey(k => k + 1);
   }, []);
 
   // ── 文书填入逻辑 ──────────────────────────────────────────────────────────
@@ -174,7 +142,6 @@ export default function ChatConversationPage() {
           activeConversationId={conversationId}
           onRefresh={handleSidebarRefreshReady}
           userRole={userRole}
-          onCrystalChange={setCrystalForPreview}
         />
       </div>
 
@@ -184,7 +151,7 @@ export default function ChatConversationPage() {
       )}
 
       {/* 对话主区域 */}
-      <div className='flex flex-1 min-w-0'>
+      <div className='flex flex-1 min-w-0 overflow-hidden'>
         <ChatArea
           conversationId={conversationId}
           onUseInDoc={handleUseInDoc}
@@ -196,27 +163,45 @@ export default function ChatConversationPage() {
             isMobile ? () => setSidebarOpen(true) : undefined
           }
         />
-
-        {/* 预览区拖拽手柄（仅桌面） */}
-        {!isMobile && previewOpen && (
-          <ResizeHandle onMouseDown={startPreviewDrag} />
-        )}
-
-        {/* 右侧预览区（仅桌面） */}
-        {!isMobile && previewOpen && (
-          <div style={{ width: previewWidth }} className='shrink-0'>
-            <PreviewPane
-              content={previewContent}
-              versions={docVersions}
-              onVersionSelect={setPreviewContent}
-              onClose={() => setPreviewOpen(false)}
-              userRole={userRole}
-              crystal={crystalForPreview}
-              hasDocument={docVersions.length > 0 || previewContent.length > 0}
-            />
-          </div>
-        )}
       </div>
+
+      {/* 右侧面板区域（桌面专属） */}
+      {!isMobile && (
+        <>
+          {previewOpen ? (
+            /* 预览区（文书） */
+            <>
+              <ResizeHandle onMouseDown={() => {}} />
+              <div style={{ width: PREVIEW_WIDTH }} className='shrink-0'>
+                <PreviewPane
+                  content={previewContent}
+                  versions={docVersions}
+                  onVersionSelect={setPreviewContent}
+                  onClose={() => setPreviewOpen(false)}
+                  userRole={userRole}
+                  crystal={crystalForPreview}
+                  hasDocument={
+                    docVersions.length > 0 || previewContent.length > 0
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            /* 上下文面板（AI 案情 + 提案 + 辩论） */
+            <>
+              <div className='w-px shrink-0 bg-gray-100' />
+              <div style={{ width: CONTEXT_WIDTH }} className='shrink-0'>
+                <ChatContextPanel
+                  conversationId={conversationId}
+                  userRole={userRole}
+                  refreshTrigger={contextRefreshKey}
+                  onCrystalChange={setCrystalForPreview}
+                />
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -233,9 +218,7 @@ function ResizeHandle({
       onMouseDown={onMouseDown}
       className='relative w-px shrink-0 bg-gray-200 hover:bg-blue-300 cursor-col-resize transition-colors group'
     >
-      {/* 扩大点击区域 */}
       <div className='absolute inset-y-0 -left-1.5 -right-1.5' />
-      {/* 拖拽指示点 */}
       <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none'>
         <div className='w-0.5 h-3 bg-blue-400 rounded-full' />
       </div>
