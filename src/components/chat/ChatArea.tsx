@@ -20,6 +20,8 @@ import {
   GitBranchIcon,
   Trash2Icon,
   RefreshCwIcon,
+  CopyIcon,
+  CheckIcon,
   FileTextIcon,
   SearchIcon,
   Edit3Icon,
@@ -32,6 +34,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AnnotationToolbar } from './AnnotationToolbar';
+import { ProposalCard } from './ProposalCard';
 import type { ChatMessage, AnnotationType } from '@/types/chat';
 import { ANNOTATION_META } from '@/types/chat';
 import { useAnnotationGuide } from '@/hooks/useAnnotationGuide';
@@ -486,6 +489,8 @@ export function ChatArea({
           extractedText: null,
         })),
         annotations: [],
+        proposalId: null,
+        proposal: null,
       },
     ]);
 
@@ -541,6 +546,7 @@ export function ChatArea({
       const apiData = (await apiRes.json()) as {
         piiRedacted?: { count: number; types: string[] } | null;
         provider?: string;
+        proposalPending?: boolean;
         attachmentSummary?: {
           accepted?: Array<{
             fileName: string;
@@ -572,6 +578,15 @@ export function ChatArea({
 
       await loadMessages();
       onMessageSent?.();
+      // proposal 后台创建需要 2 次额外 AI 调用，可能耗时 5-20 秒
+      // 在服务端确认"可能有 proposal"时分三轮轮询，覆盖慢 AI 响应情况
+      if (apiData.proposalPending) {
+        [4000, 9000, 16000].forEach(delay => {
+          setTimeout(() => {
+            void loadMessages();
+          }, delay);
+        });
+      }
     } catch (error) {
       setMessages(prev => prev.filter(m => m.id !== tempId));
       const message = error instanceof Error ? error.message : '发送失败';
@@ -810,6 +825,7 @@ export function ChatArea({
                 onBranch={handleBranch}
                 onOpenDocument={onDocumentGenerated}
                 onContinue={handleContinue}
+                onProposalUpdate={loadMessages}
                 sending={sending}
                 isLast={idx === visibleMessages.length - 1}
                 guidePhase={guide.phase}
@@ -1015,6 +1031,7 @@ function MessageRow({
   onBranch,
   onOpenDocument,
   onContinue,
+  onProposalUpdate,
   sending,
   isLast,
   guidePhase,
@@ -1028,6 +1045,7 @@ function MessageRow({
   onBranch: (id: string) => void;
   onOpenDocument: (content: string) => void;
   onContinue: () => void;
+  onProposalUpdate: () => void;
   sending: boolean;
   isLast: boolean;
   guidePhase: GuidePhase;
@@ -1037,7 +1055,14 @@ function MessageRow({
   const [showActions, setShowActions] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(message.content ?? '');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   // 提取文书块（AI 消息）
   const docContent = !isUser ? extractDocument(message.content) : null;
@@ -1085,6 +1110,17 @@ function MessageRow({
           </div>
           {showActions && (
             <div className='flex items-center gap-1 justify-end'>
+              <ActionButton
+                icon={
+                  copied ? (
+                    <CheckIcon className='w-3 h-3' />
+                  ) : (
+                    <CopyIcon className='w-3 h-3' />
+                  )
+                }
+                label={copied ? '已复制' : '复制'}
+                onClick={handleCopy}
+              />
               <ActionButton
                 icon={<GitBranchIcon className='w-3 h-3' />}
                 label='分叉'
@@ -1247,6 +1283,15 @@ function MessageRow({
           />
         )}
 
+        {/* AI 建案提案卡片 */}
+        {message.proposal && (
+          <ProposalCard
+            proposal={message.proposal}
+            onConfirmed={onProposalUpdate}
+            onRejected={onProposalUpdate}
+          />
+        )}
+
         {/* 继续生成按钮：仅最后一条 AI 消息且疑似截断时显示 */}
         {isLast && isTruncated(displayContent) && !sending && (
           <button
@@ -1260,6 +1305,17 @@ function MessageRow({
 
         {showActions && (
           <div className='flex items-center gap-1 mt-2'>
+            <ActionButton
+              icon={
+                copied ? (
+                  <CheckIcon className='w-3 h-3' />
+                ) : (
+                  <CopyIcon className='w-3 h-3' />
+                )
+              }
+              label={copied ? '已复制' : '复制'}
+              onClick={handleCopy}
+            />
             <ActionButton
               icon={<GitBranchIcon className='w-3 h-3' />}
               label='分叉'

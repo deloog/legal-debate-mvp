@@ -12,6 +12,7 @@ import { join, resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { detectAndExtractCaseProposal } from '@/lib/agent/proposal/extractor';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { AIServiceFactory } from '@/lib/ai/service-refactored';
 import {
@@ -347,6 +348,9 @@ export async function GET(request: NextRequest, { params }: Params) {
           where: { userId: authUser.userId },
           orderBy: { createdAt: 'asc' },
         },
+        proposal: {
+          include: { actions: { orderBy: { sequence: 'asc' } } },
+        },
       },
     });
 
@@ -675,10 +679,14 @@ export async function POST(request: NextRequest, { params }: Params) {
       aiResponse.choices[0]?.message?.content ??
       '抱歉，AI 暂时无法回复，请稍后重试。';
 
-    // 保存 AI 消息
+    // 保存 AI 消息（先创建，稍后可能关联 proposalId）
     const assistantMessage = await prisma.message.create({
       data: { conversationId, role: 'assistant', content: aiContent },
-      include: { attachments: true, annotations: true },
+      include: {
+        attachments: true,
+        annotations: true,
+        proposal: { include: { actions: { orderBy: { sequence: 'asc' } } } },
+      },
     });
 
     // 更新对话 updatedAt
@@ -686,6 +694,85 @@ export async function POST(request: NextRequest, { params }: Params) {
       where: { id: conversationId },
       data: { updatedAt: new Date() },
     });
+
+    // ── 异步触发建案提案（不阻塞响应） ──────────────────────────────────────
+    // 仅在首轮对话且尚无提案时检测（避免同一对话重复生成）
+    const hasPriorProposal = await prisma.agentProposal.count({
+      where: { conversationId },
+    });
+
+    if (hasPriorProposal === 0) {
+      const proposalId = randomUUID();
+      void (async () => {
+        try {
+          const attachmentTexts = extractedAttachments
+            .map(a => a.text)
+            .filter(Boolean);
+          const result = await detectAndExtractCaseProposal(
+            displayContent,
+            attachmentTexts,
+            userMessage.id,
+            proposalId
+          );
+
+          if (result.shouldCreate && result.data) {
+            // 预生成 action ID，用于正确设置依赖链
+            const actionIds = result.data.suggestedActions.map(() =>
+              randomUUID()
+            );
+            const seqToId = new Map(
+              result.data.suggestedActions.map((a, i) => [
+                a.sequence,
+                actionIds[i],
+              ])
+            );
+
+            const proposal = await prisma.agentProposal.create({
+              data: {
+                id: proposalId,
+                conversationId,
+                triggerMsgId: userMessage.id,
+                userId: authUser.userId,
+                extractedData: result.data as object,
+                status: 'PENDING',
+                actions: {
+                  create: result.data.suggestedActions.map((a, i) => ({
+                    id: actionIds[i],
+                    sequence: a.sequence,
+                    dependsOnId:
+                      a.dependsOnSequence !== undefined
+                        ? (seqToId.get(a.dependsOnSequence) ?? null)
+                        : null,
+                    actionType: a.actionType,
+                    label: a.label,
+                    params: a.params as object,
+                    selected: a.required,
+                    idempotencyKey: `${proposalId}-${a.actionType}-${a.sequence}`,
+                    revertStatus: a.revertStatus,
+                  })),
+                },
+              },
+            });
+
+            // 关联到 AI 消息
+            await prisma.message.update({
+              where: { id: assistantMessage.id },
+              data: { proposalId: proposal.id },
+            });
+
+            logger.info('建案提案已创建', {
+              proposalId: proposal.id,
+              conversationId,
+            });
+          }
+        } catch (err) {
+          logger.error(
+            '建案提案创建失败',
+            err instanceof Error ? err : new Error(String(err))
+          );
+        }
+      })();
+    }
 
     // ── 异步提取案情晶体（不阻塞响应） ────────────────────────────────────
     // 每 2 轮更新一次（第 1 轮结束后提取，之后每 2 条 assistant 消息更新一次）
@@ -728,6 +815,8 @@ export async function POST(request: NextRequest, { params }: Params) {
         },
         // 当前 AI 提供商（用于前端透明展示）
         provider: CHAT_PROVIDER,
+        // 告知前端可能有建案提案正在后台生成，需轮询刷新
+        proposalPending: hasPriorProposal === 0,
       },
       { status: 201 }
     );

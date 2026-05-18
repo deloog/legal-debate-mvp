@@ -75,7 +75,7 @@ function mergeIdempotencyMetadata(
 }
 
 function normalizeCaseType(type?: string): CaseType {
-  return CASE_TYPE_MAP[type?.toLowerCase() ?? ''] ?? 'CIVIL';
+  return CASE_TYPE_MAP[type?.toLowerCase() ?? ''] ?? 'OTHER';
 }
 
 function normalizeCaseStatus(status?: string): CaseStatus {

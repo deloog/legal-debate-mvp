@@ -1,8 +1,8 @@
 # AI 原生架构重构设计文档
 
-> **状态**：设计阶段（未实施）- 经三方四轮审查，**可进入 Phase 0 实施**  
+> **状态**：Phase 1 已完成（2026-05-18）- 经三方审查、GPT 二轮审计，Phase 2 待真实用户验证 2 周后启动  
 > **创建日期**：2026-05-17  
-> **最后修订**：2026-05-17（第四轮：EXECUTING 恢复机制、业务资源级幂等、userId 权限锁、reminder 复用、ChatMessage 类型）  
+> **最后修订**：2026-05-18（Phase 1 完成：认证修复、依赖链修复、dispatcher 快照 bug、重试 API、内联编辑、溯源提示、单元测试 13/13）  
 > **参与讨论**：产品负责人 + Claude + GPT（三方评审，四轮）  
 > **关联文档**：[CHAT_AI_CONTEXT_ARCHITECTURE.md](../CHAT_AI_CONTEXT_ARCHITECTURE.md)、[CHAT_INTERFACE_REDESIGN.md](../CHAT_INTERFACE_REDESIGN.md)
 
@@ -644,7 +644,7 @@ function createCase(
 
 ---
 
-### Phase 1：建案提案引擎（最小闭环，优先实施）
+### Phase 1：建案提案引擎（✅ 已完成 2026-05-18）
 
 **场景**：律师描述案情（文字或上传委托书）→ AI 生成建案卡片 → 律师确认 → 自动创建客户 + 案件 + 时间线
 
@@ -675,7 +675,7 @@ function createCase(
 
 ### Phase 2：主动推送层
 
-**前提**：Phase 1 数据可靠性在真实用户中验证完成（至少 2 周）。
+**前提**：Phase 1 数据可靠性在真实用户中验证完成（至少 2 周）。Phase 1 于 2026-05-18 完成，最早 2026-06-01 可启动。
 
 **场景**（按低争议到高争议排序）：
 

@@ -73,6 +73,8 @@ model User {
   conversations             Conversation[]
   annotations               Annotation[]
   casePackageReviews        CasePackageReview[]
+  proposals                 AgentProposal[]     @relation("UserProposals")
+  confirmedProposals        AgentProposal[]     @relation("ConfirmedProposals")
 
   @@index([email])
   @@index([username])
@@ -147,6 +149,7 @@ model Case {
   witnesses       Witness[]
   conversations        Conversation[]
   casePackageReviews   CasePackageReview[]
+  proposals            AgentProposal[]
 
   @@index([userId])
   @@index([clientId])
@@ -3421,11 +3424,12 @@ model Conversation {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  user     User           @relation(fields: [userId], references: [id])
-  case     Case?          @relation(fields: [caseId], references: [id], onDelete: SetNull)
-  parent   Conversation?  @relation("ConversationBranches", fields: [parentConversationId], references: [id])
-  branches Conversation[] @relation("ConversationBranches")
-  messages Message[]
+  user      User           @relation(fields: [userId], references: [id])
+  case      Case?          @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  parent    Conversation?  @relation("ConversationBranches", fields: [parentConversationId], references: [id])
+  branches  Conversation[] @relation("ConversationBranches")
+  messages  Message[]
+  proposals AgentProposal[]
 
   @@index([userId])
   @@index([caseId])
@@ -3441,9 +3445,13 @@ model Message {
   isDeleted      Boolean   @default(false)
   createdAt      DateTime  @default(now())
 
-  conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  attachments  MessageAttachment[]
-  annotations  Annotation[]
+  proposalId String? @unique
+
+  conversation       Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments        MessageAttachment[]
+  annotations        Annotation[]
+  proposal           AgentProposal?      @relation("ProposalDisplayMessage", fields: [proposalId], references: [id])
+  triggeredProposals AgentProposal[]     @relation("ProposalTriggerMessage")
 
   @@index([conversationId])
   @@map("messages")
@@ -3507,4 +3515,103 @@ enum PackageReviewStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+// ── AI 原生提案系统 ────────────────────────────────────────────────────────────
+
+enum ProposalStatus {
+  PENDING             // 等待律师确认
+  EXECUTING           // 系统执行中
+  COMPLETED           // 全部动作完成
+  PARTIALLY_COMPLETED // 部分动作完成（其余失败或跳过）
+  FAILED              // 执行失败
+  REJECTED            // 律师拒绝
+  REVERTED            // 已执行补偿式撤销
+}
+
+enum ProposalActionStatus {
+  PENDING   // 待执行（律师已勾选）
+  SKIPPED   // 律师取消勾选
+  EXECUTING // 执行中
+  COMPLETED // 成功
+  FAILED    // 失败
+}
+
+enum RevertStatus {
+  NOT_APPLICABLE // 不支持撤销（如审计日志）
+  PENDING        // 待撤销
+  COMPLETED      // 撤销成功
+  FAILED         // 撤销失败
+}
+
+model AgentProposal {
+  id             String         @id @default(cuid())
+  conversationId String
+  triggerMsgId   String?
+  userId         String
+  caseId         String?
+  confirmedById  String?
+
+  extractedData Json           // AI 原始识别结果（不可变）
+  confirmedData Json?          // 律师修改后的最终数据
+
+  status        ProposalStatus @default(PENDING)
+  confirmedAt   DateTime?
+  completedAt   DateTime?
+  revertedAt    DateTime?
+  revertReason  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversation Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User            @relation("UserProposals", fields: [userId], references: [id])
+  confirmedBy  User?           @relation("ConfirmedProposals", fields: [confirmedById], references: [id])
+  triggerMsg   Message?        @relation("ProposalTriggerMessage", fields: [triggerMsgId], references: [id])
+  case         Case?           @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  actions      ProposalAction[]
+  displayMsg   Message?        @relation("ProposalDisplayMessage")
+
+  @@index([conversationId])
+  @@index([userId])
+  @@index([caseId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("agent_proposals")
+}
+
+model ProposalAction {
+  id             String               @id @default(cuid())
+  proposalId     String
+  sequence       Int
+  dependsOnId    String?
+  actionType     String
+  label          String
+  params         Json
+  selected       Boolean              @default(true)
+
+  idempotencyKey String               @unique
+  resourceType   String?
+  resourceId     String?
+
+  status         ProposalActionStatus @default(PENDING)
+  result         Json?
+  error          String?
+  retryCount     Int                  @default(0)
+
+  revertStatus   RevertStatus         @default(NOT_APPLICABLE)
+  revertedAt     DateTime?
+  revertError    String?
+
+  executedAt DateTime?
+
+  dependsOn  ProposalAction?  @relation("ActionDependency", fields: [dependsOnId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dependents ProposalAction[] @relation("ActionDependency")
+  proposal   AgentProposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  @@unique([proposalId, sequence])
+  @@index([proposalId])
+  @@index([idempotencyKey])
+  @@index([resourceType, resourceId])
+  @@map("proposal_actions")
 }

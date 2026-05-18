@@ -33,6 +33,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   isDeleted: boolean;
+  proposalId: string | null;
+  proposal: import('./proposal').ProposalDetail | null;
   createdAt: string;
   attachments: AttachmentItem[];
   annotations: AnnotationItem[];

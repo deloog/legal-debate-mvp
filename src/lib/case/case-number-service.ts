@@ -10,6 +10,7 @@ const caseTypeConfig: Record<string, { code: string; name: string }> = {
   LABOR: { code: 'L', name: '劳' },
   INTELLECTUAL: { code: 'Z', name: '知' },
   INTELLECTUAL_PROPERTY: { code: 'Z', name: '知' },
+  OTHER: { code: 'Q', name: '其' },
 };
 
 const statusConfig: Record<string, string> = {
@@ -26,7 +27,7 @@ export async function generateCaseNumber(
   date: Date = new Date()
 ): Promise<string> {
   const year = date.getFullYear();
-  const typeInfo = caseTypeConfig[type] || caseTypeConfig.CIVIL;
+  const typeInfo = caseTypeConfig[type] || caseTypeConfig.OTHER;
   const statusCode = statusConfig[status] || '初';
   const prefix = `${year}${typeInfo.code}${typeInfo.name}${statusCode}`;
 
